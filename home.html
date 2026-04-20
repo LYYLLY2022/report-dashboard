@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>惠时尚 BI 报表导航</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f0a1a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  p.subtitle { color: #94a3b8; margin-bottom: 2.5rem; font-size: 1rem; }
+  .cards { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+  .card {
+    background: rgba(30, 20, 50, 0.8);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    width: 320px;
+    text-decoration: none;
+    color: #e2e8f0;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(167, 139, 250, 0.7);
+    box-shadow: 0 8px 32px rgba(167, 139, 250, 0.15);
+  }
+  .card .icon { font-size: 2.5rem; }
+  .card .title { font-size: 1.2rem; font-weight: 600; }
+  .card .desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <h1>惠时尚 BI 报表</h1>
+  <p class="subtitle">选择要查看的报表</p>
+  <div class="cards">
+    <a class="card" href="./index.html">
+      <div class="icon">📊</div>
+      <div class="title">平台利润看板</div>
+      <div class="desc">多平台利润、退款率、毛利率等财务数据看板</div>
+    </a>
+    <a class="card" href="./sales-channel.html">
+      <div class="icon">🏪</div>
+      <div class="title">非亚渠道业绩报告</div>
+      <div class="desc">非Amazon渠道销售额趋势、运营排名、明细数据</div>
+    </a>
+  </div>
+</body>
+</html>
