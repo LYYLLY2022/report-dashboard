@@ -309,6 +309,37 @@
 </head>
 <body>
 
+<!-- ===== 密码验证遮罩 ===== -->
+<div id="pwdOverlay" style="position:fixed;inset:0;z-index:99999;background:#0a0e14;display:flex;align-items:center;justify-content:center">
+  <div style="text-align:center;color:#e6edf3">
+    <div style="width:64px;height:64px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:700;margin:0 auto 24px">S</div>
+    <div style="font-size:20px;font-weight:600;margin-bottom:8px">素芸惠时尚 - 非亚渠道业绩报告</div>
+    <div style="color:#8b949e;margin-bottom:24px">请输入访问密码</div>
+    <input id="pwdInput" type="password" placeholder="Password" style="width:280px;padding:12px 16px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#e6edf3;font-size:15px;outline:none;text-align:center;letter-spacing:2px" onkeydown="if(event.key==='Enter')checkPwd()">
+    <div id="pwdErr" style="color:#f85149;font-size:13px;margin-top:12px;display:none">密码错误，请重试</div>
+    <button onclick="checkPwd()" style="margin-top:16px;padding:10px 40px;border-radius:8px;border:none;background:linear-gradient(135deg,#58a6ff,#1f6feb);color:#fff;font-size:15px;cursor:pointer;font-weight:500">确认</button>
+  </div>
+</div>
+<script>
+(function(){
+  var P='sy18929531199';
+  function h(s){var a=0;for(var i=0;i<s.length;i++){a=((a<<5)-a)+s.charCodeAt(i);a|=0;}return a;}
+  window._PH=h(P);
+  window.checkPwd=function(){
+    var v=document.getElementById('pwdInput').value;
+    if(h(v)===window._PH){
+      document.getElementById('pwdOverlay').style.display='none';
+      sessionStorage.setItem('_ap','1');
+    }else{
+      document.getElementById('pwdErr').style.display='block';
+      document.getElementById('pwdInput').value='';
+      document.getElementById('pwdInput').focus();
+    }
+  };
+  if(sessionStorage.getItem('_ap')==='1')document.getElementById('pwdOverlay').style.display='none';
+})();
+</script>
+
 <!-- Header -->
 <div class="header">
   <div class="header-top">
