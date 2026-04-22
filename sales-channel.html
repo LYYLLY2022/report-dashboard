@@ -301,21 +301,94 @@
   ::-webkit-scrollbar-thumb:hover { background: rgba(192,132,252,0.5); }
   /* ── Responsive ── */
   @media (max-width: 768px) {
+    html { font-size: 14px; }
+    .header {
+      padding: 12px 16px 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+    .header h1 { font-size: 15px; }
+    .logo { width: 30px; height: 30px; font-size: 14px; border-radius: 6px; }
+    .header .subtitle { font-size: 11px; margin-left: 42px; }
+    .kpi-bar {
+      padding: 10px 12px;
+      gap: 8px;
+    }
+    .kpi-card {
+      min-width: calc(50% - 6px);
+      padding: 10px 12px;
+    }
+    .kpi-value { font-size: 17px; }
+    .kpi-label { font-size: 10px; }
+    .kpi-unit { font-size: 10px; }
+    .tab-nav {
+      padding: 8px 8px 0;
+      gap: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      top: 60px;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+      flex-shrink: 0;
+      border-radius: 6px 6px 0 0;
+    }
+    .tab-content {
+      padding: 14px 12px 30px;
+    }
     .chart-grid-2 { grid-template-columns: 1fr; }
-    .kpi-bar { padding: 12px 16px; }
-    .tab-nav, .tab-content { padding-left: 16px; padding-right: 16px; }
+    .chart-card {
+      padding: 14px 12px;
+      border-radius: 10px;
+    }
+    .card-title { font-size: 13px; margin-bottom: 10px; }
+    .chart-box { min-height: 220px; }
+    .ranking-table { font-size: 11px; min-width: 100%; }
+    .ranking-table th { padding: 8px 10px; font-size: 11px; }
+    .ranking-table td { padding: 8px 10px; }
+    /* 表格移动端优化 */
+    .table-wrap,
+    #table-platform-site-daily,
+    #table-platform-op-daily {
+      max-height: 50vh;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-wrap th, .table-wrap td,
+    #table-platform-site-daily th, #table-platform-site-daily td,
+    #table-platform-op-daily th, #table-platform-op-daily td {
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+    /* 冻结列宽度适配小屏 */
+    .table-wrap th:nth-child(2),
+    .table-wrap td:nth-child(2) { left: 55px; }
+    .table-wrap th:nth-child(3),
+    .table-wrap td:nth-child(3) { left: 110px; }
+    #table-platform-site-daily th:nth-child(2),
+    #table-platform-site-daily td:nth-child(2),
+    #table-platform-op-daily th:nth-child(2),
+    #table-platform-op-daily td:nth-child(2) { left: 55px; }
+  }
+  @media (max-width: 480px) {
+    .kpi-card { min-width: 100%; }
+    .kpi-value { font-size: 18px; }
+    .header h1 { font-size: 14px; }
+    .tab-btn { padding: 7px 10px; font-size: 11px; }
+    .chart-box { min-height: 200px; }
   }
 </style>
 </head>
 <body>
 
 <!-- ===== 密码验证遮罩 ===== -->
-<div id="pwdOverlay" style="position:fixed;inset:0;z-index:99999;background:#0a0e14;display:flex;align-items:center;justify-content:center">
-  <div style="text-align:center;color:#e6edf3">
-    <div style="width:64px;height:64px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:700;margin:0 auto 24px">S</div>
-    <div style="font-size:20px;font-weight:600;margin-bottom:8px">素芸惠时尚 - 非亚渠道业绩报告</div>
-    <div style="color:#8b949e;margin-bottom:24px">请输入访问密码</div>
-    <input id="pwdInput" type="password" placeholder="Password" style="width:280px;padding:12px 16px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#e6edf3;font-size:15px;outline:none;text-align:center;letter-spacing:2px" onkeydown="if(event.key==='Enter')checkPwd()">
+<div id="pwdOverlay" style="position:fixed;inset:0;z-index:99999;background:#0a0e14;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="text-align:center;color:#e6edf3;max-width:320px;width:100%">
+    <div style="width:56px;height:56px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:700;margin:0 auto 20px">S</div>
+    <div style="font-size:18px;font-weight:600;margin-bottom:6px">素芸惠时尚 - 非亚渠道业绩报告</div>
+    <div style="color:#8b949e;margin-bottom:20px;font-size:14px">请输入访问密码</div>
+    <input id="pwdInput" type="password" placeholder="Password" style="width:100%;max-width:260px;padding:12px 16px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#e6edf3;font-size:15px;outline:none;text-align:center;letter-spacing:2px;box-sizing:border-box" onkeydown="if(event.key==='Enter')checkPwd()">
     <div id="pwdErr" style="color:#f85149;font-size:13px;margin-top:12px;display:none">密码错误，请重试</div>
     <button onclick="checkPwd()" style="margin-top:16px;padding:10px 40px;border-radius:8px;border:none;background:linear-gradient(135deg,#58a6ff,#1f6feb);color:#fff;font-size:15px;cursor:pointer;font-weight:500">确认</button>
   </div>
