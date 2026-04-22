@@ -286,6 +286,9 @@
     <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-launch').scrollIntoView({behavior:'smooth',block:'start'})">
       <span class="icon">🚀</span> 上架跟踪
     </a>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-sales-launch').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">👤</span> 销售上架跟踪
+    </a>
   </div>
 
   <div class="nav-group">
@@ -502,6 +505,57 @@
     </div>
   </div>
 
+  <!-- ====== 销售上架跟踪 ====== -->
+  <div class="section" id="sec-sales-launch">
+    <div class="section-title"><span class="dot"></span> 销售上架跟踪</div>
+    <div class="kpi-row" style="margin-bottom:20px;">
+      <div class="kpi-card">
+        <div class="label">新品SKU总数</div>
+        <div class="value" id="slTotalSku">115</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">已上架SKU</div>
+        <div class="value" style="color:#3fb950;" id="slLaunchedSku">10</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">未上架SKU</div>
+        <div class="value" style="color:#ff7b72;" id="slUnlaunchedSku">105</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">上架率</div>
+        <div class="value" style="color:#d29922;" id="slRate">8.7%</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <select id="slSpuFilter" onchange="renderSalesLaunchTable()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部SPU</option>
+      </select>
+      <select id="slSalesFilter" onchange="renderSalesLaunchTable()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部销售</option>
+      </select>
+      <select id="slStatusFilter" onchange="renderSalesLaunchTable()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部状态</option>
+        <option value="在售">在售</option>
+        <option value="未上架">未上架</option>
+        <option value="不在售">不在售</option>
+      </select>
+      <div style="position:relative;">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">🔍</span>
+        <input id="slSkuSearch" type="text" placeholder="SKU搜索" oninput="renderSalesLaunchTable()"
+          style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px 7px 30px;font-size:13px;width:160px;outline:none;">
+      </div>
+      <button onclick="document.getElementById('slSpuFilter').value='all';document.getElementById('slSalesFilter').value='all';document.getElementById('slStatusFilter').value='all';document.getElementById('slSkuSearch').value='';renderSalesLaunchTable();"
+        style="background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:7px 12px;font-size:12px;cursor:pointer;white-space:nowrap;">✕ 清空筛选</button>
+    </div>
+
+    <div class="chart-card" style="padding:16px 20px;">
+      <div style="overflow-x:auto;">
+        <table id="salesLaunchTable" style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px;"></table>
+      </div>
+    </div>
+  </div>
+
   <div class="content-footer">非亚渠道首批备货需求表 · 数据分析 &copy; 2026</div>
 
 </div><!-- /main-content -->
@@ -560,7 +614,7 @@ window.addEventListener('resize', function() {
 var mainContent = document.getElementById('main-content');
 
 var navItems = document.querySelectorAll('.nav-item');
-var sectionIds = ['sec-overview','sec-trend','sec-prod','sec-sku','sec-cross','sec-pivot1','sec-pivot2','sec-launch'];
+var sectionIds = ['sec-overview','sec-trend','sec-prod','sec-sku','sec-cross','sec-pivot1','sec-pivot2','sec-launch','sec-sales-launch'];
 
 function updateActiveNav() {
   var current = sectionIds[0];
@@ -2689,6 +2743,254 @@ function renderLaunchTable() {
 }
 
 renderLaunchTable();
+
+/* ===== 销售上架跟踪数据 ===== */
+var SALES_LAUNCH_DATA = {
+  "total_skus": 115,
+  "launched_skus": 10,
+  "unlaunched_skus": 105,
+  "data": [
+    {"SPU":"TMM012","产品SKU":"TMM012BT16-001","产品名称":"16\"一体鸭舌帽大波浪","平台":"TIKTOK SHOP","店铺":"MLHR","站点":"US","销售用户名":"kebolin-柯伯霖","商品状态":"在售"},
+    {"SPU":"TMM012","产品SKU":"TMM012BT16-04A","产品名称":"16\"一体鸭舌帽大波浪","平台":"TIKTOK SHOP","店铺":"MLHR","站点":"US","销售用户名":"kebolin-柯伯霖","商品状态":"在售"},
+    {"SPU":"TMM012","产品SKU":"TMM012BT16-012","产品名称":"16\"一体鸭舌帽大波浪","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM012","产品SKU":"TMM012BT16-P25","产品名称":"16\"一体鸭舌帽大波浪","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM012","产品SKU":"TMM012BT16-P11","产品名称":"16\"一体鸭舌帽大波浪","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC013","产品SKU":"TWC013BT18-01B","产品名称":"18\"抓夹马尾(卷筒)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC013","产品SKU":"TWC013BT18-04A","产品名称":"18\"抓夹马尾(卷筒)","平台":"TIKTOK SHOP","店铺":"FHC","站点":"US","销售用户名":"chenlanqing-陈兰卿","商品状态":"在售"},
+    {"SPU":"TWC013","产品SKU":"TWC013BT18-H79","产品名称":"18\"抓夹马尾(卷筒)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC013","产品SKU":"TWC013BT18-D46","产品名称":"18\"抓夹马尾(卷筒)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC013","产品SKU":"TWC013BT18-B12","产品名称":"18\"抓夹马尾(卷筒)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC013","产品SKU":"TWC013BT18-F05","产品名称":"18\"抓夹马尾(卷筒)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC002","产品SKU":"TWC002BT30-001","产品名称":"30\"抓夹马尾(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC002","产品SKU":"TWC002BT30-006","产品名称":"30\"抓夹马尾(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC002","产品SKU":"TWC002BT30-10B","产品名称":"30\"抓夹马尾(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC002","产品SKU":"TWC002BT30-P52","产品名称":"30\"抓夹马尾(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC002","产品SKU":"TWC002BT30-P47","产品名称":"30\"抓夹马尾(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC002","产品SKU":"TWC002BT30-D61","产品名称":"30\"抓夹马尾(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-001","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"HWM","站点":"US","销售用户名":"lijieying-李洁莹","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-001","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"PRM","站点":"US","销售用户名":"yaohongzhen-姚红珍","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-006","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"PRM","站点":"US","销售用户名":"yaohongzhen-姚红珍","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-006","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"HWM","站点":"US","销售用户名":"lijieying-李洁莹","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-10B","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"PRM","站点":"US","销售用户名":"yaohongzhen-姚红珍","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-10B","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"HWM","站点":"US","销售用户名":"lijieying-李洁莹","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-P52","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"HWM","站点":"US","销售用户名":"lijieying-李洁莹","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-P52","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"PRM","站点":"US","销售用户名":"yaohongzhen-姚红珍","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-P47","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"PRM","站点":"US","销售用户名":"yaohongzhen-姚红珍","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-P47","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"HWM","站点":"US","销售用户名":"lijieying-李洁莹","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-D61","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"PRM","站点":"US","销售用户名":"yaohongzhen-姚红珍","商品状态":"在售"},
+    {"SPU":"TWC001","产品SKU":"TWC001ST30-D61","产品名称":"30\"抓夹马尾(直发)","平台":"TIKTOK SHOP","店铺":"HWM","站点":"US","销售用户名":"lijieying-李洁莹","商品状态":"在售"},
+    {"SPU":"TMM014","产品SKU":"TMM014ST06-001","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM014","产品SKU":"TMM014ST06-P49","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM014","产品SKU":"TMM014ST06-P18","产品名称":"","平台":"TIKTOK SHOP","店铺":"LWS","站点":"US","销售用户名":"fangmiaofen-方妙芬","商品状态":"在售"},
+    {"SPU":"TMM021","产品SKU":"TMM021BT08-001","产品名称":"8\"一体米色鸭舌帽子发(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM021","产品SKU":"TMM021BT08-004","产品名称":"8\"一体米色鸭舌帽子发(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM021","产品SKU":"TMM021BT08-P18","产品名称":"8\"一体米色鸭舌帽子发(卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM022","产品SKU":"TMM022BT08-001","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM022","产品SKU":"TMM022BT08-004","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM022","产品SKU":"TMM022BT08-P18","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM023","产品SKU":"TMM023BT08-001","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM023","产品SKU":"TMM023BT08-004","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM023","产品SKU":"TMM023BT08-P18","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM024","产品SKU":"TMM024ST08-001","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM024","产品SKU":"TMM024ST08-004","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM024","产品SKU":"TMM024ST08-P49","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TMM024","产品SKU":"TMM024ST08-P18","产品名称":"","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-01B","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-006","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-08B","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-10B","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-613","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H80","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H81","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H82","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H83","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H84","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H85","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H86","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H87","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-B01","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H88","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H89","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT20-H90","产品名称":"20\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-01B","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-006","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-08B","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-10B","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-613","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H80","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H81","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H82","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H83","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H84","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H85","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H86","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H87","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-B01","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H88","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H89","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TKD004","产品SKU":"TKD004BT24-H90","产品名称":"24\"4片11夹卡子发缠管曲","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-01B","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-006","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-A74","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-H91","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-H92","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-H93","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-H94","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-H95","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TWC014","产品SKU":"TWC014BT30-H96","产品名称":"30\"抓夹马尾(蓬蓬卷发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS001","产品SKU":"TFS001ST24-01B","产品名称":"6x6\"手勾+机制刘海发块(直发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS001","产品SKU":"TFS001ST24-H97","产品名称":"6x6\"手勾+机制刘海发块(直发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS001","产品SKU":"TFS001ST24-004","产品名称":"6x6\"手勾+机制刘海发块(直发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS001","产品SKU":"TFS001ST24-H26","产品名称":"6x6\"手勾+机制刘海发块(直发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS001","产品SKU":"TFS001ST24-H98","产品名称":"6x6\"手勾+机制刘海发块(直发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS001","产品SKU":"TFS001ST24-06A","产品名称":"6x6\"手勾+机制刘海发块(直发)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS002","产品SKU":"TFS002BT24-004","产品名称":"6x6寸手勾+机制刘海发块(BW)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS002","产品SKU":"TFS002BT24-01B","产品名称":"6x6寸手勾+机制刘海发块(BW)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS002","产品SKU":"TFS002BT24-H97","产品名称":"6x6寸手勾+机制刘海发块(BW)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS002","产品SKU":"TFS002BT24-06A","产品名称":"6x6寸手勾+机制刘海发块(BW)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS002","产品SKU":"TFS002BT24-H99","产品名称":"6x6寸手勾+机制刘海发块(BW)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS002","产品SKU":"TFS002BT24-J01","产品名称":"6x6寸手勾+机制刘海发块(BW)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS003","产品SKU":"TFS003GT20-01B","产品名称":"6x6寸手勾+机制刘海发块(水波纹)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS003","产品SKU":"TFS003GT20-H97","产品名称":"6x6寸手勾+机制刘海发块(水波纹)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS003","产品SKU":"TFS003GT20-J02","产品名称":"6x6寸手勾+机制刘海发块(水波纹)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS003","产品SKU":"TFS003GT20-06A","产品名称":"6x6寸手勾+机制刘海发块(水波纹)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TFS003","产品SKU":"TFS003GT20-J03","产品名称":"6x6寸手勾+机制刘海发块(水波纹)","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1694","产品名称":"世界杯爆炸头造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1695","产品名称":"世界杯爆炸头造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1696","产品名称":"世界杯爆炸头造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1697","产品名称":"世界杯爆炸头造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1698","产品名称":"世界杯爆炸头造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1699","产品名称":"世界杯爆炸头造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1700","产品名称":"世界杯爆炸头造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1701","产品名称":"世界杯爆炸头造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1686","产品名称":"莫西干造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1687","产品名称":"莫西干造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1688","产品名称":"莫西干造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1689","产品名称":"莫西干造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1690","产品名称":"莫西干造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1691","产品名称":"莫西干造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1692","产品名称":"莫西干造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"},
+    {"SPU":"TW-SP","产品SKU":"TW1693","产品名称":"莫西干造型头套","平台":"","店铺":"","站点":"","销售用户名":"","商品状态":"未上架"}
+  ]
+};
+
+/* 初始化销售上架跟踪筛选器 */
+(function(){
+  var d = SALES_LAUNCH_DATA.data;
+  var spuSet = {}, salesSet = {};
+  for(var i=0;i<d.length;i++){
+    spuSet[d[i].SPU] = true;
+    if(d[i]['销售用户名']) salesSet[d[i]['销售用户名']] = true;
+  }
+  var spuSel = document.getElementById('slSpuFilter');
+  var salesSel = document.getElementById('slSalesFilter');
+  var spuKeys = Object.keys(spuSet).sort();
+  for(var i=0;i<spuKeys.length;i++){
+    var o = document.createElement('option');
+    o.value = spuKeys[i]; o.textContent = spuKeys[i];
+    spuSel.appendChild(o);
+  }
+  var salesKeys = Object.keys(salesSet).sort();
+  for(var i=0;i<salesKeys.length;i++){
+    var o = document.createElement('option');
+    o.value = salesKeys[i];
+    o.textContent = salesKeys[i].indexOf('-')>=0 ? salesKeys[i].split('-').pop() : salesKeys[i];
+    salesSel.appendChild(o);
+  }
+})();
+
+function renderSalesLaunchTable(){
+  var spuFilter = document.getElementById('slSpuFilter').value;
+  var salesFilter = document.getElementById('slSalesFilter').value;
+  var statusFilter = document.getElementById('slStatusFilter').value;
+  var skuSearch = (document.getElementById('slSkuSearch').value||'').trim().toUpperCase();
+  var tbl = document.getElementById('salesLaunchTable');
+  var cs = 'padding:7px 10px;border:1px solid #21262d;white-space:nowrap;';
+  var salesClr = {'chenlanqing-陈兰卿':'#79c0ff','fangmiaofen-方妙芬':'#56d364','yaohongzhen-姚红珍':'#ff9500','lijieying-李洁莹':'#bc8cff','kebolin-柯伯霖':'#d29922'};
+
+  var d = SALES_LAUNCH_DATA.data.slice();
+
+  // Filter
+  if(spuFilter!=='all') d = d.filter(function(r){return r.SPU===spuFilter;});
+  if(salesFilter!=='all') d = d.filter(function(r){return r['销售用户名']===salesFilter;});
+  if(statusFilter!=='all') d = d.filter(function(r){return r['商品状态']===statusFilter;});
+  if(skuSearch) d = d.filter(function(r){return r['产品SKU'].toUpperCase().indexOf(skuSearch)>=0;});
+
+  // Update KPI based on filtered data
+  var skuSet = {};
+  var launchedSkus = {};
+  for(var i=0;i<d.length;i++){
+    skuSet[d[i]['产品SKU']] = true;
+    if(d[i]['商品状态']!=='未上架') launchedSkus[d[i]['产品SKU']] = true;
+  }
+  var total = Object.keys(skuSet).length;
+  var launched = Object.keys(launchedSkus).length;
+  var unlaunched = total - launched;
+  var rate = total > 0 ? (launched/total*100).toFixed(1) : '0.0';
+  document.getElementById('slTotalSku').textContent = total;
+  document.getElementById('slLaunchedSku').textContent = launched;
+  document.getElementById('slUnlaunchedSku').textContent = unlaunched;
+  document.getElementById('slRate').textContent = rate + '%';
+
+  // Group by SPU
+  var groups = {};
+  for(var i=0;i<d.length;i++){
+    var spu = d[i].SPU;
+    if(!groups[spu]) groups[spu] = [];
+    groups[spu].push(d[i]);
+  }
+  var spuKeys = Object.keys(groups).sort();
+
+  var th = '<thead><tr>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;width:80px;">SPU</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">产品SKU</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">产品名称</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">平台</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">店铺</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;text-align:center;">站点</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">销售用户名</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;text-align:center;">商品状态</th>'
+    + '</tr></thead><tbody>';
+
+  var tb = '';
+  var rowIdx = 0;
+  for(var si=0;si<spuKeys.length;si++){
+    var spu = spuKeys[si];
+    var rows = groups[spu];
+    for(var ri=0;ri<rows.length;ri++){
+      var r = rows[ri];
+      var bg = rowIdx % 2 === 0 ? '#161b22' : '#1a2332';
+      var status = r['商品状态'] || '未上架';
+      var stColor = status==='在售' ? '#3fb950' : (status==='不在售' ? '#d29922' : '#ff7b72');
+      var sn = r['销售用户名'] || '';
+      var sColor = salesClr[sn] || '#e6edf3';
+      var shortName = sn.indexOf('-')>=0 ? sn.split('-').pop() : sn;
+
+      var spuCell = '';
+      var nameCell = '';
+      if(ri===0){
+        var spuRowSpan = rows.length > 1 ? ' rowspan="'+rows.length+'"' : '';
+        var nameRowSpan = rows.length > 1 ? ' rowspan="'+rows.length+'"' : '';
+        spuCell = '<td style="'+cs+'color:#bc8cff;font-weight:600;vertical-align:middle;text-align:center;"'+spuRowSpan+'>'+spu+'</td>';
+        nameCell = '<td style="'+cs+'color:#c9d1d9;font-size:11px;vertical-align:middle;"'+nameRowSpan+'>'+(r['产品名称']||'-')+'</td>';
+      }
+
+      tb += '<tr style="background:'+bg+';">'
+        + spuCell
+        + '<td style="'+cs+'color:#e6edf3;font-family:monospace;">'+r['产品SKU']+'</td>'
+        + nameCell
+        + '<td style="'+cs+'color:#8b949e;">'+(r['平台']||'<span style="color:#484f58;">-</span>')+'</td>'
+        + '<td style="'+cs+'color:#8b949e;">'+(r['店铺']||'<span style="color:#484f58;">-</span>')+'</td>'
+        + '<td style="'+cs+'color:#8b949e;text-align:center;">'+(r['站点']||'<span style="color:#484f58;">-</span>')+'</td>'
+        + '<td style="'+cs+'color:'+sColor+';">'+(shortName||'<span style="color:#484f58;">-</span>')+'</td>'
+        + '<td style="'+cs+'color:'+stColor+';text-align:center;font-weight:600;">'+status+'</td>'
+        + '</tr>';
+      rowIdx++;
+    }
+  }
+  tbl.innerHTML = th + tb + '</tbody>';
+}
+renderSalesLaunchTable();
 
 // ===== 图表配置 =====
 const COLORS = ['#58a6ff','#3fb950','#d29922','#bc8cff','#f778ba','#ff7b72','#79c0ff','#56d364','#e3b341','#db61a2'];
