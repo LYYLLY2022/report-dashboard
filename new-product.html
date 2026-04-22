@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新品首单分析</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+
+  /* ===== 汉堡菜单按钮 ===== */
+  .hamburger {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    background: #010409; border-bottom: 1px solid #21262d;
+    padding: 10px 16px; align-items: center; justify-content: space-between;
+  }
+  .hamburger-btn {
+    background: none; border: 1px solid #30363d; border-radius: 6px;
+    color: #e6edf3; font-size: 20px; cursor: pointer;
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    padding: 0; line-height: 1;
+  }
+  .hamburger-btn:hover { background: #21262d; }
+  .hamburger-logo { font-size: 15px; font-weight: 700; color: #f0f6fc; }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+
+  /* ===== 左侧导航栏 ===== */
+  .sidebar {
+    width: 220px; min-width: 220px;
+    background: #010409;
+    border-right: 1px solid #21262d;
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid #21262d;
+  }
+  .sidebar-logo h2 {
+    font-size: 16px; font-weight: 700; color: #f0f6fc;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sidebar-logo p {
+    font-size: 11px; color: #484f58; margin-top: 6px; line-height: 1.4;
+  }
+  .nav-group { padding: 16px 0; }
+  .nav-group-title {
+    font-size: 10px; font-weight: 600; color: #484f58;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 0 20px 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; font-size: 13px; color: #8b949e;
+    text-decoration: none; cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { color: #e6edf3; background: rgba(56,139,253,0.06); }
+  .nav-item.active {
+    color: #58a6ff; background: rgba(56,139,253,0.1);
+    border-left-color: #58a6ff;
+  }
+  .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
+  .sidebar-footer {
+    margin-top: auto; padding: 16px 20px;
+    border-top: 1px solid #21262d;
+    font-size: 11px; color: #484f58; text-align: center;
+  }
+
+  /* ===== 右侧主内容区 ===== */
+  .main-content {
+    margin-left: 220px;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  /* 区块标题 */
+  .section { padding: 28px 32px 0; }
+  .section-title {
+    font-size: 18px; font-weight: 600; color: #f0f6fc;
+    padding-bottom: 14px; margin-bottom: 20px;
+    border-bottom: 1px solid #21262d;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .dot {
+    width: 4px; height: 20px; background: #58a6ff; border-radius: 2px;
+  }
+
+  /* KPI */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .kpi-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 20px 22px; }
+  .kpi-card .label { font-size: 12px; color: #8b949e; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 28px; font-weight: 700; color: #58a6ff; }
+  .kpi-card .sub { font-size: 12px; color: #8b949e; margin-top: 4px; }
+  .kpi-card.green .value { color: #3fb950; }
+  .kpi-card.orange .value { color: #d29922; }
+  .kpi-card.purple .value { color: #bc8cff; }
+
+  /* 图表网格 */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-full { }
+  .chart-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 20px; }
+  .chart-card h3 { font-size: 14px; color: #c9d1d9; margin-bottom: 16px; font-weight: 500; }
+  .chart-box { width: 100%; }
+
+  /* 弹窗 */
+  .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:999; display:flex; align-items:center; justify-content:center; }
+  .modal-box { background:#161b22; border:1px solid #30363d; border-radius:12px; width:520px; max-width:92vw; max-height:75vh; display:flex; flex-direction:column; box-shadow:0 8px 30px rgba(0,0,0,0.5); }
+  .modal-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #21262d; }
+  .modal-header h4 { font-size:14px; color:#f0f6fc; margin:0; }
+  .modal-close { background:none; border:none; color:#8b949e; font-size:22px; cursor:pointer; padding:0 4px; line-height:1; }
+  .modal-close:hover { color:#ff7b72; }
+  .modal-body { padding:16px 20px; overflow-y:auto; flex:1; }
+  .modal-body table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  .modal-body th { background:#1c2128; color:#8b949e; font-weight:600; padding:7px 12px; border:1px solid #21262d; text-align:left; position:sticky; top:0; }
+  .modal-body td { padding:6px 12px; border:1px solid #21262d; }
+  .modal-body tr:nth-child(even) td { background:#1a2332; }
+
+  /* 可点击数字 */
+  .cell-num { cursor: pointer; transition: color 0.15s, background 0.15s; border-radius: 3px; }
+  .cell-num:hover { color: #79c0ff !important; background: rgba(56,139,253,0.1); }
+
+  .content-footer { text-align: center; padding: 24px 32px; color: #484f58; font-size: 12px; border-top: 1px solid #21262d; margin-top: 16px; }
+
+  /* ===== 移动端响应式 ===== */
+  @media (max-width: 768px) {
+    /* 显示汉堡菜单 */
+    .hamburger { display: flex; }
+    /* 侧边栏隐藏，滑出 */
+    .sidebar {
+      transform: translateX(-100%);
+      top: 0; z-index: 300;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; z-index: 250; }
+    /* 主内容全宽 */
+    .main-content { margin-left: 0; height: calc(100vh - 52px); margin-top: 52px; }
+    /* 区块标题缩小 */
+    .section { padding: 20px 16px 0; }
+    .section-title { font-size: 16px; padding-bottom: 10px; margin-bottom: 14px; }
+    /* KPI: 2列 */
+    .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .kpi-card { padding: 14px 16px; border-radius: 8px; }
+    .kpi-card .label { font-size: 11px; }
+    .kpi-card .value { font-size: 22px; }
+    .kpi-card .sub { font-size: 11px; }
+    /* 图表卡片 */
+    .chart-card { padding: 14px; border-radius: 8px; }
+    .chart-card h3 { font-size: 13px; margin-bottom: 10px; }
+    /* 图表高度缩小 */
+    #chart-monthly, #chart-prod-sku, #chart-prod-site { height: 240px !important; }
+    #chart-product-bar { height: 260px !important; }
+    /* 透视表搜索框区域 */
+    .chart-card[style*="padding:24px 28px"] { padding: 14px !important; }
+    /* 搜索输入框自适应宽度 */
+    input[type="text"] { max-width: 100% !important; width: 100% !important; }
+    select { max-width: 100%; }
+    /* 搜索框 wrapper 自适应 */
+    [style*="display:flex"][style*="flex-wrap:wrap"] > div[style*="position:relative"] { flex: 1 1 140px; min-width: 120px; }
+    [style*="display:flex"][style*="flex-wrap:wrap"] > select { flex: 0 0 auto; }
+    [style*="display:flex"][style*="flex-wrap:wrap"] > button { flex: 0 0 auto; }
+    /* 弹窗全屏 */
+    .modal-box {
+      width: 100vw; max-width: 100vw; max-height: 90vh;
+      border-radius: 12px 12px 0 0;
+      margin-top: auto;
+    }
+    .modal-mask {
+      align-items: flex-end;
+      padding: 0;
+    }
+    .modal-body { padding: 12px; }
+    .modal-body table { font-size: 11px; }
+    .modal-body th, .modal-body td { padding: 5px 6px; }
+    /* 弹窗拖拽条 */
+    .modal-drag-bar {
+      display: block; width: 40px; height: 4px; border-radius: 2px;
+      background: #484f58; margin: 6px auto 0;
+    }
+    /* 页脚 */
+    .content-footer { padding: 16px; font-size: 11px; }
+  }
+
+  @media (max-width: 480px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .kpi-card .value { font-size: 20px; }
+    .section-title { font-size: 15px; }
+    #chart-monthly, #chart-prod-sku, #chart-prod-site { height: 200px !important; }
+    #chart-product-bar { height: 220px !important; }
+  }
+  /* 密码验证遮罩 */
+  .pwd-mask {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0d1117;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px;
+  }
+  .pwd-mask.hidden { display: none; }
+  .pwd-box {
+    background: #161b22; border: 1px solid #30363d; border-radius: 16px;
+    padding: 40px 36px; text-align: center; max-width: 360px; width: 90vw;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  .pwd-box h3 { color: #f0f6fc; font-size: 20px; margin-bottom: 8px; }
+  .pwd-box p { color: #8b949e; font-size: 13px; margin-bottom: 24px; }
+  .pwd-box input {
+    width: 100%; padding: 12px 16px; font-size: 15px;
+    background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+    color: #e6edf3; outline: none; text-align: center; letter-spacing: 2px;
+  }
+  .pwd-box input:focus { border-color: #58a6ff; }
+  .pwd-box button {
+    width: 100%; margin-top: 16px; padding: 12px; font-size: 14px;
+    background: #238636; border: 1px solid #2ea043; border-radius: 8px;
+    color: #fff; cursor: pointer; font-weight: 600;
+  }
+  .pwd-box button:hover { background: #2ea043; }
+  .pwd-err { color: #ff7b72; font-size: 12px; margin-top: 8px; min-height: 18px; }
+</style>
+</head>
+<body>
+
+<!-- 密码验证 -->
+<div class="pwd-mask" id="pwdMask">
+  <div class="pwd-box">
+    <h3>🔒 访问验证</h3>
+    <p>请输入密码以查看内容</p>
+    <input type="password" id="pwdInput" placeholder="输入密码" autocomplete="off" />
+    <div class="pwd-err" id="pwdErr"></div>
+    <button onclick="checkPwd()">确 认</button>
+  </div>
+</div>
+
+<!-- ===== 汉堡菜单（移动端） ===== -->
+<div class="hamburger" id="hamburger">
+  <button class="hamburger-btn" onclick="toggleSidebar()" title="菜单">☰</button>
+  <span class="hamburger-logo">📦 新品首单</span>
+  <span style="width:36px;"></span>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== 左侧导航栏 ===== -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h2><span>📦</span> 新品首单</h2>
+    <p>非亚渠道分析</p>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">数据概览</div>
+    <a class="nav-item active" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-overview').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">📊</span> KPI 总览
+    </a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">趋势图表</div>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-trend').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">📈</span> 月度新品趋势
+    </a>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-prod').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">🏆</span> 产品备货排行
+    </a>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-sku').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">🔢</span> SKU 数量分析
+    </a>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-cross').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">📍</span> 产品×站点分布
+    </a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">上架跟踪</div>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-launch').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">🚀</span> 上架跟踪
+    </a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">数据明细</div>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-pivot1').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">📋</span> 销售×产品明细
+    </a>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-pivot2').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">📦</span> 产品×销售明细
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    数据更新：2026-04-21
+  </div>
+</nav>
+
+<!-- ===== 右侧主内容区 ===== -->
+<div class="main-content" id="main-content">
+
+  <!-- ====== 区块1：KPI 总览 ====== -->
+  <div class="section" id="sec-overview">
+    <div class="section-title"><span class="dot"></span> 数据概览</div>
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="label">总备货数量</div>
+        <div class="value">3,823</div>
+        <div class="sub">件</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="label">新品种类(SPU)</div>
+        <div class="value">10</div>
+        <div class="sub">款产品</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="label">SKU 总数</div>
+        <div class="value">115</div>
+        <div class="sub">个 SKU</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="label">需求记录</div>
+        <div class="value">271</div>
+        <div class="sub">条记录 / 3 位销售</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 区块2：趋势图表 ====== -->
+  <div class="section" id="sec-trend">
+    <div class="section-title"><span class="dot"></span> 趋势图表</div>
+    <div class="chart-card">
+      <h3>📅 月度新品趋势（数量 + SKU数 + SPU数）</h3>
+      <div class="chart-box" id="chart-monthly" style="height:300px;"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-prod" style="padding-top:16px;">
+    <div class="chart-card">
+      <h3>🏆 各产品备货数量排行</h3>
+      <div class="chart-box" id="chart-product-bar" style="height:320px;"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-sku" style="padding-top:16px;">
+    <div class="section-title"><span class="dot"></span> SKU数量分析</div>
+    <div class="chart-card">
+      <h3>🔢 各产品 SKU 数量</h3>
+      <div class="chart-box" id="chart-prod-sku" style="height:300px;"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-cross" style="padding-top:16px;">
+    <div class="chart-card">
+      <h3>📍 产品×站点 备货分布</h3>
+      <div class="chart-box" id="chart-prod-site" style="height:300px;"></div>
+    </div>
+  </div>
+
+  <!-- ====== 区块3：明细透视表 ====== -->
+  <div class="section" id="sec-pivot1">
+    <div class="section-title"><span class="dot"></span> 销售 × 产品 × 日期 明细</div>
+    <div class="chart-card" style="padding:24px 28px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">👤</span>
+          <input id="searchSales" type="text" placeholder="搜索销售名称..."
+            style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;
+                   padding:7px 12px 7px 30px;font-size:13px;width:160px;outline:none;"
+            oninput="renderTable()" />
+        </div>
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">🔍</span>
+          <input id="searchProd" type="text" placeholder="搜索产品名称..."
+            style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;
+                   padding:7px 12px 7px 30px;font-size:13px;width:180px;outline:none;"
+            oninput="renderTable()" />
+        </div>
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">🏷️</span>
+          <input id="searchSpu" type="text" placeholder="搜索SPU(多个用空格/逗号)..."
+            style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;
+                   padding:7px 12px 7px 30px;font-size:13px;width:240px;outline:none;"
+            oninput="renderTable()" />
+        </div>
+        <button onclick="document.getElementById('searchSales').value='';document.getElementById('searchProd').value='';document.getElementById('searchSpu').value='';renderTable();"
+          style="background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;
+                 padding:7px 14px;font-size:12px;cursor:pointer;">重置</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="pivotTable" style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px;">
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-pivot2" style="padding-top:16px;">
+    <div class="section-title"><span class="dot"></span> 产品 × 销售 × 日期 明细</div>
+    <div class="chart-card" style="padding:24px 28px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">📦</span>
+          <input id="searchProd2" type="text" placeholder="搜索产品名称..."
+            style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;
+                   padding:7px 12px 7px 30px;font-size:13px;width:180px;outline:none;"
+            oninput="renderTable2()" />
+        </div>
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">👤</span>
+          <input id="searchSales2" type="text" placeholder="搜索销售名称..."
+            style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;
+                   padding:7px 12px 7px 30px;font-size:13px;width:160px;outline:none;"
+            oninput="renderTable2()" />
+        </div>
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">🏷️</span>
+          <input id="searchSpu2" type="text" placeholder="搜索SPU(多个用空格/逗号)..."
+            style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;
+                   padding:7px 12px 7px 30px;font-size:13px;width:240px;outline:none;"
+            oninput="renderTable2()" />
+        </div>
+        <button onclick="document.getElementById('searchProd2').value='';document.getElementById('searchSales2').value='';document.getElementById('searchSpu2').value='';renderTable2();"
+          style="background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;
+                 padding:7px 14px;font-size:12px;cursor:pointer;">重置</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="pivotTable2" style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px;">
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ====== 上架跟踪 ====== -->
+  <div class="section" id="sec-launch">
+    <div class="section-title"><span class="dot"></span> 新品上架跟踪</div>
+    <div class="kpi-row" style="margin-bottom:20px;">
+      <div class="kpi-card">
+        <div class="label">新品SKU总数</div>
+        <div class="value">115</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">已上架SKU</div>
+        <div class="value" style="color:#3fb950;">10</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">未上架SKU</div>
+        <div class="value" style="color:#ff7b72;">105</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">上架率</div>
+        <div class="value" style="color:#d29922;">8.7%</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <select id="launchFilter" onchange="renderLaunchTable()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部</option>
+        <option value="launched">仅已上架</option>
+        <option value="unlaunched">仅未上架</option>
+          <option value="TFS">TFS - [6x6寸手勾机制刘海发块-260403]</option>
+          <option value="TKD">TKD - [4片11夹卡子发缠管曲0401]</option>
+          <option value="TMM">TMM - [一体鸭舌黑帽子大波浪16寸新色首单采购需求010</option>
+          <option value="TW">TW - [世界杯造型头套-260407]</option>
+          <option value="TWC">TWC - [抓夹马尾(卷筒)首单采购需求0120]</option>
+      </select>
+      <div style="position:relative;">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">🏷️</span>
+        <input id="launchSpuSearch" type="text" placeholder="SPU (多个空格/逗号)" oninput="renderLaunchTable()"
+          style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px 7px 30px;font-size:13px;width:180px;outline:none;">
+      </div>
+      <div style="position:relative;">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">📦</span>
+        <input id="launchNameSearch" type="text" placeholder="产品名称 (多个空格/逗号)" oninput="renderLaunchTable()"
+          style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px 7px 30px;font-size:13px;width:200px;outline:none;">
+      </div>
+      <div style="position:relative;">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">🔍</span>
+        <input id="launchSkuSearch" type="text" placeholder="SKU (多个空格/逗号)" oninput="renderLaunchTable()"
+          style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px 7px 30px;font-size:13px;width:200px;outline:none;">
+      </div>
+      <div style="position:relative;">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">📊</span>
+        <input id="launchStatusSearch" type="text" placeholder="商品状态 (多个空格/逗号)" oninput="renderLaunchTable()"
+          style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px 7px 30px;font-size:13px;width:200px;outline:none;">
+      </div>
+      <button onclick="document.getElementById('launchSpuSearch').value='';document.getElementById('launchNameSearch').value='';document.getElementById('launchSkuSearch').value='';document.getElementById('launchStatusSearch').value='';renderLaunchTable();"
+        style="background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:7px 12px;font-size:12px;cursor:pointer;white-space:nowrap;">✕ 清空搜索</button>
+    </div>
+
+    <div class="chart-card" style="padding:16px 20px;">
+      <div style="overflow-x:auto;">
+        <table id="launchTable" style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:850px;"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-footer">非亚渠道首批备货需求表 · 数据分析 &copy; 2026</div>
+
+</div><!-- /main-content -->
+
+<!-- 密码验证逻辑 -->
+<script>
+(function(){
+  /* 密码hash值，非明文存储 */
+  var _K=93697338287624766641;
+  function _h(s){var n=0;for(var i=0;i<s.length;i++){n=((n<<5)-n)+s.charCodeAt(i);n|=0;}return n;}
+  window.checkPwd=function(){
+    var v=document.getElementById('pwdInput').value;
+    if(!v){document.getElementById('pwdErr').textContent='请输入密码';return;}
+    if(_h(v)===_K){
+      document.getElementById('pwdMask').classList.add('hidden');
+      sessionStorage.setItem('_np','1');
+    }else{
+      document.getElementById('pwdErr').textContent='密码错误，请重试';
+      document.getElementById('pwdInput').value='';
+      document.getElementById('pwdInput').focus();
+    }
+  };
+  document.getElementById('pwdInput').addEventListener('keydown',function(e){
+    if(e.key==='Enter')checkPwd();
+  });
+  if(sessionStorage.getItem('_np')==='1')document.getElementById('pwdMask').classList.add('hidden');
+})();
+</script>
+
+<!-- 汉堡菜单 & ECharts resize -->
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+// 侧边栏导航点击后自动关闭（移动端）
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+  });
+});
+// ECharts 窗口resize
+window.addEventListener('resize', function() {
+  if (typeof chartMonthly !== 'undefined') chartMonthly.resize();
+  if (typeof chartProductBar !== 'undefined') chartProductBar.resize();
+  if (typeof chartProdSku !== 'undefined') chartProdSku.resize();
+  if (typeof chartProdSite !== 'undefined') chartProdSite.resize();
+});
+</script>
+
+<!-- 导航滚动高亮 -->
+<script>
+var mainContent = document.getElementById('main-content');
+
+var navItems = document.querySelectorAll('.nav-item');
+var sectionIds = ['sec-overview','sec-trend','sec-prod','sec-sku','sec-cross','sec-pivot1','sec-pivot2','sec-launch'];
+
+function updateActiveNav() {
+  var current = sectionIds[0];
+  for (var i = 0; i < sectionIds.length; i++) {
+    var el = document.getElementById(sectionIds[i]);
+    if (el && el.getBoundingClientRect().top <= 120) {
+      current = id;
+    }
+  }
+  for (var j = 0; j < navItems.length; j++) {
+    var item = navItems[j];
+    var oc = item.getAttribute('onclick') || '';
+    var match = oc.match(/getElementById\('(\S+?)'\)/);
+    var target = match ? match[1] : '';
+    if (target === current) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  }
+}
+mainContent.addEventListener('scroll', updateActiveNav);
+
+</script>
+
+<script>
+// ===== 透视表数据 =====
+const DATES = ["2026-01-08","2026-01-19","2026-01-21","2026-01-27","2026-01-30","2026-03-20","2026-03-24","2026-03-30","2026-04-01","2026-04-03"];
+
+const PIVOT_RAW = [
+  {销售:"(空白)",产品名称:"6x6寸手勾机制刘海发块-260403",日期:"2026-04-01",数量:94},
+  {销售:"(空白)",产品名称:"抓夹马尾(卷筒)首单采购需求0120",日期:"2026-01-19",数量:58},
+  {销售:"姚红珍",产品名称:"30寸抓夹马尾0401",日期:"2026-03-30",数量:345},
+  {销售:"姚红珍",产品名称:"6x6寸手勾机制刘海发块-260403",日期:"2026-04-01",数量:132},
+  {销售:"姚红珍",产品名称:"8寸一体鸭舌帽子发(卷发)首批需求0130",日期:"2026-01-30",数量:324},
+  {销售:"姚红珍",产品名称:"一体鸭舌帽首批下单  260127",日期:"2026-01-27",数量:30},
+  {销售:"姚红珍",产品名称:"一体鸭舌黑帽子大波浪16寸新色首单采购需求0108",日期:"2026-01-08",数量:250},
+  {销售:"姚红珍",产品名称:"世界杯造型头套-260407",日期:"2026-04-03",数量:80},
+  {销售:"姚红珍",产品名称:"抓夹马尾(卷筒)首单采购需求0120",日期:"2026-01-19",数量:32},
+  {销售:"姚红珍",产品名称:"抓夹马尾直发+卷发-首单需求0122",日期:"2026-01-21",数量:216},
+  {销售:"姚红珍/陈兰卿/方妙芬",产品名称:"4片11夹卡子发缠管曲0401",日期:"2026-03-24",数量:1330},
+  {销售:"姚红珍/陈兰卿/方妙芬",产品名称:"（调整后）一体速干鸭舌帽子发下单0331",日期:"2026-03-20",数量:110},
+  {销售:"方妙芬",产品名称:"30寸抓夹马尾0401",日期:"2026-03-30",数量:90},
+  {销售:"方妙芬",产品名称:"6x6寸手勾机制刘海发块-260403",日期:"2026-04-01",数量:108},
+  {销售:"方妙芬",产品名称:"8寸一体鸭舌帽子发(卷发)首批需求0130",日期:"2026-01-30",数量:54},
+  {销售:"方妙芬",产品名称:"抓夹马尾(卷筒)首单采购需求0120",日期:"2026-01-19",数量:20},
+  {销售:"方妙芬",产品名称:"抓夹马尾直发+卷发-首单需求0122",日期:"2026-01-21",数量:60},
+  {销售:"陈兰卿",产品名称:"30寸抓夹马尾0401",日期:"2026-03-30",数量:90},
+  {销售:"陈兰卿",产品名称:"6x6寸手勾机制刘海发块-260403",日期:"2026-04-01",数量:176},
+  {销售:"陈兰卿",产品名称:"8寸一体鸭舌帽子发(卷发)首批需求0130",日期:"2026-01-30",数量:72},
+  {销售:"陈兰卿",产品名称:"抓夹马尾(卷筒)首单采购需求0120",日期:"2026-01-19",数量:20},
+  {销售:"陈兰卿",产品名称:"抓夹马尾直发+卷发-首单需求0122",日期:"2026-01-21",数量:132}
+];
+
+// SKU 明细数据
+const SKU_DETAIL = [{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-004","数量":4},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-06A","数量":6},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H26","数量":4},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H97","数量":4},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H98","数量":6},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-004","数量":9},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-01B","数量":5},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-06A","数量":9},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-H97","数量":9},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-H99","数量":9},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-J01","数量":9},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-06A","数量":6},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-H97","数量":4},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-J02","数量":4},{"销售":"(空白)","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-J03","数量":6},{"销售":"(空白)","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-B12","数量":15},{"销售":"(空白)","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-F05","数量":19},{"销售":"(空白)","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-H79","数量":24},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-006","数量":45},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-01B","数量":60},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-A74","数量":40},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H91","数量":40},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H92","数量":40},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H93","数量":40},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H94","数量":40},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H95","数量":20},{"销售":"姚红珍","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H96","数量":20},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-004","数量":10},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-01B","数量":10},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-06A","数量":8},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H26","数量":10},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H97","数量":10},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H98","数量":8},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-004","数量":5},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-01B","数量":5},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-06A","数量":5},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-H97","数量":5},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-H99","数量":5},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-J01","数量":5},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-01B","数量":10},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-06A","数量":8},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-H97","数量":10},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-J02","数量":10},{"销售":"姚红珍","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-J03","数量":8},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-001","数量":36},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-004","数量":36},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-P18","数量":36},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-001","数量":36},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-004","数量":36},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-P18","数量":36},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-001","数量":36},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-004","数量":36},{"销售":"姚红珍","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-P18","数量":36},{"销售":"姚红珍","产品名称":"一体鸭舌帽首批下单  260127","日期":"2026-01-27","SKU":"TMM014ST06-001","数量":10},{"销售":"姚红珍","产品名称":"一体鸭舌帽首批下单  260127","日期":"2026-01-27","SKU":"TMM014ST06-P18","数量":10},{"销售":"姚红珍","产品名称":"一体鸭舌帽首批下单  260127","日期":"2026-01-27","SKU":"TMM014ST06-P49","数量":10},{"销售":"姚红珍","产品名称":"一体鸭舌黑帽子大波浪16寸新色首单采购需求0108","日期":"2026-01-08","SKU":"TMM012BT16-001","数量":50},{"销售":"姚红珍","产品名称":"一体鸭舌黑帽子大波浪16寸新色首单采购需求0108","日期":"2026-01-08","SKU":"TMM012BT16-012","数量":50},{"销售":"姚红珍","产品名称":"一体鸭舌黑帽子大波浪16寸新色首单采购需求0108","日期":"2026-01-08","SKU":"TMM012BT16-04A","数量":50},{"销售":"姚红珍","产品名称":"一体鸭舌黑帽子大波浪16寸新色首单采购需求0108","日期":"2026-01-08","SKU":"TMM012BT16-P11","数量":50},{"销售":"姚红珍","产品名称":"一体鸭舌黑帽子大波浪16寸新色首单采购需求0108","日期":"2026-01-08","SKU":"TMM012BT16-P25","数量":50},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1686","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1687","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1688","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1689","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1690","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1691","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1692","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1693","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1694","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1695","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1696","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1697","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1698","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1699","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1700","数量":5},{"销售":"姚红珍","产品名称":"世界杯造型头套-260407","日期":"2026-04-03","SKU":"TW1701","数量":5},{"销售":"姚红珍","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-01B","数量":8},{"销售":"姚红珍","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-04A","数量":8},{"销售":"姚红珍","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-D46","数量":8},{"销售":"姚红珍","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-H79","数量":8},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-001","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-006","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-10B","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-D61","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-P47","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-P52","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-001","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-006","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-10B","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-D61","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-P47","数量":18},{"销售":"姚红珍","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-P52","数量":18},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-006","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-01B","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-08B","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-10B","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-613","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-B01","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H80","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H81","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H82","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H83","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H84","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H85","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H86","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H87","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H88","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H89","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT20-H90","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-006","数量":60},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-01B","数量":60},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-08B","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-10B","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-613","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-B01","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H80","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H81","数量":60},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H82","数量":60},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H83","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H84","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H85","数量":60},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H86","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H87","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H88","数量":40},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H89","数量":60},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"4片11夹卡子发缠管曲0401","日期":"2026-03-24","SKU":"TKD004BT24-H90","数量":60},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"（调整后）一体速干鸭舌帽子发下单0331","日期":"2026-03-20","SKU":"TMM024ST08-001","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"（调整后）一体速干鸭舌帽子发下单0331","日期":"2026-03-20","SKU":"TMM024ST08-004","数量":30},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"（调整后）一体速干鸭舌帽子发下单0331","日期":"2026-03-20","SKU":"TMM024ST08-P18","数量":25},{"销售":"姚红珍/陈兰卿/方妙芬","产品名称":"（调整后）一体速干鸭舌帽子发下单0331","日期":"2026-03-20","SKU":"TMM024ST08-P49","数量":25},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-006","数量":10},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-01B","数量":10},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-A74","数量":10},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H91","数量":10},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H92","数量":10},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H93","数量":10},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H94","数量":10},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H95","数量":10},{"销售":"方妙芬","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H96","数量":10},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-004","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-01B","数量":8},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-06A","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H26","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H97","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H98","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-004","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-01B","数量":8},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-06A","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-H97","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-H99","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-J01","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-01B","数量":8},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-06A","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-H97","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-J02","数量":6},{"销售":"方妙芬","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-J03","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-001","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-004","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-P18","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-001","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-004","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-P18","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-001","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-004","数量":6},{"销售":"方妙芬","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-P18","数量":6},{"销售":"方妙芬","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-01B","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-04A","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-D46","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-H79","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-001","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-006","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-10B","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-D61","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-P47","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-P52","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-001","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-006","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-10B","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-D61","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-P47","数量":5},{"销售":"方妙芬","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-P52","数量":5},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-006","数量":10},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-01B","数量":10},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-A74","数量":10},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H91","数量":10},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H92","数量":10},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H93","数量":10},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H94","数量":10},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H95","数量":10},{"销售":"陈兰卿","产品名称":"30寸抓夹马尾0401","日期":"2026-03-30","SKU":"TWC014BT30-H96","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-004","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-01B","数量":12},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-06A","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H26","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H97","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS001ST24-H98","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-004","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-01B","数量":12},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-06A","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-H97","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-H99","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS002BT24-J01","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-01B","数量":12},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-06A","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-H97","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-J02","数量":10},{"销售":"陈兰卿","产品名称":"6x6寸手勾机制刘海发块-260403","日期":"2026-04-01","SKU":"TFS003GT20-J03","数量":10},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-001","数量":8},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-004","数量":8},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM021BT08-P18","数量":8},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-001","数量":8},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-004","数量":8},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM022BT08-P18","数量":8},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-001","数量":8},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-004","数量":8},{"销售":"陈兰卿","产品名称":"8寸一体鸭舌帽子发(卷发)首批需求0130","日期":"2026-01-30","SKU":"TMM023BT08-P18","数量":8},{"销售":"陈兰卿","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-01B","数量":5},{"销售":"陈兰卿","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-04A","数量":5},{"销售":"陈兰卿","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-D46","数量":5},{"销售":"陈兰卿","产品名称":"抓夹马尾(卷筒)首单采购需求0120","日期":"2026-01-19","SKU":"TWC013BT18-H79","数量":5},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-001","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-006","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-10B","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-D61","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-P47","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC001ST30-P52","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-001","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-006","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-10B","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-D61","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-P47","数量":11},{"销售":"陈兰卿","产品名称":"抓夹马尾直发+卷发-首单需求0122","日期":"2026-01-21","SKU":"TWC002BT30-P52","数量":11}];
+const SKU_SPEC_MAP = {"TMM012BT16-Z28": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "116/350", "价格": "18"}, "TMM012BT16-D52": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "27/613", "价格": "18"}, "TMM012BT16-H42": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "24H613", "价格": "18"}, "TMM012BT16-PIN": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "PINK", "价格": "18"}, "TMM012BT16-Z29": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "4/60/88A", "价格": "18"}, "TMM012BT16-P10": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "10P22T", "价格": "18"}, "TMM012BT16-010": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "10", "价格": "18"}, "TMM012BT16-001": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "01", "价格": "18"}, "TMM012BT16-04A": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "4A", "价格": "18"}, "TMM012BT16-012": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "12", "价格": "18"}, "TMM012BT16-P25": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "16P613", "价格": "18"}, "TMM012BT16-P11": {"SPU": "TMM012", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "12P24", "价格": "18"}, "TWC013BT18-01B": {"SPU": "TWC013", "产品名称": "18\"抓夹马尾(卷筒)", "尺寸": "18", "颜色": "1B", "价格": "10"}, "TWC013BT18-04A": {"SPU": "TWC013", "产品名称": "18\"抓夹马尾(卷筒)", "尺寸": "18", "颜色": "4A", "价格": "10"}, "TWC013BT18-006": {"SPU": "TWC013", "产品名称": "18\"抓夹马尾(卷筒)", "尺寸": "18", "颜色": "06", "价格": "10"}, "TWC013BT18-033": {"SPU": "TWC013", "产品名称": "18\"抓夹马尾(卷筒)", "尺寸": "18", "颜色": "33", "价格": "10"}, "TWC013BT18-B12": {"SPU": "TWC013", "产品名称": "18\"抓夹马尾(卷筒)", "尺寸": "18", "颜色": "60A", "价格": "10"}, "TWC013BT18-F05": {"SPU": "TWC013", "产品名称": "18\"抓夹马尾(卷筒)", "尺寸": "18", "颜色": "60/60A", "价格": "10"}, "TWC013BT18-H79": {"SPU": "TWC013", "产品名称": "18\"抓夹马尾(卷筒)", "尺寸": "18", "颜色": "12H15", "价格": "10"}, "TWC013BT18-D46": {"SPU": "TWC013", "产品名称": "18\"抓夹马尾(卷筒)", "尺寸": "18", "颜色": "24/613", "价格": "10"}, "TWC001ST21-D42": {"SPU": "TWC001", "产品名称": "21\"抓夹马尾(直发)", "尺寸": "21", "颜色": "18/613", "价格": "9.5"}, "TWC001ST21-D46": {"SPU": "TWC001", "产品名称": "21\"抓夹马尾(直发)", "尺寸": "21", "颜色": "24/613", "价格": "9.5"}, "TWC001ST21-D61": {"SPU": "TWC001", "产品名称": "21\"抓夹马尾(直发)", "尺寸": "21", "颜色": "86/613", "价格": "9.5"}, "TWC001ST30-001": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "01", "价格": "12"}, "TWC001ST30-02A": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "2A", "价格": "12"}, "TWC001ST30-006": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "06", "价格": "12"}, "TWC001ST30-10B": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "10B", "价格": "12"}, "TWC001ST30-012": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "12", "价格": "12"}, "TWC001ST30-088": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "88", "价格": "12"}, "TWC001ST30-P52": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "12P22T", "价格": "12"}, "TWC001ST30-22T": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "22T", "价格": "12"}, "TWC001ST30-B07": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "22T/88", "价格": "12"}, "TWC001ST30-P47": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "24P88", "价格": "12"}, "TWC001ST30-D42": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "18/613", "价格": "12"}, "TWC001ST30-D46": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "24/613", "价格": "12"}, "TWC001ST30-D61": {"SPU": "TWC001", "产品名称": "30\"抓夹马尾(直发)", "尺寸": "30", "颜色": "86/613", "价格": "12"}, "TWC002BT30-001": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "01", "价格": "12.5"}, "TWC002BT30-02A": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "2A", "价格": "12.5"}, "TWC002BT30-006": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "06", "价格": "12.5"}, "TWC002BT30-10B": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "10B", "价格": "12.5"}, "TWC002BT30-012": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "12", "价格": "12.5"}, "TWC002BT30-M30": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "M30", "价格": "12.5"}, "TWC002BT30-088": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "88", "价格": "12.5"}, "TWC002BT30-P52": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "12P22T", "价格": "12.5"}, "TWC002BT30-22T": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "22T", "价格": "12.5"}, "TWC002BT30-B07": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "22T/88", "价格": "12.5"}, "TWC002BT30-P47": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "24P88", "价格": "12.5"}, "TWC002BT30-D42": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "18/613", "价格": "12.5"}, "TWC002BT30-D46": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "24/613", "价格": "12.5"}, "TWC002BT30-D61": {"SPU": "TWC002", "产品名称": "30\"抓夹马尾(卷发)", "尺寸": "30", "颜色": "86/613", "价格": "12.5"}, "TMM021BT08-001": {"SPU": "TMM021", "产品名称": "8\"一体米色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "01", "价格": "20"}, "TMM021BT08-004": {"SPU": "TMM021", "产品名称": "8\"一体米色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "04", "价格": "20"}, "TMM021BT08-P18": {"SPU": "TMM021", "产品名称": "8\"一体米色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "18P613", "价格": "20"}, "TMM022BT08-001": {"SPU": "TMM022", "产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "01", "价格": "20"}, "TMM022BT08-004": {"SPU": "TMM022", "产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "04", "价格": "20"}, "TMM022BT08-P18": {"SPU": "TMM022", "产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "18P613", "价格": "20"}, "TMM023BT08-001": {"SPU": "TMM023", "产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "01", "价格": "20"}, "TMM023BT08-004": {"SPU": "TMM023", "产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "04", "价格": "20"}, "TMM023BT08-P18": {"SPU": "TMM023", "产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)", "尺寸": "08", "颜色": "18P613", "价格": "20"}, "TKD004BT20-01B": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "1B", "价格": "18.5"}, "TKD004BT20-006": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "06", "价格": "18.5"}, "TKD004BT20-08B": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "8B", "价格": "18.5"}, "TKD004BT20-10B": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "10B", "价格": "18.5"}, "TKD004BT20-613": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "613", "价格": "18.5"}, "TKD004BT20-H80": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "1BH60/60A", "价格": "18.5"}, "TKD004BT20-H81": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "12H22A", "价格": "18.5"}, "TKD004BT20-H82": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "12CH80", "价格": "18.5"}, "TKD004BT20-H83": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "18TH60A", "价格": "18.5"}, "TKD004BT20-H84": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "8/9H60", "价格": "18.5"}, "TKD004BT20-H85": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "9H88B", "价格": "18.5"}, "TKD004BT20-H86": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "6H26", "价格": "18.5"}, "TKD004BT20-H87": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "24H60A", "价格": "18.5"}, "TKD004BT20-B01": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "18H88", "价格": "18.5"}, "TKD004BT20-H88": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "8B/12H27/30", "价格": "18.5"}, "TKD004BT20-H89": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "6AH27M", "价格": "18.5"}, "TKD004BT20-H90": {"SPU": "TKD004", "产品名称": "20\"4片11夹卡子发缠管曲", "尺寸": "20", "颜色": "6AH22T", "价格": "18.5"}, "TKD004BT24-01B": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "1B", "价格": "20"}, "TKD004BT24-006": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "06", "价格": "20"}, "TKD004BT24-08B": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "8B", "价格": "20"}, "TKD004BT24-10B": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "10B", "价格": "20"}, "TKD004BT24-613": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "613", "价格": "20"}, "TKD004BT24-H80": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "1BH60/60A", "价格": "20"}, "TKD004BT24-H81": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "12H22A", "价格": "20"}, "TKD004BT24-H82": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "12CH80", "价格": "20"}, "TKD004BT24-H83": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "18TH60A", "价格": "20"}, "TKD004BT24-H84": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "8/9H60", "价格": "20"}, "TKD004BT24-H85": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "9H88B", "价格": "20"}, "TKD004BT24-H86": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "6H26", "价格": "20"}, "TKD004BT24-H87": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "24H60A", "价格": "20"}, "TKD004BT24-B01": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "18H88", "价格": "20"}, "TKD004BT24-H88": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "8B/12H27/30", "价格": "20"}, "TKD004BT24-H89": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "6AH27M", "价格": "20"}, "TKD004BT24-H90": {"SPU": "TKD004", "产品名称": "24\"4片11夹卡子发缠管曲", "尺寸": "24", "颜色": "6AH22T", "价格": "20"}, "TWC014BT30-01B": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "1B", "价格": "14.5"}, "TWC014BT30-006": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "06", "价格": "14.5"}, "TWC014BT30-A74": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "10B", "价格": "14.5"}, "TWC014BT30-H91": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "8B/33AH36A/80D", "价格": "14.5"}, "TWC014BT30-H92": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "12/12BH88", "价格": "14.5"}, "TWC014BT30-H93": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "18TH613", "价格": "14.5"}, "TWC014BT30-H94": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "6AT12/88", "价格": "14.5"}, "TWC014BT30-H95": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "4T118L/BUG", "价格": "14.5"}, "TWC014BT30-H96": {"SPU": "TWC014", "产品名称": "30\"抓夹马尾(蓬蓬卷发)", "尺寸": "30", "颜色": "15A/80DH60", "价格": "14.5"}, "TFS001ST24-01B": {"SPU": "TFS001", "产品名称": "6x6\"手勾+机制刘海发块(直发)", "尺寸": "24", "颜色": "1B", "价格": "49.5"}, "TFS001ST24-H97": {"SPU": "TFS001", "产品名称": "6x6\"手勾+机制刘海发块(直发)", "尺寸": "24", "颜色": "6/10", "价格": "49.5"}, "TFS001ST24-004": {"SPU": "TFS001", "产品名称": "6x6\"手勾+机制刘海发块(直发)", "尺寸": "24", "颜色": "4", "价格": "49.5"}, "TFS001ST24-H26": {"SPU": "TFS001", "产品名称": "6x6\"手勾+机制刘海发块(直发)", "尺寸": "24", "颜色": "H6/30", "价格": "49.5"}, "TFS001ST24-H98": {"SPU": "TFS001", "产品名称": "6x6\"手勾+机制刘海发块(直发)", "尺寸": "24", "颜色": "R6/12/18", "价格": "52.5"}, "TFS001ST24-06A": {"SPU": "TFS001", "产品名称": "6x6\"手勾+机制刘海发块(直发)", "尺寸": "24", "颜色": "6A", "价格": "49.5"}, "TFS002BT24-004": {"SPU": "TFS002", "产品名称": "6x6寸手勾+机制刘海发块(BW)", "尺寸": "24", "颜色": "04", "价格": "54.5"}, "TFS002BT24-01B": {"SPU": "TFS002", "产品名称": "6x6寸手勾+机制刘海发块(BW)", "尺寸": "24", "颜色": "1B", "价格": "54.5"}, "TFS002BT24-H97": {"SPU": "TFS002", "产品名称": "6x6寸手勾+机制刘海发块(BW)", "尺寸": "24", "颜色": "6/10", "价格": "54.5"}, "TFS002BT24-06A": {"SPU": "TFS002", "产品名称": "6x6寸手勾+机制刘海发块(BW)", "尺寸": "24", "颜色": "6A", "价格": "54.5"}, "TFS002BT24-H99": {"SPU": "TFS002", "产品名称": "6x6寸手勾+机制刘海发块(BW)", "尺寸": "24", "颜色": "R6/33/344", "价格": "57.5"}, "TFS002BT24-J01": {"SPU": "TFS002", "产品名称": "6x6寸手勾+机制刘海发块(BW)", "尺寸": "24", "颜色": "R6/12/36", "价格": "57.5"}, "TFS003GT20-01B": {"SPU": "TFS003", "产品名称": "6x6寸手勾+机制刘海发块(水波纹)", "尺寸": "20", "颜色": "1B", "价格": "54"}, "TFS003GT20-H97": {"SPU": "TFS003", "产品名称": "6x6寸手勾+机制刘海发块(水波纹)", "尺寸": "20", "颜色": "6/10", "价格": "54"}, "TFS003GT20-J02": {"SPU": "TFS003", "产品名称": "6x6寸手勾+机制刘海发块(水波纹)", "尺寸": "20", "颜色": "H6/439", "价格": "54"}, "TFS003GT20-06A": {"SPU": "TFS003", "产品名称": "6x6寸手勾+机制刘海发块(水波纹)", "尺寸": "20", "颜色": "6A", "价格": "54"}, "TFS003GT20-J03": {"SPU": "TFS003", "产品名称": "6x6寸手勾+机制刘海发块(水波纹)", "尺寸": "20", "颜色": "R6/12/26", "价格": "57"}, "TMM028ST08-001": {"SPU": "TMM028", "产品名称": "8\"黑色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "01", "价格": ""}, "TMM028ST08-004": {"SPU": "TMM028", "产品名称": "8\"黑色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "04", "价格": ""}, "TMM028ST08-018": {"SPU": "TMM028", "产品名称": "8\"黑色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "18", "价格": ""}, "TMM028ST08-P49": {"SPU": "TMM028", "产品名称": "8\"黑色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "4P27", "价格": ""}, "TMM028ST08-P18": {"SPU": "TMM028", "产品名称": "8\"黑色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "18P613", "价格": ""}, "TMM028ST08-P10": {"SPU": "TMM028", "产品名称": "8\"黑色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "10P22T", "价格": ""}, "TMM028ST08-P17": {"SPU": "TMM028", "产品名称": "8\"黑色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "85P613", "价格": ""}, "TMM028ST08-06A": {"SPU": "TMM028", "产品名称": "8\"黑色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "6A", "价格": ""}, "TMM029ST08-001": {"SPU": "TMM029", "产品名称": "8\"白色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "01", "价格": ""}, "TMM029ST08-004": {"SPU": "TMM029", "产品名称": "8\"白色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "04", "价格": ""}, "TMM029ST08-018": {"SPU": "TMM029", "产品名称": "8\"白色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "18", "价格": ""}, "TMM029ST08-P49": {"SPU": "TMM029", "产品名称": "8\"白色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "4P27", "价格": ""}, "TMM029ST08-P18": {"SPU": "TMM029", "产品名称": "8\"白色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "18P613", "价格": ""}, "TMM029ST08-P10": {"SPU": "TMM029", "产品名称": "8\"白色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "10P22T", "价格": ""}, "TMM029ST08-P17": {"SPU": "TMM029", "产品名称": "8\"白色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "85P613", "价格": ""}, "TMM029ST08-06A": {"SPU": "TMM029", "产品名称": "8\"白色圆孔速干鸭舌帽子发(直发)", "尺寸": "08", "颜色": "6A", "价格": ""}, "TMM030GT18-001": {"SPU": "TMM030", "产品名称": "18\"黑色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "01", "价格": ""}, "TMM030GT18-004": {"SPU": "TMM030", "产品名称": "18\"黑色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "04", "价格": ""}, "TMM030GT18-018": {"SPU": "TMM030", "产品名称": "18\"黑色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "18", "价格": ""}, "TMM030GT18-P49": {"SPU": "TMM030", "产品名称": "18\"黑色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "4P27", "价格": ""}, "TMM030GT18-P18": {"SPU": "TMM030", "产品名称": "18\"黑色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "18P613", "价格": ""}, "TMM030GT18-P10": {"SPU": "TMM030", "产品名称": "18\"黑色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "10P22T", "价格": ""}, "TMM030GT18-P17": {"SPU": "TMM030", "产品名称": "18\"黑色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "85P613", "价格": ""}, "TMM030GT18-06A": {"SPU": "TMM030", "产品名称": "18\"黑色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "6A", "价格": ""}, "TMM031GT18-001": {"SPU": "TMM031", "产品名称": "18\"白色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "01", "价格": ""}, "TMM031GT18-004": {"SPU": "TMM031", "产品名称": "18\"白色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "04", "价格": ""}, "TMM031GT18-018": {"SPU": "TMM031", "产品名称": "18\"白色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "18", "价格": ""}, "TMM031GT18-P49": {"SPU": "TMM031", "产品名称": "18\"白色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "4P27", "价格": ""}, "TMM031GT18-P18": {"SPU": "TMM031", "产品名称": "18\"白色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "18P613", "价格": ""}, "TMM031GT18-P10": {"SPU": "TMM031", "产品名称": "18\"白色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "10P22T", "价格": ""}, "TMM031GT18-P17": {"SPU": "TMM031", "产品名称": "18\"白色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "85P613", "价格": ""}, "TMM031GT18-06A": {"SPU": "TMM031", "产品名称": "18\"白色圆孔速干鸭舌帽子发(水波纹)", "尺寸": "18", "颜色": "6A", "价格": ""}, "TW1686": {"SPU": "TW-SP", "产品名称": "莫西干造型头套", "尺寸": "00", "颜色": "彩虹天兰A", "价格": "6.5"}, "TW1687": {"SPU": "TW-SP", "产品名称": "莫西干造型头套", "尺寸": "00", "颜色": "彩虹桔色", "价格": "6.5"}, "TW1688": {"SPU": "TW-SP", "产品名称": "莫西干造型头套", "尺寸": "00", "颜色": "彩虹黄色", "价格": "6.5"}, "TW1689": {"SPU": "TW-SP", "产品名称": "莫西干造型头套", "尺寸": "00", "颜色": "彩虹宝兰A", "价格": "6.5"}, "TW1690": {"SPU": "TW-SP", "产品名称": "莫西干造型头套", "尺寸": "00", "颜色": "彩虹桃红", "价格": "6.5"}, "TW1691": {"SPU": "TW-SP", "产品名称": "莫西干造型头套", "尺寸": "00", "颜色": "绿黄色", "价格": "6.5"}, "TW1692": {"SPU": "TW-SP", "产品名称": "莫西干造型头套", "尺寸": "00", "颜色": "彩虹紫色", "价格": "6.5"}, "TW1693": {"SPU": "TW-SP", "产品名称": "莫西干造型头套", "尺寸": "00", "颜色": "黑红色", "价格": "6.5"}, "TW1694": {"SPU": "TW-SP", "产品名称": "世界杯爆炸头造型头套", "尺寸": "00", "颜色": "葡萄牙", "价格": "8.9"}, "TW1695": {"SPU": "TW-SP", "产品名称": "世界杯爆炸头造型头套", "尺寸": "00", "颜色": "加拿大", "价格": "8.9"}, "TW1696": {"SPU": "TW-SP", "产品名称": "世界杯爆炸头造型头套", "尺寸": "00", "颜色": "墨西哥", "价格": "8.9"}, "TW1697": {"SPU": "TW-SP", "产品名称": "世界杯爆炸头造型头套", "尺寸": "00", "颜色": "法国", "价格": "8.9"}, "TW1698": {"SPU": "TW-SP", "产品名称": "世界杯爆炸头造型头套", "尺寸": "00", "颜色": "西班牙", "价格": "8.9"}, "TW1699": {"SPU": "TW-SP", "产品名称": "世界杯爆炸头造型头套", "尺寸": "00", "颜色": "德国", "价格": "8.9"}, "TW1700": {"SPU": "TW-SP", "产品名称": "世界杯爆炸头造型头套", "尺寸": "00", "颜色": "荷兰", "价格": "8.9"}, "TW1701": {"SPU": "TW-SP", "产品名称": "世界杯爆炸头造型头套", "尺寸": "00", "颜色": "美国", "价格": "8.9"}, "TMM014ST06-001": {"SPU": "TMM014", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "116/350", "价格": "18"}, "TMM014ST06-P49": {"SPU": "TMM014", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "116/350", "价格": "18"}, "TMM014ST06-P18": {"SPU": "TMM014", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "116/350", "价格": "18"}, "TMM024ST08-001": {"SPU": "TMM024", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "116/350", "价格": "18"}, "TMM024ST08-004": {"SPU": "TMM024", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "116/350", "价格": "18"}, "TMM024ST08-P49": {"SPU": "TMM024", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "116/350", "价格": "18"}, "TMM024ST08-P18": {"SPU": "TMM024", "产品名称": "16\"一体鸭舌帽大波浪", "尺寸": "16", "颜色": "116/350", "价格": "18"}};
+
+
+const SALES_ORDER = ["陈兰卿","方妙芬","姚红珍","姚红珍/陈兰卿/方妙芬","(空白)"];
+
+// 原始产品名称→标准产品名称（从规格书提取）
+const PROD_STD_NAME = {
+  "一体鸭舌黑帽子大波浪16寸新色首单采购需求0108": "16\"一体鸭舌帽大波浪",
+  "抓夹马尾(卷筒)首单采购需求0120": "18\"抓夹马尾(卷筒)",
+  "抓夹马尾直发+卷发-首单需求0122": "21\"/30\"抓夹马尾(直发)",
+  "8寸一体鸭舌帽子发(卷发)首批需求0130": "8\"一体鸭舌帽子发(卷发)",
+  "4片11夹卡子发缠管曲0401": "20\"/24\"4片11夹卡子发缠管曲",
+  "30寸抓夹马尾0401": "30\"抓夹马尾(蓬蓬卷发)",
+  "6x6寸手勾机制刘海发块-260403": "6x6\"手勾+机制刘海发块",
+  "世界杯造型头套-260407": "世界杯爆炸头造型头套",
+  "一体鸭舌帽首批下单  260127": "6\"一体鸭舌帽",
+  "（调整后）一体速干鸭舌帽子发下单0331": "8\"圆孔速干鸭舌帽子发"
+};
+
+// 产品→SPU 映射（从规格书提取）
+const PROD_SPU_MAP = {
+  "一体鸭舌黑帽子大波浪16寸新色首单采购需求0108": "TMM012",
+  "抓夹马尾(卷筒)首单采购需求0120": "TWC013",
+  "抓夹马尾直发+卷发-首单需求0122": "TWC001/TWC002",
+  "8寸一体鸭舌帽子发(卷发)首批需求0130": "TMM021/TMM022/TMM023",
+  "4片11夹卡子发缠管曲0401": "TKD004",
+  "30寸抓夹马尾0401": "TWC014",
+  "6x6寸手勾机制刘海发块-260403": "TFS001/TFS002/TFS003",
+  "世界杯造型头套-260407": "TW-SP",
+  "一体鸭舌帽首批下单  260127": "TMM014",
+  "（调整后）一体速干鸭舌帽子发下单0331": "TMM024"
+};
+
+// 辅助：获取标准产品名称
+function stdName(raw) { return PROD_STD_NAME[raw] || raw; }
+
+function showSkuDetail(sale, prod, date) {
+  const items = SKU_DETAIL.filter(d => d.销售===sale && d.产品名称===prod && d.日期===date);
+  if (!items.length) return;
+  const total = items.reduce((s,d)=>s+d.数量,0);
+  const displayProd = stdName(prod);
+  const shortProd = displayProd.length > 22 ? displayProd.slice(0,22)+'…' : displayProd;
+
+  const rowsHtml = items.map((d,i) => {
+    const sp = SKU_SPEC_MAP[d.SKU] || {};
+    const spu  = sp['SPU']  || '-';
+    const pn   = sp['产品名称'] || '-';
+    const size = sp['尺寸']  || '-';
+    const clr  = sp['颜色']  || '-';
+    const price = sp['价格'] ? sp['价格'] + ' RMB' : '-';
+    return '<tr>'
+      +'<td style="color:#8b949e;text-align:center;">'+(i+1)+'</td>'
+      +'<td style="color:#e6edf3;font-family:monospace;">'+d.SKU+'</td>'
+      +'<td style="color:#bc8cff;font-weight:600;">'+spu+'</td>'
+      +'<td style="color:#c9d1d9;">'+pn+'</td>'
+      +'<td style="color:#79c0ff;text-align:center;">'+size+'"</td>'
+      +'<td style="color:#56d364;">'+clr+'</td>'
+      +'<td style="color:#f0a742;text-align:right;">'+price+'</td>'
+      +'<td style="color:#58a6ff;font-weight:700;text-align:right;">'+d.数量+'</td>'
+      +'</tr>';
+  }).join('');
+
+  const dlId = 'dlBtn_' + Date.now();
+
+  let mask = document.createElement('div');
+  mask.className = 'modal-mask';
+  mask.onclick = e => { if(e.target===mask) mask.remove(); };
+  mask.innerHTML = '<div class="modal-box" style="max-width:960px;width:94vw;">'
+    +'<div class="modal-drag-bar"></div>'
+    +'<div class="modal-header">'
+    +'<h4 style="font-size:13px;">'+sale+' &nbsp;|&nbsp; '+shortProd+' &nbsp;|&nbsp; '+date+' &nbsp;<span style="color:#58a6ff;">('+items.length+' SKU / '+total+' 件)</span></h4>'
+    +'<div style="display:flex;gap:8px;align-items:center;">'
+    +'<button id="'+dlId+'" style="background:#238636;border:1px solid #2ea043;border-radius:6px;color:#fff;padding:5px 12px;font-size:12px;cursor:pointer;">⬇ 下载CSV</button>'
+    +'<button class="modal-close" onclick="this.closest(\'.modal-mask\').remove()">&times;</button>'
+    +'</div></div>'
+    +'<div class="modal-body"><table>'
+    +'<thead><tr>'
+    +'<th style="width:40px;text-align:center;">#</th>'
+    +'<th style="min-width:140px;">SKU</th>'
+    +'<th style="width:90px;">SPU</th>'
+    +'<th style="min-width:160px;">产品名称</th>'
+    +'<th style="width:60px;text-align:center;">尺寸</th>'
+    +'<th style="min-width:100px;">颜色</th>'
+    +'<th style="width:100px;text-align:right;">价格</th>'
+    +'<th style="width:70px;text-align:right;">数量</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rowsHtml
+    +'<tr style="background:#1c2128;">'
+    +'<td colspan="7" style="color:#f0f6fc;font-weight:700;text-align:right;padding-right:12px;">合计</td>'
+    +'<td style="text-align:right;color:#3fb950;font-weight:800;font-size:14px;">'+total+'</td>'
+    +'</tr></tbody></table></div></div>';
+  document.body.appendChild(mask);
+
+  document.getElementById(dlId).onclick = function() {
+    const header = ['序号','SKU','SPU','产品名称','尺寸','颜色','价格(RMB)','数量'];
+    const csvRows = [header.join(',')];
+    items.forEach(function(d,i) {
+      const sp = SKU_SPEC_MAP[d.SKU] || {};
+      const row = [
+        i+1,
+        d.SKU,
+        sp['SPU']||'',
+        '"'+(sp['产品名称']||'').replace(/"/g,'""')+'"',
+        sp['尺寸']||'',
+        '"'+(sp['颜色']||'').replace(/"/g,'""')+'"',
+        sp['价格']||'',
+        d.数量
+      ];
+      csvRows.push(row.join(','));
+    });
+    csvRows.push(['','','','','','','合计',total].join(','));
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvRows.join('\n')], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = sale+'_'+displayProd+'_'+date+'.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+}
+
+function renderTable() {
+  const qs = (document.getElementById('searchSales').value||'').trim().toLowerCase();
+  const qp = (document.getElementById('searchProd').value||'').trim().toLowerCase();
+  const qspu = (document.getElementById('searchSpu').value||'').trim().toUpperCase();
+  const spuArr = qspu ? qspu.split(/[\s,，、\/]+/).filter(Boolean) : [];
+  const rows = PIVOT_RAW.filter(r => {
+    const sn = stdName(r.产品名称).toLowerCase();
+    const spu = (PROD_SPU_MAP[r.产品名称]||'').toUpperCase();
+    const matchSale = r.销售.toLowerCase().includes(qs);
+    const matchProd = sn.includes(qp);
+    const matchSpu = spuArr.length===0 || spuArr.some(s => spu.includes(s));
+    return matchSale && matchProd && matchSpu;
+  });
+  const tree = {};
+  rows.forEach(r => {
+    const sn = stdName(r.产品名称);
+    if (!tree[r.销售]) tree[r.销售] = {};
+    if (!tree[r.销售][sn]) tree[r.销售][sn] = {raw: r.产品名称, dates: {}};
+    tree[r.销售][sn].dates[r.日期] = (tree[r.销售][sn].dates[r.日期]||0) + r.数量;
+  });
+  const salesInData = Object.keys(tree);
+  const orderedSales = SALES_ORDER.filter(s => salesInData.includes(s)).concat(salesInData.filter(s => !SALES_ORDER.includes(s)));
+  const colTotal = {};
+  DATES.forEach(d => colTotal[d] = 0);
+  rows.forEach(r => { colTotal[r.日期] = (colTotal[r.日期]||0) + r.数量; });
+  const grandTotal = rows.reduce((s,r) => s+r.数量, 0);
+
+  const tbl = document.getElementById('pivotTable');
+  const cellSt = `padding:6px 10px;border:1px solid #21262d;white-space:nowrap;`;
+  const numSt  = `padding:6px 10px;border:1px solid #21262d;text-align:right;`;
+
+  let html = `<thead><tr>
+    <th style="${cellSt}background:#1c2128;color:#8b949e;font-weight:600;min-width:80px;">销售</th>
+    <th style="${cellSt}background:#1c2128;color:#8b949e;font-weight:600;min-width:160px;">产品名称</th>
+    <th style="${cellSt}background:#1c2128;color:#8b949e;font-weight:600;min-width:100px;">SPU</th>
+    ${DATES.map(d=>`<th style="${numSt}background:#1c2128;color:#8b949e;font-weight:600;">${d.slice(5)}</th>`).join('')}
+    <th style="${numSt}background:#1c2128;color:#58a6ff;font-weight:700;">总计</th>
+  </tr></thead><tbody>`;
+
+  orderedSales.forEach((sale, si) => {
+    const prods = Object.keys(tree[sale]);
+    const saleTotal = prods.reduce((s,p) => s + Object.values(tree[sale][p].dates).reduce((a,b)=>a+b,0), 0);
+    const saleDateTotals = {};
+    DATES.forEach(d => { saleDateTotals[d] = prods.reduce((s,p) => s+(tree[sale][p].dates[d]||0),0); });
+    const saleBg = si%2===0 ? '#161b22' : '#1a2332';
+    const salesColors = {'陈兰卿':'#79c0ff','方妙芬':'#56d364','姚红珍':'#ff9500','姚红珍/陈兰卿/方妙芬':'#bc8cff','(空白)':'#8b949e'};
+    const saleColor = salesColors[sale]||'#e6edf3';
+
+    html += `<tr style="background:#1c2128;">
+      <td rowspan="${prods.length+1}" style="${cellSt}background:#1c2128;color:${saleColor};font-weight:700;vertical-align:middle;font-size:13px;">${sale}</td>
+      <td style="${cellSt}background:#1c2128;color:#8b949e;font-style:italic;">小计</td>
+      <td style="${cellSt}background:#1c2128;"></td>
+      ${DATES.map(d=>{
+        const v = saleDateTotals[d];
+        return `<td style="${numSt}background:#1c2128;color:${v>0?'#d29922':'#484f58'};font-weight:600;">${v>0?v:''}</td>`;
+      }).join('')}
+      <td style="${numSt}background:#1c2128;color:#d29922;font-weight:700;">${saleTotal}</td>
+    </tr>`;
+
+    prods.forEach(prod => {
+      const rawName = tree[sale][prod].raw;
+      const prodTotal = Object.values(tree[sale][prod].dates).reduce((a,b)=>a+b,0);
+      const spu = PROD_SPU_MAP[rawName] || '-';
+      html += `<tr style="background:${saleBg};">
+        <td style="${cellSt}color:#c9d1d9;">${prod}</td>
+        <td style="${cellSt}color:#bc8cff;font-weight:600;font-size:11px;">${spu}</td>
+        ${DATES.map(d=>{
+          const v = tree[sale][prod].dates[d]||0;
+          if (v > 0) {
+            return `<td class="cell-num" style="${numSt}color:#58a6ff;" onclick="showSkuDetail('${sale.replace(/'/g,"\\'")}','${rawName.replace(/'/g,"\\'")}','${d}')">${v}</td>`;
+          }
+          return `<td style="${numSt}color:#484f58;"></td>`;
+        }).join('')}
+        <td style="${numSt}color:#3fb950;font-weight:600;">${prodTotal}</td>
+      </tr>`;
+    });
+  });
+
+  html += `<tr style="background:#21262d;">
+    <td colspan="3" style="${cellSt}color:#f0f6fc;font-weight:700;text-align:center;">总计</td>
+    ${DATES.map(d=>`<td style="${numSt}color:${colTotal[d]>0?'#58a6ff':'#484f58'};font-weight:700;">${colTotal[d]>0?colTotal[d]:''}</td>`).join('')}
+    <td style="${numSt}color:#58a6ff;font-weight:800;font-size:14px;">${grandTotal}</td>
+  </tr></tbody>`;
+  tbl.innerHTML = html;
+}
+
+renderTable();
+
+// ===== renderTable2: 产品×销售×日期 =====
+function renderTable2() {
+  const qs2 = (document.getElementById('searchSales2').value||'').trim().toLowerCase();
+  const qp2 = (document.getElementById('searchProd2').value||'').trim().toLowerCase();
+  const qspu2 = (document.getElementById('searchSpu2').value||'').trim().toUpperCase();
+  const spuArr2 = qspu2 ? qspu2.split(/[\s,，、\/]+/).filter(Boolean) : [];
+  const rows = PIVOT_RAW.filter(r => {
+    const sn = stdName(r.产品名称).toLowerCase();
+    const spu = (PROD_SPU_MAP[r.产品名称]||'').toUpperCase();
+    const matchSale = r.销售.toLowerCase().includes(qs2);
+    const matchProd = sn.includes(qp2);
+    const matchSpu = spuArr2.length===0 || spuArr2.some(s => spu.includes(s));
+    return matchSale && matchProd && matchSpu;
+  });
+  const tree = {};
+  rows.forEach(r => {
+    const sn = stdName(r.产品名称);
+    if (!tree[sn]) tree[sn] = {raw: r.产品名称, sales: {}};
+    if (!tree[sn].sales[r.销售]) tree[sn].sales[r.销售] = {dates: {}};
+    tree[sn].sales[r.销售].dates[r.日期] = (tree[sn].sales[r.销售].dates[r.日期]||0) + r.数量;
+  });
+  const prodsInData = Object.keys(tree);
+
+  const colTotal = {};
+  DATES.forEach(d => colTotal[d] = 0);
+  rows.forEach(r => { colTotal[r.日期] = (colTotal[r.日期]||0) + r.数量; });
+  const grandTotal = rows.reduce((s,r) => s+r.数量, 0);
+
+  const tbl = document.getElementById('pivotTable2');
+  const cellSt = `padding:6px 10px;border:1px solid #21262d;white-space:nowrap;`;
+  const numSt  = `padding:6px 10px;border:1px solid #21262d;text-align:right;`;
+
+  let html = `<thead><tr>
+    <th style="${cellSt}background:#1c2128;color:#8b949e;font-weight:600;min-width:160px;">产品名称</th>
+    <th style="${cellSt}background:#1c2128;color:#8b949e;font-weight:600;min-width:100px;">SPU</th>
+    <th style="${cellSt}background:#1c2128;color:#8b949e;font-weight:600;min-width:100px;">销售</th>
+    ${DATES.map(d=>`<th style="${numSt}background:#1c2128;color:#8b949e;font-weight:600;">${d.slice(5)}</th>`).join('')}
+    <th style="${numSt}background:#1c2128;color:#58a6ff;font-weight:700;">总计</th>
+  </tr></thead><tbody>`;
+
+  const salesColors = {'陈兰卿':'#79c0ff','方妙芬':'#56d364','姚红珍':'#ff9500','姚红珍/陈兰卿/方妙芬':'#bc8cff','(空白)':'#8b949e'};
+
+  prodsInData.forEach((prod, pi) => {
+    const prodInfo = tree[prod];
+    const salesKeys = Object.keys(prodInfo.sales);
+    const spu = PROD_SPU_MAP[prodInfo.raw] || '-';
+    const prodTotal = salesKeys.reduce((s,sk) => s + Object.values(prodInfo.sales[sk].dates).reduce((a,b)=>a+b,0), 0);
+    const prodDateTotals = {};
+    DATES.forEach(d => { prodDateTotals[d] = salesKeys.reduce((s,sk) => s+(prodInfo.sales[sk].dates[d]||0),0); });
+    const prodBg = pi%2===0 ? '#161b22' : '#1a2332';
+
+    // 产品小计行
+    html += `<tr style="background:#1c2128;">
+      <td rowspan="${salesKeys.length+1}" style="${cellSt}background:#1c2128;color:#c9d1d9;font-weight:700;vertical-align:middle;font-size:12px;" title="${prod}">${prod.length>26?prod.slice(0,26)+'...':prod}</td>
+      <td rowspan="${salesKeys.length+1}" style="${cellSt}background:#1c2128;color:#bc8cff;font-weight:600;vertical-align:middle;font-size:11px;">${spu}</td>
+      <td style="${cellSt}background:#1c2128;color:#8b949e;font-style:italic;">小计</td>
+      ${DATES.map(d=>{
+        const v = prodDateTotals[d];
+        return `<td style="${numSt}background:#1c2128;color:${v>0?'#d29922':'#484f58'};font-weight:600;">${v>0?v:''}</td>`;
+      }).join('')}
+      <td style="${numSt}background:#1c2128;color:#d29922;font-weight:700;">${prodTotal}</td>
+    </tr>`;
+
+    // 销售子行
+    salesKeys.forEach(sk => {
+      const saleColor = salesColors[sk]||'#e6edf3';
+      const saleDates = prodInfo.sales[sk].dates;
+      const saleTotal = Object.values(saleDates).reduce((a,b)=>a+b,0);
+      html += `<tr style="background:${prodBg};">
+        <td style="${cellSt}color:${saleColor};font-size:12px;">${sk}</td>
+        ${DATES.map(d=>{
+          const v = saleDates[d]||0;
+          if (v > 0) {
+            return `<td class="cell-num" style="${numSt}color:#58a6ff;" onclick="showSkuDetail2('${prodInfo.raw.replace(/'/g,"\\'")}','${sk.replace(/'/g,"\\'")}','${d}')">${v}</td>`;
+          }
+          return `<td style="${numSt}color:#484f58;"></td>`;
+        }).join('')}
+        <td style="${numSt}color:#3fb950;font-weight:600;">${saleTotal}</td>
+      </tr>`;
+    });
+  });
+
+  html += `<tr style="background:#21262d;">
+    <td colspan="3" style="${cellSt}color:#f0f6fc;font-weight:700;text-align:center;">总计</td>`;
+  DATES.forEach(d => { html += `<td style="${numSt}color:${colTotal[d]>0?'#58a6ff':'#484f58'};font-weight:700;">${colTotal[d]>0?colTotal[d]:''}</td>`; });
+  html += `<td style="${numSt}color:#58a6ff;font-weight:800;font-size:14px;">${grandTotal}</td></tr></tbody>`;
+  tbl.innerHTML = html;
+}
+
+function showSkuDetail2(prod, sale, date) {
+  let items = SKU_DETAIL.filter(d => d.产品名称===prod && d.日期===date);
+  if (sale !== '__ALL__') items = items.filter(d => d.销售===sale);
+  if (!items.length) return;
+  const total = items.reduce((s,d)=>s+d.数量,0);
+  const displayProd = stdName(prod);
+  const shortProd = displayProd.length > 22 ? displayProd.slice(0,22)+'…' : displayProd;
+
+  const rowsHtml = items.map((d,i) => {
+    const sp = SKU_SPEC_MAP[d.SKU] || {};
+    const spu  = sp['SPU']  || '-';
+    const pn   = sp['产品名称'] || '-';
+    const size = sp['尺寸']  || '-';
+    const clr  = sp['颜色']  || '-';
+    const price = sp['价格'] ? sp['价格'] + ' RMB' : '-';
+    return '<tr>'
+      +'<td style="color:#8b949e;text-align:center;">'+(i+1)+'</td>'
+      +'<td style="color:#e6edf3;font-family:monospace;">'+d.SKU+'</td>'
+      +'<td style="color:#bc8cff;font-weight:600;">'+spu+'</td>'
+      +'<td style="color:#c9d1d9;">'+pn+'</td>'
+      +'<td style="color:#79c0ff;text-align:center;">'+size+'"</td>'
+      +'<td style="color:#56d364;">'+clr+'</td>'
+      +'<td style="color:#f0a742;text-align:right;">'+price+'</td>'
+      +'<td style="color:#58a6ff;font-weight:700;text-align:right;">'+d.数量+'</td>'
+      +'</tr>';
+  }).join('');
+
+  const dlId = 'dlBtn_' + Date.now();
+
+  let mask = document.createElement('div');
+  mask.className = 'modal-mask';
+  mask.onclick = e => { if(e.target===mask) mask.remove(); };
+  mask.innerHTML = '<div class="modal-box" style="max-width:960px;width:94vw;">'
+    +'<div class="modal-drag-bar"></div>'
+    +'<div class="modal-header"><h4>'+shortProd+' · '+date+' · <span style="color:#58a6ff;">'+total+'</span> 件</h4>'
+    +"<span class=\"modal-close\" onclick=\"this.closest('.modal-mask').remove()\">&times;</span></div>"
+    +'<div class="modal-body">'
+    +'<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">'
+    +'<span style="font-size:12px;color:#8b949e;">SKU明细（'+items.length+'条）</span>'
+    +'<button id="'+dlId+'" style="margin-left:auto;background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:5px 12px;font-size:12px;cursor:pointer;">\u2B07 下载CSV</button>'
+    +'</div>'
+    +'<div style="overflow-x:auto;"><table><thead><tr>'
+    +'<th style="text-align:center;">序号</th><th>SKU</th><th>SPU</th><th>产品名称</th><th style="text-align:center;">尺寸</th><th>颜色</th><th style="text-align:right;">价格(RMB)</th><th style="text-align:right;">数量</th>'
+    +'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div></div></div>';
+  document.body.appendChild(mask);
+
+  document.getElementById(dlId).onclick = function() {
+    const header = ['序号','SKU','SPU','产品名称','尺寸','颜色','价格(RMB)','数量'];
+    const csvRows = [header.join(',')];
+    items.forEach((d,i) => {
+      const sp = SKU_SPEC_MAP[d.SKU] || {};
+      csvRows.push([i+1, d.SKU, sp['SPU']||'-', sp['产品名称']||'-', sp['尺寸']||'-', sp['颜色']||'-', sp['价格']||'-', d.数量].join(','));
+    });
+    csvRows.push(['','','','','','','合计',total].join(','));
+    const bom = '\\uFEFF';
+    const blob = new Blob([bom + csvRows.join('\\n')], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = displayProd + '_' + date + '.csv';
+    a.click();
+  };
+}
+
+renderTable2();
+
+// ===== 上架跟踪数据 =====
+var LAUNCH_DATA = {
+  "total_skus": 115,
+  "launched_skus": 10,
+  "unlaunched_skus": 105,
+  "spu_data": {
+    "TFS": {
+      "产品名称": "[6x6寸手勾机制刘海发块-260403]",
+      "总SKU数": 17,
+      "已上架SKU数": 0,
+      "未上架SKU数": 17,
+      "备货数量": 510,
+      "sku_list": [
+        {
+          "SKU": "TFS001ST24-01B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS001",
+          "规格产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格尺寸": "24",
+          "规格颜色": "1B",
+          "规格价格": "49.5"
+        },
+        {
+          "SKU": "TFS001ST24-H97",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS001",
+          "规格产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格尺寸": "24",
+          "规格颜色": "6/10",
+          "规格价格": "49.5"
+        },
+        {
+          "SKU": "TFS001ST24-004",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS001",
+          "规格产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格尺寸": "24",
+          "规格颜色": "4",
+          "规格价格": "49.5"
+        },
+        {
+          "SKU": "TFS001ST24-H26",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS001",
+          "规格产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格尺寸": "24",
+          "规格颜色": "H6/30",
+          "规格价格": "49.5"
+        },
+        {
+          "SKU": "TFS001ST24-H98",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS001",
+          "规格产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格尺寸": "24",
+          "规格颜色": "R6/12/18",
+          "规格价格": "52.5"
+        },
+        {
+          "SKU": "TFS001ST24-06A",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS001",
+          "规格产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格尺寸": "24",
+          "规格颜色": "6A",
+          "规格价格": "49.5"
+        },
+        {
+          "SKU": "TFS002BT24-004",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS002",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(BW)",
+          "规格尺寸": "24",
+          "规格颜色": "04",
+          "规格价格": "54.5"
+        },
+        {
+          "SKU": "TFS002BT24-01B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS002",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(BW)",
+          "规格尺寸": "24",
+          "规格颜色": "1B",
+          "规格价格": "54.5"
+        },
+        {
+          "SKU": "TFS002BT24-H97",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS002",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(BW)",
+          "规格尺寸": "24",
+          "规格颜色": "6/10",
+          "规格价格": "54.5"
+        },
+        {
+          "SKU": "TFS002BT24-06A",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS002",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(BW)",
+          "规格尺寸": "24",
+          "规格颜色": "6A",
+          "规格价格": "54.5"
+        },
+        {
+          "SKU": "TFS002BT24-H99",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS002",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(BW)",
+          "规格尺寸": "24",
+          "规格颜色": "R6/33/344",
+          "规格价格": "57.5"
+        },
+        {
+          "SKU": "TFS002BT24-J01",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS002",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(BW)",
+          "规格尺寸": "24",
+          "规格颜色": "R6/12/36",
+          "规格价格": "57.5"
+        },
+        {
+          "SKU": "TFS003GT20-01B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS003",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(水波纹)",
+          "规格尺寸": "20",
+          "规格颜色": "1B",
+          "规格价格": "54"
+        },
+        {
+          "SKU": "TFS003GT20-H97",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS003",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(水波纹)",
+          "规格尺寸": "20",
+          "规格颜色": "6/10",
+          "规格价格": "54"
+        },
+        {
+          "SKU": "TFS003GT20-J02",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS003",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(水波纹)",
+          "规格尺寸": "20",
+          "规格颜色": "H6/439",
+          "规格价格": "54"
+        },
+        {
+          "SKU": "TFS003GT20-06A",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS003",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(水波纹)",
+          "规格尺寸": "20",
+          "规格颜色": "6A",
+          "规格价格": "54"
+        },
+        {
+          "SKU": "TFS003GT20-J03",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-01",
+          "规格书产品名称": "6x6\"手勾+机制刘海发块(直发)",
+          "规格SPU": "TFS003",
+          "规格产品名称": "6x6寸手勾+机制刘海发块(水波纹)",
+          "规格尺寸": "20",
+          "规格颜色": "R6/12/26",
+          "规格价格": "57"
+        }
+      ]
+    },
+    "TKD": {
+      "产品名称": "[4片11夹卡子发缠管曲0401]",
+      "总SKU数": 34,
+      "已上架SKU数": 0,
+      "未上架SKU数": 34,
+      "备货数量": 1330,
+      "sku_list": [
+        {
+          "SKU": "TKD004BT20-01B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "1B",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-006",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "06",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-08B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "8B",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-10B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "10B",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-613",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "613",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H80",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "1BH60/60A",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H81",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "12H22A",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H82",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "12CH80",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H83",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "18TH60A",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H84",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "8/9H60",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H85",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "9H88B",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H86",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "6H26",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H87",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "24H60A",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-B01",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "18H88",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H88",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "8B/12H27/30",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H89",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "6AH27M",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT20-H90",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格尺寸": "20",
+          "规格颜色": "6AH22T",
+          "规格价格": "18.5"
+        },
+        {
+          "SKU": "TKD004BT24-01B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "1B",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-006",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "06",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-08B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "8B",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-10B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "10B",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-613",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "613",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H80",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "1BH60/60A",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H81",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "12H22A",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H82",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "12CH80",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H83",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "18TH60A",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H84",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "8/9H60",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H85",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "9H88B",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H86",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "6H26",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H87",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "24H60A",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-B01",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "18H88",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H88",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "8B/12H27/30",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H89",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "6AH27M",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TKD004BT24-H90",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-24",
+          "规格书产品名称": "20\"4片11夹卡子发缠管曲",
+          "规格SPU": "TKD004",
+          "规格产品名称": "24\"4片11夹卡子发缠管曲",
+          "规格尺寸": "24",
+          "规格颜色": "6AH22T",
+          "规格价格": "20"
+        }
+      ]
+    },
+    "TMM": {
+      "产品名称": "[一体鸭舌黑帽子大波浪16寸新色首单采购需求0108]",
+      "总SKU数": 21,
+      "已上架SKU数": 3,
+      "未上架SKU数": 18,
+      "备货数量": 840,
+      "sku_list": [
+        {
+          "SKU": "TMM012BT16-001",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "kebolin-柯伯霖",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "MLHR",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-08",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM012",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "01",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM012BT16-04A",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "kebolin-柯伯霖",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "MLHR",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-08",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM012",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "4A",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM012BT16-012",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-08",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM012",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "12",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM012BT16-P25",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-08",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM012",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "16P613",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM012BT16-P11",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-08",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM012",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "12P24",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM014ST06-001",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-27",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM014",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "116/350",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM014ST06-P49",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-27",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM014",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "116/350",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM014ST06-P18",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "fangmiaofen-方妙芬",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "LWS",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-27",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM014",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "116/350",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM021BT08-001",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体米色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM021",
+          "规格产品名称": "8\"一体米色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "01",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM021BT08-004",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体米色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM021",
+          "规格产品名称": "8\"一体米色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "04",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM021BT08-P18",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体米色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM021",
+          "规格产品名称": "8\"一体米色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "18P613",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM022BT08-001",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM022",
+          "规格产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "01",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM022BT08-004",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM022",
+          "规格产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "04",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM022BT08-P18",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM022",
+          "规格产品名称": "8\"一体藏蓝色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "18P613",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM023BT08-001",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM023",
+          "规格产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "01",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM023BT08-004",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM023",
+          "规格产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "04",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM023BT08-P18",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-30",
+          "规格书产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)",
+          "规格SPU": "TMM023",
+          "规格产品名称": "8\"一体黑灰色鸭舌帽子发(卷发)",
+          "规格尺寸": "08",
+          "规格颜色": "18P613",
+          "规格价格": "20"
+        },
+        {
+          "SKU": "TMM024ST08-001",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-20",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM024",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "116/350",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM024ST08-004",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-20",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM024",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "116/350",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM024ST08-P49",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-20",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM024",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "116/350",
+          "规格价格": "18"
+        },
+        {
+          "SKU": "TMM024ST08-P18",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-20",
+          "规格书产品名称": "16\"一体鸭舌帽大波浪",
+          "规格SPU": "TMM024",
+          "规格产品名称": "16\"一体鸭舌帽大波浪",
+          "规格尺寸": "16",
+          "规格颜色": "116/350",
+          "规格价格": "18"
+        }
+      ]
+    },
+    "TW": {
+      "产品名称": "[世界杯造型头套-260407]",
+      "总SKU数": 16,
+      "已上架SKU数": 0,
+      "未上架SKU数": 16,
+      "备货数量": 80,
+      "sku_list": [
+        {
+          "SKU": "TW1694",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "世界杯爆炸头造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "世界杯爆炸头造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "葡萄牙",
+          "规格价格": "8.9"
+        },
+        {
+          "SKU": "TW1695",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "世界杯爆炸头造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "世界杯爆炸头造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "加拿大",
+          "规格价格": "8.9"
+        },
+        {
+          "SKU": "TW1696",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "世界杯爆炸头造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "世界杯爆炸头造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "墨西哥",
+          "规格价格": "8.9"
+        },
+        {
+          "SKU": "TW1697",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "世界杯爆炸头造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "世界杯爆炸头造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "法国",
+          "规格价格": "8.9"
+        },
+        {
+          "SKU": "TW1698",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "世界杯爆炸头造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "世界杯爆炸头造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "西班牙",
+          "规格价格": "8.9"
+        },
+        {
+          "SKU": "TW1699",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "世界杯爆炸头造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "世界杯爆炸头造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "德国",
+          "规格价格": "8.9"
+        },
+        {
+          "SKU": "TW1700",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "世界杯爆炸头造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "世界杯爆炸头造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "荷兰",
+          "规格价格": "8.9"
+        },
+        {
+          "SKU": "TW1701",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "世界杯爆炸头造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "世界杯爆炸头造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "美国",
+          "规格价格": "8.9"
+        },
+        {
+          "SKU": "TW1686",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "莫西干造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "莫西干造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "彩虹天兰A",
+          "规格价格": "6.5"
+        },
+        {
+          "SKU": "TW1687",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "莫西干造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "莫西干造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "彩虹桔色",
+          "规格价格": "6.5"
+        },
+        {
+          "SKU": "TW1688",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "莫西干造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "莫西干造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "彩虹黄色",
+          "规格价格": "6.5"
+        },
+        {
+          "SKU": "TW1689",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "莫西干造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "莫西干造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "彩虹宝兰A",
+          "规格价格": "6.5"
+        },
+        {
+          "SKU": "TW1690",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "莫西干造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "莫西干造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "彩虹桃红",
+          "规格价格": "6.5"
+        },
+        {
+          "SKU": "TW1691",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "莫西干造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "莫西干造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "绿黄色",
+          "规格价格": "6.5"
+        },
+        {
+          "SKU": "TW1692",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "莫西干造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "莫西干造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "彩虹紫色",
+          "规格价格": "6.5"
+        },
+        {
+          "SKU": "TW1693",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-04-03",
+          "规格书产品名称": "莫西干造型头套",
+          "规格SPU": "TW-SP",
+          "规格产品名称": "莫西干造型头套",
+          "规格尺寸": "00",
+          "规格颜色": "黑红色",
+          "规格价格": "6.5"
+        }
+      ]
+    },
+    "TWC": {
+      "产品名称": "[抓夹马尾(卷筒)首单采购需求0120]",
+      "总SKU数": 27,
+      "已上架SKU数": 7,
+      "未上架SKU数": 20,
+      "备货数量": 1063,
+      "sku_list": [
+        {
+          "SKU": "TWC013BT18-01B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-19",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC013",
+          "规格产品名称": "18\"抓夹马尾(卷筒)",
+          "规格尺寸": "18",
+          "规格颜色": "1B",
+          "规格价格": "10"
+        },
+        {
+          "SKU": "TWC013BT18-04A",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "chenlanqing-陈兰卿",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "FHC",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-19",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC013",
+          "规格产品名称": "18\"抓夹马尾(卷筒)",
+          "规格尺寸": "18",
+          "规格颜色": "4A",
+          "规格价格": "10"
+        },
+        {
+          "SKU": "TWC013BT18-H79",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-19",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC013",
+          "规格产品名称": "18\"抓夹马尾(卷筒)",
+          "规格尺寸": "18",
+          "规格颜色": "12H15",
+          "规格价格": "10"
+        },
+        {
+          "SKU": "TWC013BT18-D46",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-19",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC013",
+          "规格产品名称": "18\"抓夹马尾(卷筒)",
+          "规格尺寸": "18",
+          "规格颜色": "24/613",
+          "规格价格": "10"
+        },
+        {
+          "SKU": "TWC013BT18-B12",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-19",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC013",
+          "规格产品名称": "18\"抓夹马尾(卷筒)",
+          "规格尺寸": "18",
+          "规格颜色": "60A",
+          "规格价格": "10"
+        },
+        {
+          "SKU": "TWC013BT18-F05",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-19",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC013",
+          "规格产品名称": "18\"抓夹马尾(卷筒)",
+          "规格尺寸": "18",
+          "规格颜色": "60/60A",
+          "规格价格": "10"
+        },
+        {
+          "SKU": "TWC002BT30-001",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC002",
+          "规格产品名称": "30\"抓夹马尾(卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "01",
+          "规格价格": "12.5"
+        },
+        {
+          "SKU": "TWC002BT30-006",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC002",
+          "规格产品名称": "30\"抓夹马尾(卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "06",
+          "规格价格": "12.5"
+        },
+        {
+          "SKU": "TWC002BT30-10B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC002",
+          "规格产品名称": "30\"抓夹马尾(卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "10B",
+          "规格价格": "12.5"
+        },
+        {
+          "SKU": "TWC002BT30-P52",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC002",
+          "规格产品名称": "30\"抓夹马尾(卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "12P22T",
+          "规格价格": "12.5"
+        },
+        {
+          "SKU": "TWC002BT30-P47",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC002",
+          "规格产品名称": "30\"抓夹马尾(卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "24P88",
+          "规格价格": "12.5"
+        },
+        {
+          "SKU": "TWC002BT30-D61",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "18\"抓夹马尾(卷筒)",
+          "规格SPU": "TWC002",
+          "规格产品名称": "30\"抓夹马尾(卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "86/613",
+          "规格价格": "12.5"
+        },
+        {
+          "SKU": "TWC001ST30-001",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "lijieying-李洁莹",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "HWM",
+              "站点": "US",
+              "商品状态": "在售"
+            },
+            {
+              "销售用户名": "yaohongzhen-姚红珍",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "PRM",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "30\"抓夹马尾(直发)",
+          "规格SPU": "TWC001",
+          "规格产品名称": "30\"抓夹马尾(直发)",
+          "规格尺寸": "30",
+          "规格颜色": "01",
+          "规格价格": "12"
+        },
+        {
+          "SKU": "TWC001ST30-006",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "yaohongzhen-姚红珍",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "PRM",
+              "站点": "US",
+              "商品状态": "在售"
+            },
+            {
+              "销售用户名": "lijieying-李洁莹",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "HWM",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "30\"抓夹马尾(直发)",
+          "规格SPU": "TWC001",
+          "规格产品名称": "30\"抓夹马尾(直发)",
+          "规格尺寸": "30",
+          "规格颜色": "06",
+          "规格价格": "12"
+        },
+        {
+          "SKU": "TWC001ST30-10B",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "yaohongzhen-姚红珍",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "PRM",
+              "站点": "US",
+              "商品状态": "在售"
+            },
+            {
+              "销售用户名": "lijieying-李洁莹",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "HWM",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "30\"抓夹马尾(直发)",
+          "规格SPU": "TWC001",
+          "规格产品名称": "30\"抓夹马尾(直发)",
+          "规格尺寸": "30",
+          "规格颜色": "10B",
+          "规格价格": "12"
+        },
+        {
+          "SKU": "TWC001ST30-P52",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "lijieying-李洁莹",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "HWM",
+              "站点": "US",
+              "商品状态": "在售"
+            },
+            {
+              "销售用户名": "yaohongzhen-姚红珍",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "PRM",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "30\"抓夹马尾(直发)",
+          "规格SPU": "TWC001",
+          "规格产品名称": "30\"抓夹马尾(直发)",
+          "规格尺寸": "30",
+          "规格颜色": "12P22T",
+          "规格价格": "12"
+        },
+        {
+          "SKU": "TWC001ST30-P47",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "yaohongzhen-姚红珍",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "PRM",
+              "站点": "US",
+              "商品状态": "在售"
+            },
+            {
+              "销售用户名": "lijieying-李洁莹",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "HWM",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "30\"抓夹马尾(直发)",
+          "规格SPU": "TWC001",
+          "规格产品名称": "30\"抓夹马尾(直发)",
+          "规格尺寸": "30",
+          "规格颜色": "24P88",
+          "规格价格": "12"
+        },
+        {
+          "SKU": "TWC001ST30-D61",
+          "已上架": true,
+          "上架信息": [
+            {
+              "销售用户名": "yaohongzhen-姚红珍",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "PRM",
+              "站点": "US",
+              "商品状态": "在售"
+            },
+            {
+              "销售用户名": "lijieying-李洁莹",
+              "平台": "TIKTOK SHOP",
+              "店铺名称": "HWM",
+              "站点": "US",
+              "商品状态": "在售"
+            }
+          ],
+          "提交需求时间": "2026-01-21",
+          "规格书产品名称": "30\"抓夹马尾(直发)",
+          "规格SPU": "TWC001",
+          "规格产品名称": "30\"抓夹马尾(直发)",
+          "规格尺寸": "30",
+          "规格颜色": "86/613",
+          "规格价格": "12"
+        },
+        {
+          "SKU": "TWC014BT30-01B",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "1B",
+          "规格价格": "14.5"
+        },
+        {
+          "SKU": "TWC014BT30-006",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "06",
+          "规格价格": "14.5"
+        },
+        {
+          "SKU": "TWC014BT30-A74",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "10B",
+          "规格价格": "14.5"
+        },
+        {
+          "SKU": "TWC014BT30-H91",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "8B/33AH36A/80D",
+          "规格价格": "14.5"
+        },
+        {
+          "SKU": "TWC014BT30-H92",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "12/12BH88",
+          "规格价格": "14.5"
+        },
+        {
+          "SKU": "TWC014BT30-H93",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "18TH613",
+          "规格价格": "14.5"
+        },
+        {
+          "SKU": "TWC014BT30-H94",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "6AT12/88",
+          "规格价格": "14.5"
+        },
+        {
+          "SKU": "TWC014BT30-H95",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "4T118L/BUG",
+          "规格价格": "14.5"
+        },
+        {
+          "SKU": "TWC014BT30-H96",
+          "已上架": false,
+          "上架信息": [],
+          "提交需求时间": "2026-03-30",
+          "规格书产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格SPU": "TWC014",
+          "规格产品名称": "30\"抓夹马尾(蓬蓬卷发)",
+          "规格尺寸": "30",
+          "规格颜色": "15A/80DH60",
+          "规格价格": "14.5"
+        }
+      ]
+    }
+  }
+};
+
+var launchTimeSortDir = -1; // -1=降序(最新在前), 1=升序
+
+function renderLaunchTable() {
+  var filter = document.getElementById('launchFilter').value;
+  var spuSearch = (document.getElementById('launchSpuSearch').value || '').trim().toUpperCase();
+  var nameSearch = (document.getElementById('launchNameSearch').value || '').trim().toUpperCase();
+  var skuSearch = (document.getElementById('launchSkuSearch').value || '').trim().toUpperCase();
+  var statusSearch = (document.getElementById('launchStatusSearch').value || '').trim().toUpperCase();
+  var tbl = document.getElementById('launchTable');
+  var cs = 'padding:7px 10px;border:1px solid #21262d;white-space:nowrap;';
+  var ns = cs + 'text-align:right;';
+
+  // Parse multi-keyword: split by space, comma, Chinese comma
+  function parseMulti(val) {
+    if (!val) return [];
+    return val.split(/[\s,，]+/).filter(function(k){return k;});
+  }
+  var spuKeys_arr = parseMulti(spuSearch);
+  var nameKeys_arr = parseMulti(nameSearch);
+  var skuKeys_arr = parseMulti(skuSearch);
+  var statusKeys_arr = parseMulti(statusSearch);
+
+  // Multi-keyword match: ALL keywords must match
+  function multiMatch(val, keys) {
+    if (keys.length === 0) return true;
+    var v = val.toUpperCase();
+    for (var i = 0; i < keys.length; i++) {
+      if (v.indexOf(keys[i]) < 0) return false;
+    }
+    return true;
+  }
+
+  var rows = [];
+  var spuKeys = Object.keys(LAUNCH_DATA.spu_data);
+  for (var si = 0; si < spuKeys.length; si++) {
+    var spu = spuKeys[si];
+    var info = LAUNCH_DATA.spu_data[spu];
+    for (var ki = 0; ki < info.sku_list.length; ki++) {
+      var sku = info.sku_list[ki];
+      // Determine effective status for filtering
+      var effStatus = '未上架';
+      if (sku['上架信息'] && sku['上架信息'].length > 0) {
+        effStatus = (sku['上架信息'][0]['商品状态'] || '在售');
+      }
+      rows.push({
+        spu: sku['规格SPU'] || spu,
+        productName: sku['规格产品名称'] || '',
+        sku: sku.SKU,
+        size: sku['规格尺寸'] || '',
+        color: sku['规格颜色'] || '',
+        price: sku['规格价格'] || '',
+        launched: sku['已上架'],
+        launchInfo: sku['上架信息'],
+        submitTime: sku['提交需求时间'] || '',
+        effStatus: effStatus
+      });
+    }
+  }
+
+  // Filter by dropdown
+  if (filter === 'launched') rows = rows.filter(function(r) { return r.launched; });
+  else if (filter === 'unlaunched') rows = rows.filter(function(r) { return !r.launched; });
+  else if (filter !== 'all') rows = rows.filter(function(r) { return r.spu === filter; });
+
+  // Filter by search boxes (AND logic between boxes)
+  if (spuKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.spu, spuKeys_arr); });
+  if (nameKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.productName, nameKeys_arr); });
+  if (skuKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.sku, skuKeys_arr); });
+  if (statusKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.effStatus, statusKeys_arr); });
+
+  // Sort by submitTime
+  var timeDir = launchTimeSortDir;
+  rows.sort(function(a, b) {
+    var ta = a.submitTime || '';
+    var tb2 = b.submitTime || '';
+    if (ta === tb2) return 0;
+    if (!ta) return 1;
+    if (!tb2) return -1;
+    var cmp = ta.localeCompare(tb2);
+    return timeDir * cmp;
+  });
+
+  var salesClr = {'chenlanqing-陈兰卿':'#79c0ff','fangmiaofen-方妙芬':'#56d364','yaohongzhen-姚红珍':'#ff9500','lijieying-李洁莹':'#bc8cff','kebolin-柯伯霖':'#d29922'};
+  var sortArrow = timeDir > 0 ? ' ↑' : ' ↓';
+
+  var th = '<thead><tr>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">SPU</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">产品名称</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">SKU</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#58a6ff;font-weight:600;cursor:pointer;user-select:none;" onclick="launchTimeSortDir*=-1;renderLaunchTable();" title="点击排序">提交需求时间' + sortArrow + '</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;text-align:center;">尺寸</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">颜色</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;text-align:right;">价格</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;text-align:center;">商品状态</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">销售用户名</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">平台</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;">店铺</th>'
+    + '<th style="'+cs+'background:#1c2128;color:#8b949e;font-weight:600;text-align:center;">站点</th>'
+    + '</tr></thead><tbody>';
+
+  var tb = '';
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var bg = i % 2 === 0 ? '#161b22' : '#1a2332';
+    if (r.launchInfo.length > 0) {
+      for (var j = 0; j < r.launchInfo.length; j++) {
+        var inf = r.launchInfo[j];
+        var sn = inf['销售用户名'] || '';
+        var sColor = salesClr[sn] || '#e6edf3';
+        var shortName = sn.indexOf('-') >= 0 ? sn.split('-').pop() : sn;
+        var platform = inf['平台'] || '-';
+        var shop = inf['店铺名称'] || '-';
+        var site = inf['站点'] || '-';
+        var prodStatus = inf['商品状态'] || '在售';
+        var stColor = prodStatus === '在售' ? '#3fb950' : (prodStatus === '不在售' ? '#d29922' : '#ff7b72');
+        tb += '<tr style="background:'+bg+';">'
+          + '<td style="'+cs+'color:#bc8cff;font-weight:600;">'+r.spu+'</td>'
+          + '<td style="'+cs+'color:#c9d1d9;font-size:11px;">'+r.productName+'</td>'
+          + '<td style="'+cs+'color:#e6edf3;font-family:monospace;">'+r.sku+'</td>'
+          + '<td style="'+cs+'color:#8b949e;">'+(r.submitTime||'-')+'</td>'
+          + '<td style="'+cs+'color:#e6edf3;text-align:center;">'+r.size+'</td>'
+          + '<td style="'+cs+'color:#e6edf3;">'+r.color+'</td>'
+          + '<td style="'+cs+'color:#e6edf3;text-align:right;">'+r.price+'</td>'
+          + '<td style="'+cs+'color:'+stColor+';text-align:center;font-weight:600;">'+prodStatus+'</td>'
+          + '<td style="'+cs+'color:'+sColor+';">'+shortName+'</td>'
+          + '<td style="'+cs+'color:#8b949e;">'+platform+'</td>'
+          + '<td style="'+cs+'color:#8b949e;">'+shop+'</td>'
+          + '<td style="'+cs+'color:#8b949e;text-align:center;">'+site+'</td>'
+          + '</tr>';
+      }
+    } else {
+      tb += '<tr style="background:'+bg+';">'
+        + '<td style="'+cs+'color:#bc8cff;font-weight:600;">'+r.spu+'</td>'
+        + '<td style="'+cs+'color:#c9d1d9;font-size:11px;">'+r.productName+'</td>'
+        + '<td style="'+cs+'color:#e6edf3;font-family:monospace;">'+r.sku+'</td>'
+        + '<td style="'+cs+'color:#8b949e;">'+(r.submitTime||'-')+'</td>'
+        + '<td style="'+cs+'color:#e6edf3;text-align:center;">'+r.size+'</td>'
+        + '<td style="'+cs+'color:#e6edf3;">'+r.color+'</td>'
+        + '<td style="'+cs+'color:#e6edf3;text-align:right;">'+r.price+'</td>'
+        + '<td style="'+cs+'color:#ff7b72;text-align:center;font-weight:600;">未上架</td>'
+        + '<td style="'+cs+'color:#484f58;">-</td>'
+        + '<td style="'+cs+'color:#484f58;">-</td>'
+        + '<td style="'+cs+'color:#484f58;">-</td>'
+        + '<td style="'+cs+'color:#484f58;text-align:center;">-</td>'
+        + '</tr>';
+    }
+  }
+
+  tbl.innerHTML = th + tb + '</tbody>';
+}
+
+renderLaunchTable();
+
+// ===== 图表配置 =====
+const COLORS = ['#58a6ff','#3fb950','#d29922','#bc8cff','#f778ba','#ff7b72','#79c0ff','#56d364','#e3b341','#db61a2'];
+const tooltipStyle = { backgroundColor:'#1c2128', borderColor:'#30363d', textStyle:{color:'#e6edf3',fontSize:12} };
+const baseOpt = { backgroundColor:'transparent', textStyle:{color:'#8b949e'} };
+
+const monthly = [
+  {月份:'2026-01', 数量:1268, SKU数:35, SPU数:2, 产品数:5},
+  {月份:'2026-03', 数量:1965, SKU数:47, SPU数:3, 产品数:3},
+  {月份:'2026-04', 数量:590,  SKU数:33, SPU数:2, 产品数:2}
+];
+
+const products = [
+  {产品名称:'4片11夹卡子发缠管曲0401',数量:1330},
+  {产品名称:'6x6寸手勾机制刘海发块-260403',数量:510},
+  {产品名称:'30寸抓夹马尾0401',数量:525},
+  {产品名称:'8寸一体鸭舌帽子发(卷发)首批需求0130',数量:450},
+  {产品名称:'抓夹马尾直发+卷发-首单需求0122',数量:424},
+  {产品名称:'一体鸭舌黑帽子大波浪16寸新色首单采购需求0108',数量:250},
+  {产品名称:'抓夹马尾(卷筒)首单采购需求0120',数量:130},
+  {产品名称:'（调整后）一体速干鸭舌帽子发下单0331',数量:110},
+  {产品名称:'世界杯造型头套-260407',数量:80},
+  {产品名称:'一体鸭舌帽首批下单  260127',数量:30}
+];
+
+const prodSiteRaw = [
+  {产品名称:'30寸抓夹马尾0401',站点:'US',数量:445},
+  {产品名称:'30寸抓夹马尾0401',站点:'UK',数量:80},
+  {产品名称:'4片11夹卡子发缠管曲0401',站点:'US',数量:1330},
+  {产品名称:'6x6寸手勾机制刘海发块-260403',站点:'US',数量:348},
+  {产品名称:'6x6寸手勾机制刘海发块-260403',站点:'UK',数量:162},
+  {产品名称:'8寸一体鸭舌帽子发(卷发)首批需求0130',站点:'US',数量:324},
+  {产品名称:'8寸一体鸭舌帽子发(卷发)首批需求0130',站点:'UK',数量:126},
+  {产品名称:'一体鸭舌帽首批下单  260127',站点:'US',数量:30},
+  {产品名称:'一体鸭舌黑帽子大波浪16寸新色首单采购需求0108',站点:'US',数量:250},
+  {产品名称:'世界杯造型头套-260407',站点:'US',数量:80},
+  {产品名称:'抓夹马尾(卷筒)首单采购需求0120',站点:'US',数量:130},
+  {产品名称:'抓夹马尾直发+卷发-首单需求0122',站点:'US',数量:424},
+  {产品名称:'（调整后）一体速干鸭舌帽子发下单0331',站点:'US',数量:20},
+  {产品名称:'（调整后）一体速干鸭舌帽子发下单0331',站点:'GL',数量:90}
+];
+
+// ---- 1. 月度趋势 ----
+{
+  const chart = echarts.init(document.getElementById('chart-monthly'));
+  const months = monthly.map(d=>d.月份);
+  chart.setOption({
+    ...baseOpt,
+    tooltip: {...tooltipStyle, trigger:'axis', axisPointer:{type:'cross'}},
+    legend: {top:0, right:0, textStyle:{color:'#8b949e'}, itemWidth:12, itemHeight:8, fontSize:11},
+    grid: {left:'10%', right:'12%', bottom:'10%', top:'38px'},
+    xAxis: {type:'category', data:months, axisLabel:{color:'#8b949e'}, axisLine:{lineStyle:{color:'#30363d'}}},
+    yAxis: [
+      {type:'value', name:'数量', nameTextStyle:{color:'#8b949e'}, axisLabel:{color:'#8b949e'}, splitLine:{lineStyle:{color:'#21262d'}}},
+      {type:'value', name:'SKU/SPU数', nameTextStyle:{color:'#8b949e'}, axisLabel:{color:'#8b949e'}, splitLine:{show:false}}
+    ],
+    series: [
+      {name:'备货数量', type:'bar', data:monthly.map(d=>d.数量), itemStyle:{color:'#58a6ff', borderRadius:[4,4,0,0]},
+        label:{show:true, position:'top', color:'#8b949e', fontSize:11}},
+      {name:'SKU数', type:'line', yAxisIndex:1, data:monthly.map(d=>d.SKU数),
+        symbol:'circle', symbolSize:8, lineStyle:{color:'#3fb950', width:2},
+        itemStyle:{color:'#3fb950'}, label:{show:true, position:'top', color:'#3fb950', fontSize:11}},
+      {name:'SPU数', type:'line', yAxisIndex:1, data:monthly.map(d=>d.SPU数),
+        symbol:'diamond', symbolSize:8, lineStyle:{color:'#d29922', width:2, type:'dashed'},
+        itemStyle:{color:'#d29922'}, label:{show:true, position:'bottom', color:'#d29922', fontSize:11}}
+    ]
+  });
+}
+
+// ---- 2. 产品数量横向柱图 ----
+{
+  const chart = echarts.init(document.getElementById('chart-product-bar'));
+  const names = products.map(d=>d.产品名称.replace(/\\n/g,''));
+  const shortNames = ['4片11夹卡子发缠管曲','30寸抓夹马尾','6x6手勾刘海发块','8寸一体鸭舌帽子发','抓夹马尾直发+卷发','一体鸭舌黑帽大波浪','抓夹马尾(卷筒)','速干鸭舌帽子发','世界杯造型头套','一体鸭舌帽首批'];
+  const vals = products.map(d=>d.数量);
+  chart.setOption({
+    ...baseOpt,
+    tooltip: {...tooltipStyle, trigger:'axis', formatter: p => `${names[p[0].dataIndex]}<br/>备货数量：<b>${p[0].value}</b> 件`},
+    grid: {left:'160px', right:'60px', bottom:'8%', top:'5%'},
+    xAxis: {type:'value', axisLabel:{color:'#8b949e'}, splitLine:{lineStyle:{color:'#21262d'}}},
+    yAxis: {type:'category', data:shortNames.reverse(), axisLabel:{color:'#c9d1d9', fontSize:11}, axisLine:{lineStyle:{color:'#30363d'}}},
+    series: [{
+      type:'bar', data:vals.slice().reverse(),
+      itemStyle:{borderRadius:[0,4,4,0],
+        color: p => COLORS[p.dataIndex % COLORS.length]},
+      label:{show:true, position:'right', color:'#8b949e', fontSize:11, formatter: v => `${v} 件`}
+    }]
+  });
+}
+
+// ---- 8. 产品SKU数 ----
+{
+  const chart = echarts.init(document.getElementById('chart-prod-sku'));
+  const shortN = ['4片11夹卡子发','6x6手勾刘海发块','世界杯造型头套','抓夹马尾直发+卷发','30寸抓夹马尾','8寸一体鸭舌帽子发','抓夹马尾(卷筒)','一体鸭舌黑帽大波浪','速干鸭舌帽子发','一体鸭舌帽首批'];
+  const skuVals = [34,17,16,12,9,9,6,5,4,3];
+  chart.setOption({
+    ...baseOpt,
+    tooltip: {...tooltipStyle, trigger:'axis'},
+    grid: {left:'155px', right:'55px', bottom:'8%', top:'5%'},
+    xAxis: {type:'value', axisLabel:{color:'#8b949e'}, splitLine:{lineStyle:{color:'#21262d'}}},
+    yAxis: {type:'category', data:shortN.slice().reverse(), axisLabel:{color:'#c9d1d9', fontSize:11}, axisLine:{lineStyle:{color:'#30363d'}}},
+    series:[{
+      type:'bar', data:skuVals.slice().reverse(),
+      itemStyle:{borderRadius:[0,4,4,0], color: p => COLORS[(p.dataIndex+3) % COLORS.length]},
+      label:{show:true, position:'right', color:'#8b949e', fontSize:11, formatter: v => `${v} SKU`}
+    }]
+  });
+}
+
+// ---- 9. 产品×站点 堆叠柱图 ----
+{
+  const chart = echarts.init(document.getElementById('chart-prod-site'));
+  const shortProd = ['30寸抓夹马尾','4片11夹卡子发','6x6手勾刘海发块','8寸鸭舌帽子发','鸭舌帽首批','一体鸭舌黑帽大波浪','世界杯造型头套','抓夹马尾(卷筒)','抓夹马尾直发+卷发','速干鸭舌帽子发'];
+  const fullProd = ['30寸抓夹马尾0401','4片11夹卡子发缠管曲0401','6x6寸手勾机制刘海发块-260403','8寸一体鸭舌帽子发(卷发)首批需求0130','一体鸭舌帽首批下单  260127','一体鸭舌黑帽子大波浪16寸新色首单采购需求0108','世界杯造型头套-260407','抓夹马尾(卷筒)首单采购需求0120','抓夹马尾直发+卷发-首单需求0122','（调整后）一体速干鸭舌帽子发下单0331'];
+  const sites = ['US','UK','GL'];
+  const lookup = {};
+  prodSiteRaw.forEach(d=>{ lookup[`${d.产品名称}_${d.站点}`] = d.数量; });
+  chart.setOption({
+    ...baseOpt,
+    tooltip: {...tooltipStyle, trigger:'axis', axisPointer:{type:'shadow'}},
+    legend: {top:0, textStyle:{color:'#8b949e'}, itemWidth:12, itemHeight:8},
+    grid: {left:'130px', right:'5%', bottom:'5%', top:'40px'},
+    xAxis: {type:'value', axisLabel:{color:'#8b949e'}, splitLine:{lineStyle:{color:'#21262d'}}},
+    yAxis: {type:'category', data:shortProd, axisLabel:{color:'#c9d1d9', fontSize:10}, axisLine:{lineStyle:{color:'#30363d'}}},
+    series: sites.map((s,i)=>({
+      name:s, type:'bar', stack:'total',
+      data: fullProd.map(p => lookup[`${p}_${s}`] || 0),
+      itemStyle:{color:['#58a6ff','#3fb950','#d29922'][i]},
+      label:{show:true, position:'inside', color:'#fff', fontSize:10,
+        formatter: p => p.value > 0 ? p.value : ''}
+    }))
+  });
+}
+
+window.addEventListener('resize', () => {
+  ['chart-monthly','chart-product-bar','chart-prod-sku','chart-prod-site']
+  .forEach(id => { const el = document.getElementById(id); if(el) echarts.getInstanceByDom(el)?.resize(); });
+});
+</script>
+</body>
+</html>
