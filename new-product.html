@@ -593,24 +593,21 @@ renderLaunchTable();"
     </div>
     <!-- 筛选行 -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-      <select id="ssSpuFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
-        <option value="all">全部SPU</option>
-      </select>
-      <select id="ssPlatFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
-        <option value="all">全部平台</option>
-      </select>
-      <select id="ssSiteFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
-        <option value="all">全部站点</option>
-      </select>
-      <select id="ssSaleFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
-        <option value="all">全部销售</option>
+      <select id="ssSpuFilter" multiple onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:4px 8px;font-size:12px;outline:none;min-height:32px;max-height:80px;" title="按住Ctrl可多选SPU"></select>
+      <select id="ssPlatFilter" multiple onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:4px 8px;font-size:12px;outline:none;min-height:32px;max-height:80px;" title="按住Ctrl可多选平台"></select>
+      <select id="ssSiteFilter" multiple onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:4px 8px;font-size:12px;outline:none;min-height:32px;max-height:80px;" title="按住Ctrl可多选站点"></select>
+      <select id="ssSaleFilter" multiple onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:4px 8px;font-size:12px;outline:none;min-height:32px;max-height:80px;" title="按住Ctrl可多选销售"></select>
+      <select id="ssStatusFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部状态</option>
+        <option value="sold">有售出</option>
+        <option value="unsold">无售出</option>
       </select>
       <div style="position:relative;">
         <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">🔍</span>
-        <input id="ssSkuSearch" type="text" placeholder="SKU搜索" oninput="renderSalesSummary()"
-          style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px 7px 30px;font-size:13px;width:180px;outline:none;">
+        <input id="ssSkuSearch" type="text" placeholder="SKU搜索(逗号分隔多选)" oninput="renderSalesSummary()"
+          style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px 7px 30px;font-size:13px;width:220px;outline:none;">
       </div>
-      <button onclick="document.getElementById('ssSpuFilter').value='all';document.getElementById('ssPlatFilter').value='all';document.getElementById('ssSiteFilter').value='all';document.getElementById('ssSaleFilter').value='all';document.getElementById('ssSkuSearch').value='';renderSalesSummary();"
+      <button onclick="clearSSFilters();"
         style="background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:7px 12px;font-size:12px;cursor:pointer;white-space:nowrap;">✕ 清空筛选</button>
     </div>
     <!-- 表格 -->
@@ -731,7 +728,7 @@ var SALES_LAUNCH_DATA = {"total_skus":115,"launched_skus":30,"unlaunched_skus":8
     if(r['站点']) siteSet[r['站点']] = true;
     if(r['销售']) saleSet[r['销售']] = true;
   });
-  function fillSelect(id, keys) {
+  function fillMultiSelect(id, keys) {
     var sel = document.getElementById(id);
     keys.sort().forEach(function(k){
       if(!k) return;
@@ -739,24 +736,58 @@ var SALES_LAUNCH_DATA = {"total_skus":115,"launched_skus":30,"unlaunched_skus":8
       o.value = k; o.textContent = k; sel.appendChild(o);
     });
   }
-  fillSelect('ssSpuFilter', Object.keys(spuSet));
-  fillSelect('ssPlatFilter', Object.keys(platSet2));
-  fillSelect('ssSiteFilter', Object.keys(siteSet));
-  fillSelect('ssSaleFilter', Object.keys(saleSet));
+  fillMultiSelect('ssSpuFilter', Object.keys(spuSet));
+  fillMultiSelect('ssPlatFilter', Object.keys(platSet2));
+  fillMultiSelect('ssSiteFilter', Object.keys(siteSet));
+  fillMultiSelect('ssSaleFilter', Object.keys(saleSet));
+
+  // 清空筛选
+  window.clearSSFilters = function(){
+    ['ssSpuFilter','ssPlatFilter','ssSiteFilter','ssSaleFilter'].forEach(function(id){
+      var sel = document.getElementById(id);
+      for(var i=0;i<sel.options.length;i++) sel.options[i].selected = false;
+    });
+    document.getElementById('ssStatusFilter').value = 'all';
+    document.getElementById('ssSkuSearch').value = '';
+    renderSalesSummary();
+  };
+
+  // 从多选select获取选中值数组（未选=返回null表示"全部"）
+  function getMultiSelect(id) {
+    var sel = document.getElementById(id);
+    var vals = [];
+    for(var i=0;i<sel.options.length;i++){
+      if(sel.options[i].selected) vals.push(sel.options[i].value);
+    }
+    return vals.length > 0 ? vals : null;
+  }
+
+  // 判断记录是否有售出
+  function hasSales(r) {
+    return months.some(function(m){ return (r[m]||0) > 0; });
+  }
 
   window.renderSalesSummary = function(){
-    var spuF   = document.getElementById('ssSpuFilter').value;
-    var platF  = document.getElementById('ssPlatFilter').value;
-    var siteF  = document.getElementById('ssSiteFilter').value;
-    var saleF  = document.getElementById('ssSaleFilter').value;
-    var skuKw  = (document.getElementById('ssSkuSearch').value || '').trim().toUpperCase();
+    var spuVals  = getMultiSelect('ssSpuFilter');
+    var platVals = getMultiSelect('ssPlatFilter');
+    var siteVals = getMultiSelect('ssSiteFilter');
+    var saleVals = getMultiSelect('ssSaleFilter');
+    var statusF  = document.getElementById('ssStatusFilter').value;
+    var skuRaw   = (document.getElementById('ssSkuSearch').value || '').trim().toUpperCase();
+    // SKU支持逗号分隔多选
+    var skuKws = skuRaw ? skuRaw.split(/[,，\s]+/).filter(function(s){return s;}) : [];
 
     var filtered = rows.filter(function(r){
-      if(spuF  !== 'all' && r.SPU  !== spuF)  return false;
-      if(platF !== 'all' && r['平台'] !== platF) return false;
-      if(siteF !== 'all' && r['站点'] !== siteF) return false;
-      if(saleF !== 'all' && r['销售'] !== saleF) return false;
-      if(skuKw && r.SKU.indexOf(skuKw) < 0) return false;
+      if(spuVals  && spuVals.indexOf(r.SPU) < 0)  return false;
+      if(platVals && platVals.indexOf(r['平台']) < 0) return false;
+      if(siteVals && siteVals.indexOf(r['站点']) < 0) return false;
+      if(saleVals && saleVals.indexOf(r['销售']) < 0) return false;
+      if(statusF === 'sold' && !hasSales(r)) return false;
+      if(statusF === 'unsold' && hasSales(r)) return false;
+      if(skuKws.length > 0){
+        var match = skuKws.some(function(kw){ return r.SKU.indexOf(kw) >= 0; });
+        if(!match) return false;
+      }
       return true;
     });
 
