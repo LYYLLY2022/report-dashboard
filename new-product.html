@@ -93,10 +93,19 @@
     padding-bottom: 14px; margin-bottom: 20px;
     border-bottom: 1px solid #21262d;
     display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
   }
   .section-title .dot {
     width: 4px; height: 20px; background: #58a6ff; border-radius: 2px;
   }
+  .section-title .dl-btn {
+    margin-left: auto;
+    background: #21262d; border: 1px solid #30363d; border-radius: 6px;
+    color: #8b949e; padding: 5px 14px; font-size: 12px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .section-title .dl-btn:hover { background: #30363d; color: #e6edf3; border-color: #58a6ff; }
 
   /* KPI */
   .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
@@ -288,6 +297,9 @@
     </a>
     <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-sales-launch').scrollIntoView({behavior:'smooth',block:'start'})">
       <span class="icon">👤</span> 销售上架跟踪
+    </a>
+    <a class="nav-item" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('sec-sales-summary').scrollIntoView({behavior:'smooth',block:'start'})">
+      <span class="icon">📊</span> 销量汇总
     </a>
   </div>
 
@@ -558,9 +570,275 @@ renderLaunchTable();"
     </div>
   </div>
 
+  <div class="section" id="sec-sales-summary">
+    <div class="section-title"><span class="dot"></span> 销量汇总 <button class="dl-btn" onclick="dlCSV('salesSummaryTable','销量汇总')">📥 下载CSV</button></div>
+    <!-- KPI 卡片 -->
+    <div class="kpi-row" style="margin-bottom:20px;">
+      <div class="kpi-card">
+        <div class="label">有销量SKU数</div>
+        <div class="value" id="ssTotalSkus" style="color:#58a6ff;">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">总销量</div>
+        <div class="value" id="ssTotalQty" style="color:#3fb950;">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">涉及平台数</div>
+        <div class="value" id="ssPlatCount" style="color:#d29922;">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">统计月份</div>
+        <div class="value" id="ssMonthRange" style="color:#a5d6ff;font-size:14px;">-</div>
+      </div>
+    </div>
+    <!-- 筛选行 -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <select id="ssSpuFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部SPU</option>
+      </select>
+      <select id="ssPlatFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部平台</option>
+      </select>
+      <select id="ssSiteFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部站点</option>
+      </select>
+      <select id="ssSaleFilter" onchange="renderSalesSummary()" style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px;font-size:13px;outline:none;">
+        <option value="all">全部销售</option>
+      </select>
+      <div style="position:relative;">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#8b949e;font-size:13px;">🔍</span>
+        <input id="ssSkuSearch" type="text" placeholder="SKU搜索" oninput="renderSalesSummary()"
+          style="background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 12px 7px 30px;font-size:13px;width:180px;outline:none;">
+      </div>
+      <button onclick="document.getElementById('ssSpuFilter').value='all';document.getElementById('ssPlatFilter').value='all';document.getElementById('ssSiteFilter').value='all';document.getElementById('ssSaleFilter').value='all';document.getElementById('ssSkuSearch').value='';renderSalesSummary();"
+        style="background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:7px 12px;font-size:12px;cursor:pointer;white-space:nowrap;">✕ 清空筛选</button>
+    </div>
+    <!-- 表格 -->
+    <div class="chart-card" style="padding:16px 20px;">
+      <div style="overflow-x:auto;">
+        <table id="salesSummaryTable" style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px;"></table>
+      </div>
+    </div>
+  </div>
+
   <div class="content-footer">非亚渠道首批备货需求表 · 数据分析 &copy; 2026</div>
 
 </div><!-- /main-content -->
+
+<!-- ===== 通用下载函数 ===== -->
+<script>
+/* 下载 ECharts 图表为 PNG */
+function dlChart(chartId, fileName) {
+  var chartDom = document.getElementById(chartId);
+  if (!chartDom) { alert('图表不存在'); return; }
+  var chart = echarts.getInstanceByDom(chartDom);
+  if (!chart) { alert('图表未初始化'); return; }
+  var url = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#0d1117' });
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = fileName + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+/* 下载 HTML 表格为 CSV（自动处理 rowspan/colspan 展开和 BOM 编码） */
+function dlCSV(tableId, fileName) {
+  var tbl = document.getElementById(tableId);
+  if (!tbl) { alert('表格不存在'); return; }
+  var matrix = [];
+  var rowEls = tbl.querySelectorAll('tr');
+  rowEls.forEach(function(tr) {
+    var cells = tr.querySelectorAll('th, td');
+    var rowIdx = matrix.length;
+    var colIdx = 0;
+    cells.forEach(function(cell) {
+      while (colIdx < (matrix[rowIdx] || []).length && matrix[rowIdx][colIdx] !== undefined) {
+        colIdx++;
+      }
+      var rs = parseInt(cell.getAttribute('rowspan')) || 1;
+      var cs = parseInt(cell.getAttribute('colspan')) || 1;
+      var text = cell.textContent.trim().replace(/"/g, '""');
+      for (var r = 0; r < rs; r++) {
+        for (var c = 0; c < cs; c++) {
+          var trIdx = rowIdx + r;
+          var tcIdx = colIdx + c;
+          if (!matrix[trIdx]) matrix[trIdx] = [];
+          matrix[trIdx][tcIdx] = (r === 0 && c === 0) ? text : '';
+        }
+      }
+      colIdx += cs;
+    });
+  });
+  var csv = '\uFEFF';
+  matrix.forEach(function(row, i) {
+    if (!row) return;
+    var line = row.map(function(cell) {
+      if (cell === undefined) cell = '';
+      return '"' + cell + '"';
+    }).join(',');
+    csv += line + (i < matrix.length - 1 ? '\n' : '');
+  });
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+</script>
+
+<!-- ===== 销量汇总模块 ===== -->
+<script>
+(function(){
+  if (typeof SALES_SUMMARY_DATA === 'undefined') return;
+  var sd = SALES_SUMMARY_DATA;
+  var months = sd.months || [];
+  var rows = sd.data || [];
+
+  // 更新 KPI 卡片
+  var skuSet = {}, platSet = {};
+  rows.forEach(function(r){
+    skuSet[r.SKU] = true;
+    if(r['平台']) platSet[r['平台']] = true;
+  });
+  var skuWithSales = 0;
+  rows.forEach(function(r){
+    var hasSales = months.some(function(m){ return (r[m]||0) > 0; });
+    if(hasSales) skuWithSales++;
+  });
+  document.getElementById('ssTotalSkus').textContent = skuWithSales + ' / ' + Object.keys(skuSet).length;
+  document.getElementById('ssTotalQty').textContent = sd.total_qty || 0;
+  document.getElementById('ssPlatCount').textContent = Object.keys(platSet).length;
+  document.getElementById('ssMonthRange').textContent = months.length ? months[0] + (months.length > 1 ? ' ~ ' + months[months.length-1] : '') : '-';
+
+  // 初始化筛选下拉
+  var spuSet = {}, siteSet = {}, saleSet = {}, platSet2 = {};
+  rows.forEach(function(r){
+    if(r.SPU) spuSet[r.SPU] = true;
+    if(r['平台']) platSet2[r['平台']] = true;
+    if(r['站点']) siteSet[r['站点']] = true;
+    if(r['销售']) saleSet[r['销售']] = true;
+  });
+  function fillSelect(id, keys) {
+    var sel = document.getElementById(id);
+    keys.sort().forEach(function(k){
+      if(!k) return;
+      var o = document.createElement('option');
+      o.value = k; o.textContent = k; sel.appendChild(o);
+    });
+  }
+  fillSelect('ssSpuFilter', Object.keys(spuSet));
+  fillSelect('ssPlatFilter', Object.keys(platSet2));
+  fillSelect('ssSiteFilter', Object.keys(siteSet));
+  fillSelect('ssSaleFilter', Object.keys(saleSet));
+
+  window.renderSalesSummary = function(){
+    var spuF   = document.getElementById('ssSpuFilter').value;
+    var platF  = document.getElementById('ssPlatFilter').value;
+    var siteF  = document.getElementById('ssSiteFilter').value;
+    var saleF  = document.getElementById('ssSaleFilter').value;
+    var skuKw  = (document.getElementById('ssSkuSearch').value || '').trim().toUpperCase();
+
+    var filtered = rows.filter(function(r){
+      if(spuF  !== 'all' && r.SPU  !== spuF)  return false;
+      if(platF !== 'all' && r['平台'] !== platF) return false;
+      if(siteF !== 'all' && r['站点'] !== siteF) return false;
+      if(saleF !== 'all' && r['销售'] !== saleF) return false;
+      if(skuKw && r.SKU.indexOf(skuKw) < 0) return false;
+      return true;
+    });
+
+    var tbl = document.getElementById('salesSummaryTable');
+    if(!tbl) return;
+    var hs  = 'padding:7px 10px;background:#1c2128;color:#8b949e;font-weight:600;border-bottom:1px solid #30363d;white-space:nowrap;';
+    var ths = 'padding:7px 10px;background:#1c2128;color:#d29922;font-weight:600;border-bottom:1px solid #30363d;white-space:nowrap;';
+    var mhs = 'padding:7px 10px;background:#1c2128;color:#58a6ff;font-weight:600;border-bottom:1px solid #30363d;white-space:nowrap;text-align:right;';
+
+    var th = '<thead><tr>'
+      + '<th style="'+hs+'min-width:60px;">SPU</th>'
+      + '<th style="'+ths+'min-width:100px;">提交需求时间</th>'
+      + '<th style="'+hs+'min-width:130px;">产品名称</th>'
+      + '<th style="'+hs+'min-width:155px;">SKU</th>'
+      + '<th style="'+hs+'">平台</th>'
+      + '<th style="'+hs+'">店铺</th>'
+      + '<th style="'+hs+'">站点</th>'
+      + '<th style="'+hs+'">销售</th>';
+    months.forEach(function(m){ th += '<th style="'+mhs+'min-width:80px;">'+m+'</th>'; });
+    th += '</tr></thead>';
+
+    var spuCount = {}, skuCount = {};
+    filtered.forEach(function(r){
+      spuCount[r.SPU] = (spuCount[r.SPU]||0)+1;
+      var sk = r.SPU+'|'+r.SKU+'|'+r['提交需求时间'];
+      skuCount[sk] = (skuCount[sk]||0)+1;
+    });
+
+    var tb = '<tbody>';
+    var renderedSpu = {}, renderedSku = {};
+    var rowCs = 'padding:7px 10px;border-bottom:1px solid #21262d;vertical-align:middle;';
+
+    filtered.forEach(function(r){
+      var skKey = r.SPU+'|'+r.SKU+'|'+r['提交需求时间'];
+      tb += '<tr>';
+      if(!renderedSpu[r.SPU]){
+        renderedSpu[r.SPU] = true;
+        tb += '<td style="'+rowCs+'font-weight:600;color:#79c0ff;" rowspan="'+spuCount[r.SPU]+'">'+r.SPU+'</td>';
+      }
+      if(!renderedSku[skKey]){
+        renderedSku[skKey] = true;
+        tb += '<td style="'+rowCs+'color:#d29922;font-size:12px;" rowspan="'+skuCount[skKey]+'">'+(r['提交需求时间']||'')+'</td>';
+        tb += '<td style="'+rowCs+'color:#e6edf3;max-width:200px;white-space:normal;" rowspan="'+skuCount[skKey]+'">'+r['产品名称']+'</td>';
+        tb += '<td style="'+rowCs+'font-family:monospace;font-size:12px;color:#e6edf3;" rowspan="'+skuCount[skKey]+'">'+r.SKU+'</td>';
+      }
+      var plat = r['平台'] || '';
+      var shop = r['店铺'] || '';
+      var site = r['站点'] || '';
+      var sale = r['销售'] || '';
+      var noPlatStyle = (!plat && !shop && !site && !sale) ? 'color:#484f58;font-style:italic;' : 'color:#8b949e;';
+      tb += '<td style="'+rowCs+noPlatStyle+'">'+plat+'</td>';
+      tb += '<td style="'+rowCs+'color:#8b949e;">'+shop+'</td>';
+      tb += '<td style="'+rowCs+'color:#8b949e;">'+site+'</td>';
+      tb += '<td style="'+rowCs+'color:#8b949e;">'+sale+'</td>';
+      months.forEach(function(m){
+        var qty = r[m] || 0;
+        var qColor = qty > 0 ? '#3fb950' : '#484f58';
+        tb += '<td style="'+rowCs+'text-align:right;color:'+qColor+';font-weight:'+(qty>0?'600':'400')+';font-size:13px;">'+(qty > 0 ? qty : '')+'</td>';
+      });
+      tb += '</tr>';
+    });
+
+    var fixedCols = 8;
+    if(filtered.length > 0){
+      var hasAnySales = months.some(function(m){
+        return filtered.some(function(r){ return (r[m]||0)>0; });
+      });
+      if(hasAnySales){
+        tb += '<tr style="background:#161b22;">';
+        tb += '<td style="padding:8px 10px;font-weight:700;color:#f0f6fc;border-top:2px solid #30363d;" colspan="'+fixedCols+'">合计</td>';
+        months.forEach(function(m){
+          var total = 0;
+          filtered.forEach(function(r){ total += (r[m]||0); });
+          tb += '<td style="padding:8px 10px;text-align:right;font-weight:700;color:#58a6ff;border-top:2px solid #30363d;">'+(total>0?total:'')+'</td>';
+        });
+        tb += '</tr>';
+      }
+    }
+
+    if(filtered.length === 0){
+      var colCount = fixedCols + months.length;
+      tb += '<tr><td colspan="'+colCount+'" style="padding:24px;text-align:center;color:#484f58;">无匹配数据</td></tr>';
+    }
+
+    tb += '</tbody>';
+    tbl.innerHTML = th + tb;
+  };
+
+  renderSalesSummary();
+})();
+</script>
 
 <!-- 密码验证逻辑 -->
 <script>
@@ -616,7 +894,7 @@ window.addEventListener('resize', function() {
 var mainContent = document.getElementById('main-content');
 
 var navItems = document.querySelectorAll('.nav-item');
-var sectionIds = ['sec-overview','sec-trend','sec-prod','sec-sku','sec-cross','sec-pivot1','sec-pivot2','sec-launch','sec-sales-launch'];
+var sectionIds = ['sec-overview','sec-trend','sec-prod','sec-sku','sec-cross','sec-pivot1','sec-pivot2','sec-launch','sec-sales-launch','sec-sales-summary'];
 
 function updateActiveNav() {
   var current = sectionIds[0];
