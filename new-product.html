@@ -713,6 +713,7 @@ var SALES_LAUNCH_DATA = {"total_skus":115,"launched_skus":49,"unlaunched_skus":6
 
 
 
+
 // ===== 透视表数据 =====
 
 // ===== 透视表数据结束 =====
@@ -3170,7 +3171,7 @@ renderLaunchTable();
   var spuSet = {}, salesSet = {};
   for(var i=0;i<d.length;i++){
     spuSet[d[i].SPU] = true;
-    if(d[i]['销售用户名']) salesSet[d[i]['销售用户名']] = true;
+    if(d[i]['销售用户名']) salesSet[d[i]['销售用户名'].trim()] = true;
   }
   var spuSel = document.getElementById('slSpuFilter');
   var salesSel = document.getElementById('slSalesFilter');
