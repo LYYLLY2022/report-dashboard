@@ -3048,30 +3048,24 @@ function renderLaunchTable() {
   }
 
   var rows = [];
-  var spuKeys = Object.keys(LAUNCH_DATA.spu_data);
-  for (var si = 0; si < spuKeys.length; si++) {
-    var spu = spuKeys[si];
-    var info = LAUNCH_DATA.spu_data[spu];
-    for (var ki = 0; ki < info.sku_list.length; ki++) {
-      var sku = info.sku_list[ki];
-      // Determine effective status for filtering
-      var effStatus = '未上架';
-      if (sku['上架信息'] && sku['上架信息'].length > 0) {
-        effStatus = (sku['上架信息'][0]['商品状态'] || '在售');
-      }
-      rows.push({
-        spu: sku['规格SPU'] || spu,
-        productName: sku['规格产品名称'] || '',
-        sku: sku.SKU,
-        size: sku['规格尺寸'] || '',
-        color: sku['规格颜色'] || '',
-        price: sku['规格价格'] || '',
-        launched: sku['已上架'],
-        launchInfo: sku['上架信息'],
-        submitTime: sku['提交需求时间'] || '',
-        effStatus: effStatus
-      });
-    }
+  var d = SALES_LAUNCH_DATA.data;
+  for (var i = 0; i < d.length; i++) {
+    var r = d[i];
+    rows.push({
+      spu: r.SPU || '',
+      productName: r['产品名称'] || '',
+      sku: r['产品SKU'] || '',
+      size: r['尺寸'] || '',
+      color: r['颜色'] || '',
+      price: r['价格'] || '',
+      launched: r['商品状态'] !== '未上架',
+      platform: r['平台'] || '',
+      shop: r['店铺'] || '',
+      site: r['站点'] || '',
+      saleName: r['销售用户名'] || '',
+      status: r['商品状态'] || '未上架',
+      submitTime: r['提交需求时间'] || ''
+    });
   }
 
   // Filter by dropdown
@@ -3083,7 +3077,7 @@ function renderLaunchTable() {
   if (spuKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.spu, spuKeys_arr); });
   if (nameKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.productName, nameKeys_arr); });
   if (skuKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.sku, skuKeys_arr); });
-  if (statusKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.effStatus, statusKeys_arr); });
+  if (statusKeys_arr.length > 0) rows = rows.filter(function(r) { return multiMatch(r.status, statusKeys_arr); });
 
   // Sort by submitTime
   var timeDir = launchTimeSortDir;
@@ -3119,48 +3113,28 @@ function renderLaunchTable() {
   for (var i = 0; i < rows.length; i++) {
     var r = rows[i];
     var bg = i % 2 === 0 ? '#161b22' : '#1a2332';
-    if (r.launchInfo.length > 0) {
-      for (var j = 0; j < r.launchInfo.length; j++) {
-        var inf = r.launchInfo[j];
-        var sn = inf['销售用户名'] || '';
-        var sColor = salesClr[sn] || '#e6edf3';
-        var shortName = sn.indexOf('-') >= 0 ? sn.split('-').pop() : sn;
-        var platform = inf['平台'] || '-';
-        var shop = inf['店铺名称'] || '-';
-        var site = inf['站点'] || '-';
-        var prodStatus = inf['商品状态'] || '在售';
-        var stColor = prodStatus === '在售' ? '#3fb950' : (prodStatus === '不在售' ? '#d29922' : '#ff7b72');
-        tb += '<tr style="background:'+bg+';">'
-          + '<td style="'+cs+'color:#bc8cff;font-weight:600;">'+r.spu+'</td>'
-          + '<td style="'+cs+'color:#c9d1d9;font-size:11px;">'+r.productName+'</td>'
-          + '<td style="'+cs+'color:#e6edf3;font-family:monospace;">'+r.sku+'</td>'
-          + '<td style="'+cs+'color:#8b949e;">'+(r.submitTime||'-')+'</td>'
-          + '<td style="'+cs+'color:#e6edf3;text-align:center;">'+r.size+'</td>'
-          + '<td style="'+cs+'color:#e6edf3;">'+r.color+'</td>'
-          + '<td style="'+cs+'color:#e6edf3;text-align:right;">'+r.price+'</td>'
-          + '<td style="'+cs+'color:'+stColor+';text-align:center;font-weight:600;">'+prodStatus+'</td>'
-          + '<td style="'+cs+'color:'+sColor+';">'+shortName+'</td>'
-          + '<td style="'+cs+'color:#8b949e;">'+platform+'</td>'
-          + '<td style="'+cs+'color:#8b949e;">'+shop+'</td>'
-          + '<td style="'+cs+'color:#8b949e;text-align:center;">'+site+'</td>'
-          + '</tr>';
-      }
-    } else {
-      tb += '<tr style="background:'+bg+';">'
-        + '<td style="'+cs+'color:#bc8cff;font-weight:600;">'+r.spu+'</td>'
-        + '<td style="'+cs+'color:#c9d1d9;font-size:11px;">'+r.productName+'</td>'
-        + '<td style="'+cs+'color:#e6edf3;font-family:monospace;">'+r.sku+'</td>'
-        + '<td style="'+cs+'color:#8b949e;">'+(r.submitTime||'-')+'</td>'
-        + '<td style="'+cs+'color:#e6edf3;text-align:center;">'+r.size+'</td>'
-        + '<td style="'+cs+'color:#e6edf3;">'+r.color+'</td>'
-        + '<td style="'+cs+'color:#e6edf3;text-align:right;">'+r.price+'</td>'
-        + '<td style="'+cs+'color:#ff7b72;text-align:center;font-weight:600;">未上架</td>'
-        + '<td style="'+cs+'color:#484f58;">-</td>'
-        + '<td style="'+cs+'color:#484f58;">-</td>'
-        + '<td style="'+cs+'color:#484f58;">-</td>'
-        + '<td style="'+cs+'color:#484f58;text-align:center;">-</td>'
-        + '</tr>';
-    }
+    var sn = r.saleName || '';
+    var sColor = salesClr[sn] || '#e6edf3';
+    var shortName = sn.indexOf('-') >= 0 ? sn.split('-').pop() : sn;
+    var platform = r.platform || '-';
+    var shop = r.shop || '-';
+    var site = r.site || '-';
+    var prodStatus = r.status || '未上架';
+    var stColor = prodStatus === '在售' ? '#3fb950' : (prodStatus === '不在售' ? '#d29922' : '#ff7b72');
+    tb += '<tr style="background:'+bg+';">'
+      + '<td style="'+cs+'color:#bc8cff;font-weight:600;">'+r.spu+'</td>'
+      + '<td style="'+cs+'color:#c9d1d9;font-size:11px;">'+r.productName+'</td>'
+      + '<td style="'+cs+'color:#e6edf3;font-family:monospace;">'+r.sku+'</td>'
+      + '<td style="'+cs+'color:#8b949e;">'+(r.submitTime||'-')+'</td>'
+      + '<td style="'+cs+'color:#e6edf3;text-align:center;">'+r.size+'</td>'
+      + '<td style="'+cs+'color:#e6edf3;">'+r.color+'</td>'
+      + '<td style="'+cs+'color:#e6edf3;text-align:right;">'+r.price+'</td>'
+      + '<td style="'+cs+'color:'+stColor+';text-align:center;font-weight:600;">'+prodStatus+'</td>'
+      + '<td style="'+cs+'color:'+sColor+';">'+(shortName||'-')+'</td>'
+      + '<td style="'+cs+'color:#8b949e;">'+platform+'</td>'
+      + '<td style="'+cs+'color:#8b949e;">'+shop+'</td>'
+      + '<td style="'+cs+'color:#8b949e;text-align:center;">'+site+'</td>'
+      + '</tr>';
   }
 
   tbl.innerHTML = th + tb + '</tbody>';
