@@ -292,17 +292,6 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
 </div>
 
 
-<!-- ======= TAB 5: 首单需求明细 ======= -->
-<div id="tab-firstorder" class="tab-panel">
-  <div style="background:#111827;border-radius:12px;overflow:hidden;padding:0">
-
-    <!-- Title bar -->
-    <div style="background:#1f2937;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #374151">
-      <span style="color:#f9fafb;font-size:14px;font-weight:700;letter-spacing:.5px">销售 × 产品 × 日期 明细</span>
-      <button onclick="downloadFOCSV()" style="background:#374151;border:none;color:#d1d5db;padding:7px 16px;border-radius:7px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#374151'">
-        📥 下载CSV
-      </button>
-    </div>
 
     <!-- Filters -->
     <div style="background:#1f2937;padding:12px 20px;display:flex;gap:10px;flex-wrap:wrap;border-bottom:1px solid #374151">
@@ -337,6 +326,55 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
     </div>
 
   </div>
+</div>
+
+
+<!-- ======= TAB 5: 首单需求明细 ======= -->
+<div id="tab-firstorder" class="tab-panel">
+
+  <!-- Title + CSV -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div>
+      <span style="font-size:15px;font-weight:700;color:#1f2937">销售 × 产品 × 日期 明细</span>
+      <span style="font-size:12px;color:#9ca3af;margin-left:10px">首单备货需求汇总（按SPU聚合）</span>
+    </div>
+    <button onclick="downloadFOCSV()" style="background:#6366f1;border:none;color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;transition:background .2s" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">
+      📥 下载CSV
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters" style="margin-bottom:14px">
+    <div style="position:relative">
+      <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:12px">👤</span>
+      <input id="fo-f-seller" placeholder="搜索销售名称..." oninput="renderFO()"
+        style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px 6px 26px;font-size:12px;color:#444;background:#fff;outline:none;width:160px"
+        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+    </div>
+    <div style="position:relative">
+      <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:12px">🔍</span>
+      <input id="fo-f-name" placeholder="搜索产品名称..." oninput="renderFO()"
+        style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px 6px 26px;font-size:12px;color:#444;background:#fff;outline:none;width:180px"
+        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+    </div>
+    <div style="position:relative">
+      <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:12px">🏷</span>
+      <input id="fo-f-spu" placeholder="搜索SPU(多个用空格/逗号)..." oninput="renderFO()"
+        style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px 6px 26px;font-size:12px;color:#444;background:#fff;outline:none;width:220px"
+        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+    </div>
+    <button onclick="document.getElementById('fo-f-seller').value='';document.getElementById('fo-f-name').value='';document.getElementById('fo-f-spu').value='';renderFO()" class="btn-r">重置</button>
+    <span class="rcnt" id="fo-row-cnt"></span>
+  </div>
+
+  <!-- Table -->
+  <div class="tbl-wrap" style="overflow-x:auto;max-height:74vh;overflow-y:auto">
+    <table id="fo-table" style="min-width:900px">
+      <thead id="fo-thead"></thead>
+      <tbody id="fo-tbody"></tbody>
+    </table>
+  </div>
+
 </div>
 
 </div><!-- /wrap -->
@@ -515,129 +553,133 @@ buildSellerCards();
 go(1);
 
 // ======= FIRST ORDER DATA =======
-const FO_DATA = {"姚红珍": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 70}, "total": 70}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 56}, "total": 56}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 30}, "total": 30}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 46}, "total": 46}, "TKD004": {"name": "24\"4片11夹卡子发缠管曲", "dates": {"03-24": 1330}, "total": 1330}, "TLE002": {"name": "一夹八字刘海", "dates": {"04-25": 70}, "total": 70}, "TMM012": {"name": "16\"一体鸭舌帽大波浪", "dates": {"01-08": 250}, "total": 250}, "TMM014": {"name": "6\"一体藏蓝色鸭舌帽子发(直发)", "dates": {"01-27": 30}, "total": 30}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM024": {"name": "8\"黑色水滴孔速干鸭舌帽子发(直发)", "dates": {"03-20": 110}, "total": 110}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-21": 140}, "total": 140}, "TW-SP": {"name": "世界杯爆炸头造型头套", "dates": {"04-03": 80}, "total": 80}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 108}, "total": 108}, "TWC002": {"name": "24\"抓夹马尾(卷发)", "dates": {"04-25": 180, "01-21": 108}, "total": 288}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-17": 150}, "total": 150}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 32}, "total": 32}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-25": 34, "03-30": 345}, "total": 379}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-21": 120}, "total": 120}}, "方妙芬": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 100}, "total": 100}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 38}, "total": 38}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 38}, "total": 38}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 32}, "total": 32}, "TKD004": {"name": "24\"4片11夹卡子发缠管曲", "dates": {"03-24": 1330}, "total": 1330}, "TLE002": {"name": "一夹八字刘海", "dates": {"04-27": 42}, "total": 42}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM024": {"name": "8\"黑色水滴孔速干鸭舌帽子发(直发)", "dates": {"03-20": 110}, "total": 110}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-22": 35}, "total": 35}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 30}, "total": 30}, "TWC002": {"name": "24\"抓夹马尾(卷发)", "dates": {"04-24": 48, "01-21": 30}, "total": 78}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-20": 64}, "total": 64}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 20}, "total": 20}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-24": 40, "03-30": 90}, "total": 130}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-22": 56}, "total": 56}}, "陈兰卿": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 180}, "total": 180}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 62}, "total": 62}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 62}, "total": 62}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 52}, "total": 52}, "TKD004": {"name": "24\"4片11夹卡子发缠管曲", "dates": {"03-24": 1330}, "total": 1330}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM024": {"name": "8\"黑色水滴孔速干鸭舌帽子发(直发)", "dates": {"03-20": 110}, "total": 110}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-22": 35}, "total": 35}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 66}, "total": 66}, "TWC002": {"name": "30\"抓夹马尾(卷发)", "dates": {"04-27": 60, "01-21": 66}, "total": 126}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-20": 40}, "total": 40}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 20}, "total": 20}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-27": 40, "03-30": 90}, "total": 130}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-22": 35}, "total": 35}}};
+const FO_DATA = {"姚红珍": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 70}, "total": 70}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 56}, "total": 56}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 30}, "total": 30}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 46}, "total": 46}, "TLE002": {"name": "一夹八字刘海", "dates": {"04-25": 70}, "total": 70}, "TMM012": {"name": "16\"一体鸭舌帽大波浪", "dates": {"01-08": 250}, "total": 250}, "TMM014": {"name": "6\"一体藏蓝色鸭舌帽子发(直发)", "dates": {"01-27": 30}, "total": 30}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-21": 140}, "total": 140}, "TW-SP": {"name": "世界杯爆炸头造型头套", "dates": {"04-03": 80}, "total": 80}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 108}, "total": 108}, "TWC002": {"name": "24\"抓夹马尾(卷发)", "dates": {"04-25": 180, "01-21": 108}, "total": 288}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-17": 150}, "total": 150}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 32}, "total": 32}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-25": 34, "03-30": 345}, "total": 379}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-21": 120}, "total": 120}}, "姚红珍/陈兰卿/方妙芬": {"TKD004": {"name": "24\"4片11夹卡子发缠管曲", "dates": {"03-24": 1330}, "total": 1330}, "TMM024": {"name": "8\"黑色水滴孔速干鸭舌帽子发(直发)", "dates": {"03-20": 110}, "total": 110}}, "方妙芬": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 100}, "total": 100}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 38}, "total": 38}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 38}, "total": 38}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 32}, "total": 32}, "TLE002": {"name": "一夹八字刘海", "dates": {"04-27": 42}, "total": 42}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-22": 35}, "total": 35}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 30}, "total": 30}, "TWC002": {"name": "24\"抓夹马尾(卷发)", "dates": {"04-24": 48, "01-21": 30}, "total": 78}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-20": 64}, "total": 64}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 20}, "total": 20}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-24": 40, "03-30": 90}, "total": 130}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-22": 56}, "total": 56}}, "起订量补充": {"TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 24}, "total": 24}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 50}, "total": 50}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 20}, "total": 20}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 58}, "total": 58}}, "陈兰卿": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 180}, "total": 180}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 62}, "total": 62}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 62}, "total": 62}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 52}, "total": 52}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-22": 35}, "total": 35}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 66}, "total": 66}, "TWC002": {"name": "30\"抓夹马尾(卷发)", "dates": {"04-27": 60, "01-21": 66}, "total": 126}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-20": 40}, "total": 40}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 20}, "total": 20}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-27": 40, "03-30": 90}, "total": 130}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-22": 35}, "total": 35}}};
 const FO_DATES = ["01-08", "01-19", "01-21", "01-27", "01-30", "03-20", "03-24", "03-30", "04-01", "04-03", "04-10", "04-17", "04-20", "04-21", "04-22", "04-24", "04-25", "04-27"];
 
 const FO_SELLER_COLORS = {
-  '姚红珍':'#a78bfa','方妙芬':'#34d399','陈兰卿':'#60a5fa'
+  '姚红珍':'#6366f1',
+  '方妙芬':'#10b981',
+  '陈兰卿':'#3b82f6',
+  '姚红珍/陈兰卿/方妙芬':'#f59e0b',
+  '起订量补充':'#9ca3af'
 };
 
 function renderFO() {
-  const fSeller = document.getElementById('fo-f-seller').value.trim().toLowerCase();
-  const fName   = document.getElementById('fo-f-name').value.trim().toLowerCase();
-  const fSpuRaw = document.getElementById('fo-f-spu').value.trim();
-  const fSpus   = fSpuRaw ? fSpuRaw.split(/[\s,，]+/).filter(s=>s).map(s=>s.toLowerCase()) : [];
+  const fSeller = (document.getElementById('fo-f-seller').value||'').trim().toLowerCase();
+  const fName   = (document.getElementById('fo-f-name').value||'').trim().toLowerCase();
+  const fSpuRaw = (document.getElementById('fo-f-spu').value||'').trim();
+  const fSpus   = fSpuRaw ? fSpuRaw.split(/[\s,，]+/).filter(Boolean).map(s=>s.toLowerCase()) : [];
 
-  // Determine visible dates (only dates with data in filtered view)
-  let visibleDates = [...FO_DATES];
+  // Thead
+  const thBase = 'padding:9px 12px;font-size:11px;font-weight:700;color:#475569;white-space:nowrap;border-bottom:2px solid #e2e8f0;background:#f8fafc;text-align:center;position:sticky;top:0;z-index:2';
+  const thLeft = thBase + ';text-align:left';
+  document.getElementById('fo-thead').innerHTML = '<tr>'
+    + '<th style="' + thLeft + ';min-width:110px;position:sticky;left:0;z-index:3">销售</th>'
+    + '<th style="' + thLeft + ';min-width:170px">产品名称</th>'
+    + '<th style="' + thLeft + ';min-width:70px">SPU</th>'
+    + FO_DATES.map(d=>'<th style="' + thBase + ';min-width:52px">' + d + '</th>').join('')
+    + '<th style="' + thBase + ';color:#f59e0b;font-weight:800;min-width:58px;position:sticky;right:0;z-index:3;background:#f8fafc">总计</th>'
+    + '</tr>';
 
-  // Build thead
-  const thStyle = 'padding:9px 12px;font-size:11px;font-weight:700;color:#9ca3af;white-space:nowrap;border-bottom:2px solid #374151;border-right:1px solid #374151;background:#1f2937;text-align:center;position:sticky;top:0;z-index:2';
-  const thLeft  = 'padding:9px 12px;font-size:11px;font-weight:700;color:#9ca3af;white-space:nowrap;border-bottom:2px solid #374151;border-right:1px solid #374151;background:#1f2937;text-align:left;position:sticky;top:0;z-index:2';
-  let thead = `<tr>
-    <th style="${thLeft};min-width:80px;position:sticky;left:0;z-index:3">销售</th>
-    <th style="${thLeft};min-width:160px">产品名称</th>
-    <th style="${thLeft};min-width:80px">SPU</th>
-    ${visibleDates.map(d=>`<th style="${thStyle};min-width:52px">${d}</th>`).join('')}
-    <th style="${thStyle};color:#f59e0b;min-width:60px;position:sticky;right:0;z-index:3;background:#1f2937">总计</th>
-  </tr>`;
-  document.getElementById('fo-thead').innerHTML = thead;
-
-  // Build tbody
   let tbody = '';
-  let grandTotal = {};
-  visibleDates.forEach(d => grandTotal[d] = 0);
-  let grandTotalAll = 0;
+  let grandD = {}, grandAll = 0;
+  FO_DATES.forEach(d => grandD[d] = 0);
+  let rowCount = 0;
 
-  const sellers = Object.keys(FO_DATA).sort();
+  const sellerOrder = ['姚红珍','方妙芬','陈兰卿','姚红珍/陈兰卿/方妙芬','起订量补充'];
+  const sellers = sellerOrder.filter(s => FO_DATA[s]).concat(
+    Object.keys(FO_DATA).filter(s => !sellerOrder.includes(s)).sort()
+  );
+
   sellers.forEach(seller => {
     if (fSeller && !seller.toLowerCase().includes(fSeller)) return;
-    const spus = Object.keys(FO_DATA[seller]).sort();
-    const filteredSpus = spus.filter(spu => {
+    const allSpus = Object.keys(FO_DATA[seller]).sort();
+    const visSpus = allSpus.filter(spu => {
       const v = FO_DATA[seller][spu];
       if (fName && !v.name.toLowerCase().includes(fName)) return false;
       if (fSpus.length && !fSpus.some(fs => spu.toLowerCase().includes(fs))) return false;
       return true;
     });
-    if (filteredSpus.length === 0) return;
+    if (!visSpus.length) return;
 
-    const color = FO_SELLER_COLORS[seller] || '#e5e7eb';
-    let sellerSubtotal = {};
-    visibleDates.forEach(d => sellerSubtotal[d] = 0);
-    let sellerTotal = 0;
+    const color = FO_SELLER_COLORS[seller] || '#6366f1';
+    let subD = {}, subTotal = 0;
+    FO_DATES.forEach(d => subD[d] = 0);
 
-    filteredSpus.forEach((spu, idx) => {
+    visSpus.forEach((spu, idx) => {
       const v = FO_DATA[seller][spu];
       let rowTotal = 0;
-      const dateCells = visibleDates.map(d => {
+      const dateCells = FO_DATES.map(d => {
         const qty = v.dates[d] || 0;
-        sellerSubtotal[d] += qty;
-        grandTotal[d] += qty;
-        rowTotal += qty;
-        sellerTotal += qty;
-        grandTotalAll += qty;
-        const cellStyle = qty > 0
-          ? `background:#1e3a5f;color:#60a5fa;font-weight:700;font-size:13px`
-          : `color:#374151;font-size:12px`;
-        return `<td style="padding:8px 10px;text-align:center;border-right:1px solid #1f2937;border-bottom:1px solid #1f2937;${cellStyle}">${qty > 0 ? qty : ''}</td>`;
+        subD[d] += qty; grandD[d] += qty;
+        rowTotal += qty; subTotal += qty; grandAll += qty;
+        if (qty > 0) {
+          return '<td style="padding:8px 10px;text-align:center;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;background:#eff6ff;color:#1d4ed8;font-weight:700;font-size:13px">' + qty + '</td>';
+        }
+        return '<td style="padding:8px 10px;text-align:center;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;color:#e2e8f0"></td>';
       }).join('');
 
-      const sellerCell = idx === 0
-        ? `<td rowspan="${filteredSpus.length + 1}" style="padding:8px 14px;font-weight:700;font-size:13px;color:${color};vertical-align:middle;text-align:center;border-right:1px solid #374151;border-bottom:2px solid #374151;background:#111827;position:sticky;left:0;z-index:1">${seller}</td>`
+      const sellerTd = idx === 0
+        ? '<td rowspan="' + (visSpus.length + 1) + '" style="padding:8px 14px;font-weight:700;font-size:13px;color:' + color + ';vertical-align:middle;text-align:center;border-right:2px solid #e2e8f0;border-bottom:2px solid #e2e8f0;background:#fafafa;position:sticky;left:0;z-index:1">' + seller + '</td>'
         : '';
 
-      tbody += `<tr>
-        ${sellerCell}
-        <td style="padding:7px 12px;font-size:12px;color:#d1d5db;border-right:1px solid #1f2937;border-bottom:1px solid #1f2937;white-space:nowrap">${v.name}</td>
-        <td style="padding:7px 12px;font-family:monospace;font-size:12px;font-weight:600;color:#f59e0b;border-right:1px solid #374151;border-bottom:1px solid #1f2937;white-space:nowrap">${spu}</td>
-        ${dateCells}
-        <td style="padding:7px 12px;text-align:center;font-weight:700;font-size:13px;color:#10b981;background:#111827;border-left:1px solid #374151;border-bottom:1px solid #1f2937;position:sticky;right:0;z-index:1">${rowTotal}</td>
-      </tr>`;
+      tbody += '<tr>'
+        + sellerTd
+        + '<td style="padding:7px 12px;font-size:12px;color:#374151;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;white-space:nowrap">' + v.name + '</td>'
+        + '<td style="padding:7px 12px;font-family:monospace;font-size:12px;font-weight:600;color:#d97706;border-right:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;white-space:nowrap">' + spu + '</td>'
+        + dateCells
+        + '<td style="padding:7px 12px;text-align:center;font-weight:700;font-size:13px;color:#059669;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;position:sticky;right:0;background:#f0fdf4;z-index:1">' + rowTotal + '</td>'
+        + '</tr>';
+      rowCount++;
     });
 
-    // 小计 row
-    const subCells = visibleDates.map(d => {
-      const qty = sellerSubtotal[d];
-      return `<td style="padding:8px 10px;text-align:center;font-weight:700;font-size:13px;color:${qty>0?'#f59e0b':'#374151'};background:#1f2937;border-right:1px solid #374151;border-bottom:2px solid #374151">${qty > 0 ? qty : ''}</td>`;
+    // 小计
+    const subCells = FO_DATES.map(d => {
+      const qty = subD[d];
+      return '<td style="padding:8px 10px;text-align:center;font-weight:700;font-size:13px;background:#fffbeb;border-right:1px solid #e2e8f0;border-bottom:2px solid #d1d5db;color:' + (qty > 0 ? '#b45309' : '#e5e7eb') + '">' + (qty > 0 ? qty : '') + '</td>';
     }).join('');
-    tbody += `<tr>
-      <td colspan="2" style="padding:8px 14px;font-size:11px;font-weight:700;color:#6b7280;background:#1f2937;border-right:1px solid #374151;border-bottom:2px solid #374151;text-align:right;letter-spacing:.5px">小计</td>
-      ${subCells}
-      <td style="padding:8px 12px;text-align:center;font-weight:700;font-size:14px;color:#f59e0b;background:#1f2937;border-left:1px solid #374151;border-bottom:2px solid #374151;position:sticky;right:0;z-index:1">${sellerTotal}</td>
-    </tr>`;
+    tbody += '<tr>'
+      + '<td colspan="2" style="padding:8px 14px;font-size:11px;font-weight:700;color:#9ca3af;background:#fffbeb;border-right:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;text-align:right;letter-spacing:.5px">小计</td>'
+      + subCells
+      + '<td style="padding:8px 12px;text-align:center;font-weight:800;font-size:14px;color:#b45309;background:#fffbeb;border-left:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;position:sticky;right:0;z-index:1">' + subTotal + '</td>'
+      + '</tr>';
   });
 
-  // Grand total row
-  const gtCells = visibleDates.map(d => {
-    const qty = grandTotal[d];
-    return `<td style="padding:9px 10px;text-align:center;font-weight:700;font-size:13px;color:${qty>0?'#fbbf24':'#374151'};background:#111827;border-right:1px solid #374151">${qty > 0 ? qty : ''}</td>`;
+  // 合计
+  const gtCells = FO_DATES.map(d => {
+    const qty = grandD[d];
+    return '<td style="padding:9px 10px;text-align:center;font-weight:700;font-size:13px;background:#f8fafc;border-right:1px solid #e2e8f0;color:' + (qty > 0 ? '#6366f1' : '#e5e7eb') + '">' + (qty > 0 ? qty : '') + '</td>';
   }).join('');
-  tbody += `<tr>
-    <td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;color:#9ca3af;background:#111827;border-right:1px solid #374151;text-align:right;letter-spacing:.5px;position:sticky;left:0;z-index:1">合计</td>
-    ${gtCells}
-    <td style="padding:9px 12px;text-align:center;font-weight:700;font-size:15px;color:#fbbf24;background:#111827;border-left:1px solid #374151;position:sticky;right:0;z-index:1">${grandTotalAll}</td>
-  </tr>`;
+  tbody += '<tr>'
+    + '<td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;color:#6b7280;background:#f8fafc;border-right:2px solid #e2e8f0;text-align:right;letter-spacing:.5px;position:sticky;left:0;z-index:1">合计</td>'
+    + gtCells
+    + '<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:15px;color:#6366f1;background:#f8fafc;border-left:2px solid #e2e8f0;position:sticky;right:0;z-index:1">' + grandAll + '</td>'
+    + '</tr>';
 
   document.getElementById('fo-tbody').innerHTML = tbody;
+  document.getElementById('fo-row-cnt').textContent = rowCount + ' 条产品行';
 }
 
 function downloadFOCSV() {
-  const rows = [['销售','产品名称','SPU',...FO_DATES,'总计']];
-  Object.keys(FO_DATA).sort().forEach(seller => {
-    const spus = Object.keys(FO_DATA[seller]).sort();
-    spus.forEach(spu => {
+  const rows = [['销售','产品名称','SPU'].concat(FO_DATES).concat(['总计'])];
+  Object.keys(FO_DATA).forEach(seller => {
+    Object.keys(FO_DATA[seller]).sort().forEach(spu => {
       const v = FO_DATA[seller][spu];
       const total = FO_DATES.reduce((s,d)=>s+(v.dates[d]||0),0);
-      rows.push([seller, v.name, spu, ...FO_DATES.map(d=>v.dates[d]||''), total]);
+      rows.push([seller, v.name, spu].concat(FO_DATES.map(d=>v.dates[d]||'')).concat([total]));
     });
   });
   const csv = rows.map(r=>r.join(',')).join('\n');
   const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='首单需求明细.csv'; a.click();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '首单需求明细.csv';
+  a.click();
 }
 
 renderFO();
+
+
 
 
 // ======= SALES DATA =======
