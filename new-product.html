@@ -168,6 +168,20 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
 
 </div>
 
+  <!-- 月度新品趋势图表 -->
+  <div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:20px 24px;margin-top:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="display:inline-block;width:4px;height:18px;background:#6366f1;border-radius:3px"></span>
+        <span style="font-size:14px;font-weight:700;color:#1f2937">月度新品趋势</span>
+        <span style="font-size:12px;color:#9ca3af;margin-left:4px">上架记录数 + SKU数 + SPU数</span>
+      </div>
+    </div>
+    <div style="position:relative;height:280px">
+      <canvas id="ovMonthChart"></canvas>
+    </div>
+  </div>
+
 <!-- ======= TAB 2: 销售人员详情 ======= -->
 <div id="tab-seller" class="tab-panel">
   <div style="margin-bottom:14px;font-size:12px;color:#6b7280">
@@ -798,6 +812,116 @@ function downloadFOCSV(){
 }
 
 renderFO1();
+
+
+// ======= OVERVIEW MONTHLY TREND CHART =======
+(function(){
+  const monthly = {};
+  ALL.forEach(r => {
+    if (!r.time || r.time === '-') return;
+    const m = r.time.slice(0,7);
+    if (!monthly[m]) monthly[m] = {records:0, skus:new Set(), spus:new Set()};
+    monthly[m].records++;
+    if (r.sku !== '-') monthly[m].skus.add(r.sku);
+    if (r.spu !== '-') monthly[m].spus.add(r.spu);
+  });
+  const labels = Object.keys(monthly).sort();
+  const records = labels.map(m => monthly[m].records);
+  const skuCnt  = labels.map(m => monthly[m].skus.size);
+  const spuCnt  = labels.map(m => monthly[m].spus.size);
+
+  new Chart(document.getElementById('ovMonthChart'), {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar',
+          label: '上架记录数',
+          data: records,
+          backgroundColor: 'rgba(99,102,241,.18)',
+          borderColor: '#6366f1',
+          borderWidth: 1.5,
+          borderRadius: 6,
+          yAxisID: 'y'
+        },
+        {
+          type: 'line',
+          label: 'SKU数',
+          data: skuCnt,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,.1)',
+          pointBackgroundColor: '#10b981',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          tension: 0.3,
+          borderWidth: 2.5,
+          yAxisID: 'y1',
+          datalabels: { display: true }
+        },
+        {
+          type: 'line',
+          label: 'SPU数',
+          data: spuCnt,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,.08)',
+          pointBackgroundColor: '#f59e0b',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          tension: 0.3,
+          borderWidth: 2,
+          borderDash: [5,4],
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'end',
+          labels: { font: {size:12}, boxWidth: 12, padding: 16, color: '#374151' }
+        },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#1f2937',
+          bodyColor: '#374151',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: ctx => {
+              const units = ['条','个','个'];
+              return ` ${ctx.dataset.label}: ${ctx.parsed.y}${units[ctx.datasetIndex]||''}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#f3f4f6' },
+          ticks: { color: '#6b7280', font: {size:11} }
+        },
+        y: {
+          position: 'left',
+          title: { display: true, text: '上架记录数', color: '#9ca3af', font:{size:11} },
+          grid: { color: '#f3f4f6' },
+          ticks: { color: '#6b7280', font: {size:10} },
+          beginAtZero: true
+        },
+        y1: {
+          position: 'right',
+          title: { display: true, text: 'SKU / SPU 数', color: '#9ca3af', font:{size:11} },
+          grid: { display: false },
+          ticks: { color: '#6b7280', font: {size:10} },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+})();
 
 </script>
 </body>
