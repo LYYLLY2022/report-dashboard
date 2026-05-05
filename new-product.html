@@ -3,7 +3,285 @@
 <head>
 <meta charset="UTF-8">
 <title>新品上架情况</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
+// ======= SALES DATA =======
+const SALES_ROWS = [{"order_id": "577319936851284911", "status": "已发货", "order_time": "2026-03-23", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577320258728988858", "status": "已发货", "order_time": "2026-03-23", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P47", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577320262211899938", "status": "已发货", "order_time": "2026-03-23", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577320286035350201", "status": "已发货", "order_time": "2026-03-23", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-006", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577321224884818504", "status": "已发货", "order_time": "2026-03-24", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577321248156062663", "status": "已发货", "order_time": "2026-03-24", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "15-14401-39337", "status": "已发货", "order_time": "2026-03-24", "plat": "eBay", "shop": "HG", "site": "US", "seller": "黄冰妹", "sku": "TWC002BT30-001", "spu": "TWC002", "name": "30\"抓夹马尾(卷发)", "qty": 1, "price": 20.9, "amount": 20.9, "total": 20.9}, {"order_id": "577322666151153996", "status": "已发货", "order_time": "2026-03-25", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577323963165021123", "status": "已发货", "order_time": "2026-03-26", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577325710267159119", "status": "已发货", "order_time": "2026-03-27", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577326255203061818", "status": "已发货", "order_time": "2026-03-28", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577326394638897685", "status": "已发货", "order_time": "2026-03-28", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577326630834704972", "status": "已发货", "order_time": "2026-03-28", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-D61", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "GSU1XW13900M6WC", "status": "已发货", "order_time": "-", "plat": "SHEIN", "shop": "HRB", "site": "-", "seller": "彭丹丽", "sku": "TMM014ST06-P18", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 21.58, "amount": 21.58, "total": 21.58}, {"order_id": "17-14418-27753", "status": "已发货", "order_time": "2026-03-29", "plat": "eBay", "shop": "IA", "site": "UK", "seller": "黄冰妹", "sku": "TWC002BT30-P47", "spu": "TWC002", "name": "30\"抓夹马尾(卷发)", "qty": 1, "price": 16.58, "amount": 16.58, "total": 16.58}, {"order_id": "577327945912783704", "status": "已发货", "order_time": "2026-03-29", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-006", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 30.99, "amount": 30.99, "total": 18.35}, {"order_id": "GSU1X334B00NPEM", "status": "已发货", "order_time": "-", "plat": "SHEIN", "shop": "HRB", "site": "-", "seller": "彭丹丽", "sku": "TMM014ST06-P18", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 21.58, "amount": 21.58, "total": 21.58}, {"order_id": "577329327076709233", "status": "已发货", "order_time": "2026-03-30", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577329325476123066", "status": "已发货", "order_time": "2026-03-30", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-006", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "PO-210-08137592026231257", "status": "已发货", "order_time": "2026-03-30", "plat": "TEMU", "shop": "RCC", "site": "UK", "seller": "李洁莹", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577330519188803904", "status": "已发货", "order_time": "2026-03-31", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577330527182098790", "status": "已发货", "order_time": "2026-03-31", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "GSU1XT3280011QL", "status": "已发货", "order_time": "-", "plat": "SHEIN", "shop": "HRB", "site": "-", "seller": "彭丹丽", "sku": "TMM014ST06-P49", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 21.58, "amount": 21.58, "total": 21.58}, {"order_id": "PO-210-13878772306551725", "status": "已发货", "order_time": "2026-04-02", "plat": "TEMU", "shop": "RCC", "site": "UK", "seller": "李洁莹", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577333560416178183", "status": "已发货", "order_time": "2026-04-03", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 29.99, "amount": 29.99, "total": 18.18}, {"order_id": "577334105265246730", "status": "已发货", "order_time": "2026-04-03", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-006", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 20.13}, {"order_id": "GSU1X722N00M1Q8", "status": "已发货", "order_time": "-", "plat": "SHEIN", "shop": "HRB", "site": "-", "seller": "彭丹丽", "sku": "TMM014ST06-001", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 18.79, "amount": 18.79, "total": 18.79}, {"order_id": "577340655493091679", "status": "已发货", "order_time": "2026-04-08", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "GSU1XR03B0009ED", "status": "已发货", "order_time": "-", "plat": "SHEIN", "shop": "HRB", "site": "-", "seller": "彭丹丽", "sku": "TMM014ST06-001", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 30.24, "amount": 60.48, "total": 60.48}, {"order_id": "577341797095543264", "status": "已发货", "order_time": "2026-04-09", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-04A", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 25.42}, {"order_id": "577342800672821520", "status": "已发货", "order_time": "2026-04-10", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-D61", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577342994608788273", "status": "已发货", "order_time": "2026-04-10", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "ELDUS264101", "status": "已发货", "order_time": "2026-04-08", "plat": "线下", "shop": "WHDSY-US", "site": "-", "seller": "胡玉娣", "sku": "TMM014ST06-001", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 25.99, "amount": 25.99, "total": 25.99}, {"order_id": "577343181062902411", "status": "已发货", "order_time": "2026-04-10", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577345757809512757", "status": "已发货", "order_time": "2026-04-12", "plat": "TIKTOK SHOP", "shop": "LWS", "site": "US", "seller": "方妙芬", "sku": "TMM014ST06-P18", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 43.96, "amount": 174.24, "total": 99.71}, {"order_id": "577345918321659969", "status": "已发货", "order_time": "2026-04-12", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 25.54}, {"order_id": "GSU1XB02T002MWX", "status": "已发货", "order_time": "2026-04-12", "plat": "SHEIN", "shop": "HRB", "site": "US", "seller": "彭丹丽", "sku": "TMM014ST06-P49", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 18.59, "amount": 20.4, "total": 18.79}, {"order_id": "10-14493-00029", "status": "已发货", "order_time": "2026-04-13", "plat": "eBay", "shop": "IA", "site": "UK", "seller": "黄冰妹", "sku": "TWC002BT30-006", "spu": "TWC002", "name": "30\"抓夹马尾(卷发)", "qty": 1, "price": 16.58, "amount": 16.58, "total": 16.58}, {"order_id": "05-14501-12724", "status": "已发货", "order_time": "2026-04-13", "plat": "eBay", "shop": "IA", "site": "UK", "seller": "黄冰妹", "sku": "TWC002BT30-006", "spu": "TWC002", "name": "30\"抓夹马尾(卷发)", "qty": 1, "price": 16.58, "amount": 16.58, "total": 16.58}, {"order_id": "577346457442030302", "status": "已发货", "order_time": "2026-04-13", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 25.42}, {"order_id": "577347113989214553", "status": "已发货", "order_time": "2026-04-13", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-P47", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577347314120168402", "status": "已发货", "order_time": "2026-04-13", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-D61", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 21.08}, {"order_id": "577347351945974685", "status": "已发货", "order_time": "2026-04-13", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-D61", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 20.75}, {"order_id": "577347407703609437", "status": "已发货", "order_time": "2026-04-13", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577348245918159002", "status": "已发货", "order_time": "2026-04-14", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 34.19}, {"order_id": "577348275606819380", "status": "已发货", "order_time": "2026-04-14", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577349449003799337", "status": "已发货", "order_time": "2026-04-15", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "GSU1XL32Q00MNRG", "status": "已发货", "order_time": "2026-04-15", "plat": "SHEIN", "shop": "HRB", "site": "US", "seller": "彭丹丽", "sku": "TMM014ST06-P49", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 18.59, "amount": 20.4, "total": 18.79}, {"order_id": "577349702687363100", "status": "已发货", "order_time": "2026-04-15", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577349703458918405", "status": "已发货", "order_time": "2026-04-15", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-D61", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577350922571714688", "status": "已发货", "order_time": "2026-04-16", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577350958385041536", "status": "已发货", "order_time": "2026-04-16", "plat": "TIKTOK SHOP", "shop": "FHC", "site": "US", "seller": "陈兰卿", "sku": "TWC013BT18-04A", "spu": "TWC013", "name": "18\"抓夹马尾(卷筒)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577351816461456119", "status": "已发货", "order_time": "2026-04-17", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 34.19}, {"order_id": "GSU1XH16B00NMGX", "status": "已发货", "order_time": "2026-04-17", "plat": "SHEIN", "shop": "HRB", "site": "US", "seller": "彭丹丽", "sku": "TWC002BT30-P52", "spu": "TWC002", "name": "30\"抓夹马尾(卷发)", "qty": 1, "price": 12.99, "amount": 14.3, "total": 15.98}, {"order_id": "GSU1XJ56200212T", "status": "已发货", "order_time": "2026-04-18", "plat": "SHEIN", "shop": "HRB", "site": "US", "seller": "彭丹丽", "sku": "TMM014ST06-P49", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 18.59, "amount": 39.1, "total": 30.24}, {"order_id": "577353237545718481", "status": "已发货", "order_time": "2026-04-18", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-04A", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577353312622121767", "status": "已发货", "order_time": "2026-04-18", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577353350167695454", "status": "已发货", "order_time": "2026-04-18", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 27.42}, {"order_id": "577355010878444106", "status": "已发货", "order_time": "2026-04-19", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-001", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 35.03}, {"order_id": "PO-210-09330992371833295", "status": "已发货", "order_time": "2026-04-20", "plat": "TEMU", "shop": "RCC", "site": "UK", "seller": "李洁莹", "sku": "TWC001ST30-D61", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577356065273647729", "status": "已发货", "order_time": "2026-04-20", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P47", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 20.32}, {"order_id": "577356150131036188", "status": "已发货", "order_time": "2026-04-20", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577356159992762745", "status": "已发货", "order_time": "2026-04-20", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577356160384340986", "status": "已发货", "order_time": "2026-04-20", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-D61", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577356178388848799", "status": "已发货", "order_time": "2026-04-20", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577356292496593439", "status": "已发货", "order_time": "2026-04-20", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577356298014593276", "status": "已发货", "order_time": "2026-04-20", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "16-14522-79023", "status": "已发货", "order_time": "2026-04-21", "plat": "eBay", "shop": "IA", "site": "UK", "seller": "黄冰妹", "sku": "TWC002BT30-P47", "spu": "TWC002", "name": "30\"抓夹马尾(卷发)", "qty": 2, "price": 15.26, "amount": 30.52, "total": 30.52}, {"order_id": "577357471745151807", "status": "已发货", "order_time": "2026-04-21", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 15.7}, {"order_id": "577357518271648253", "status": "已发货", "order_time": "2026-04-21", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-004", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577358162173203323", "status": "已发货", "order_time": "2026-04-22", "plat": "TIKTOK SHOP", "shop": "LWS", "site": "US", "seller": "方妙芬", "sku": "TWC001ST30-P47", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 28.56, "amount": 28.56, "total": 20.05}, {"order_id": "577358694435820127", "status": "已发货", "order_time": "2026-04-22", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577358840402514366", "status": "已发货", "order_time": "2026-04-22", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-P18", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577358840402514366", "status": "已发货", "order_time": "2026-04-22", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM023BT08-P18", "spu": "TMM023", "name": "8\"一体黑灰色鸭舌帽子发(卷发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577358840402514366", "status": "已发货", "order_time": "2026-04-22", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-P18", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "26-14513-93433", "status": "已发货", "order_time": "2026-04-22", "plat": "eBay", "shop": "MLYH", "site": "US", "seller": "刘美钗", "sku": "TMM014ST06-P49", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 21.9, "amount": 21.9, "total": 21.9}, {"order_id": "05-14546-36521", "status": "已发货", "order_time": "2026-04-22", "plat": "eBay", "shop": "ET", "site": "UK", "seller": "彭丹丽", "sku": "TWC001ST30-006", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 14.99, "amount": 14.99, "total": 14.99}, {"order_id": "577359030990050159", "status": "已发货", "order_time": "2026-04-22", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-P18", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 26.14}, {"order_id": "577359033493852802", "status": "已发货", "order_time": "2026-04-22", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-P18", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 27.81}, {"order_id": "577359045809442972", "status": "已发货", "order_time": "2026-04-22", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-004", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 65.7, "total": 53.17}, {"order_id": "577359182172950860", "status": "已发货", "order_time": "2026-04-23", "plat": "TIKTOK SHOP", "shop": "ESH", "site": "US", "seller": "刘美钗", "sku": "TMM014ST06-P49", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 34.88, "amount": 34.88, "total": 30.79}, {"order_id": "577359657828716647", "status": "已发货", "order_time": "2026-04-23", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 21.19}, {"order_id": "577360008169427332", "status": "已发货", "order_time": "2026-04-23", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577360013206524478", "status": "已发货", "order_time": "2026-04-23", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-006", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577360190754886087", "status": "已发货", "order_time": "2026-04-23", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM023BT08-001", "spu": "TMM023", "name": "8\"一体黑灰色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 28.3}, {"order_id": "07-14547-50953", "status": "已发货", "order_time": "2026-04-23", "plat": "eBay", "shop": "ET", "site": "UK", "seller": "彭丹丽", "sku": "TWC001ST30-006", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 14.99, "amount": 14.99, "total": 14.99}, {"order_id": "577360790002569583", "status": "已发货", "order_time": "2026-04-24", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-012", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 26.54}, {"order_id": "577361150121906651", "status": "已发货", "order_time": "2026-04-24", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-012", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 23.52}, {"order_id": "577361381757718781", "status": "已发货", "order_time": "2026-04-24", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 20.75}, {"order_id": "577361802792899413", "status": "已发货", "order_time": "2026-04-24", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-004", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 66.65, "total": 47.71}, {"order_id": "577361996674011396", "status": "已发货", "order_time": "2026-04-24", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-04A", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 77.96, "total": 53.36}, {"order_id": "577361996674011396", "status": "已发货", "order_time": "2026-04-24", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-04A", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 77.96, "total": 53.36}, {"order_id": "577362265157374189", "status": "已发货", "order_time": "2026-04-25", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577362777944199872", "status": "已发货", "order_time": "2026-04-25", "plat": "TIKTOK SHOP", "shop": "LLCT", "site": "US", "seller": "刘美钗", "sku": "TMM014ST06-P18", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 34.88, "amount": 34.88, "total": 18.66}, {"order_id": "577363469590106918", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-004", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 23.52}, {"order_id": "GSU1Y111M002X9L", "status": "已发货", "order_time": "2026-04-26", "plat": "SHEIN", "shop": "HRB", "site": "US", "seller": "彭丹丽", "sku": "TMM014ST06-P49", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 18.59, "amount": 78.2, "total": 56.92}, {"order_id": "GSU1Y111M002X9L", "status": "已发货", "order_time": "2026-04-26", "plat": "SHEIN", "shop": "HRB", "site": "US", "seller": "彭丹丽", "sku": "TMM014ST06-P49", "spu": "TMM014", "name": "6\"一体藏蓝色鸭舌帽子发(直发)", "qty": 1, "price": 18.59, "amount": 78.2, "total": 56.92}, {"order_id": "577364041990181141", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-001", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 65.7, "total": 46.88}, {"order_id": "577364052870861511", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM023BT08-004", "spu": "TMM023", "name": "8\"一体黑灰色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 22.43}, {"order_id": "577364080897594300", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577364242174742692", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-012", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 25.02}, {"order_id": "577364245663814652", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-P11", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 24.93}, {"order_id": "577364738066255966", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 20.01}, {"order_id": "577364777771569728", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-P18", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 23.38}, {"order_id": "577364781324341924", "status": "已发货", "order_time": "2026-04-26", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM023BT08-P18", "spu": "TMM023", "name": "8\"一体黑灰色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 28.21}, {"order_id": "577364942761333545", "status": "已发货", "order_time": "2026-04-27", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM023BT08-P18", "spu": "TMM023", "name": "8\"一体黑灰色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 31.83}, {"order_id": "577365733341368531", "status": "已发货", "order_time": "2026-04-27", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577365785702994527", "status": "已发货", "order_time": "2026-04-27", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-P18", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577365785702994527", "status": "已发货", "order_time": "2026-04-27", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-P18", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577365869759861642", "status": "已发货", "order_time": "2026-04-27", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-P18", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 24.43}, {"order_id": "577365956865593622", "status": "已发货", "order_time": "2026-04-27", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577366085451027119", "status": "已发货", "order_time": "2026-04-27", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-006", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577366992079065723", "status": "已取消", "order_time": "2026-04-28", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 30.99, "amount": 30.99, "total": 20.48}, {"order_id": "577367130942968058", "status": "已发货", "order_time": "2026-04-28", "plat": "TIKTOK SHOP", "shop": "LLCT", "site": "US", "seller": "刘美钗", "sku": "TMM022BT08-001", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 35.88, "amount": 35.88, "total": 19.42}, {"order_id": "577368264383763239", "status": "已发货", "order_time": "2026-04-29", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-P11", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 24.99}, {"order_id": "577368858030084660", "status": "已发货", "order_time": "2026-04-29", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-001", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "PO-210-02384299917430541", "status": "已发货", "order_time": "2026-04-29", "plat": "TEMU", "shop": "FSC", "site": "UK", "seller": "彭丹丽", "sku": "TWC002BT30-D61", "spu": "TWC002", "name": "30\"抓夹马尾(卷发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577369405556429279", "status": "已发货", "order_time": "2026-04-30", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 20.88}, {"order_id": "577369996074258996", "status": "已发货", "order_time": "2026-04-30", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-P11", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 26.73}, {"order_id": "577370237463138704", "status": "已发货", "order_time": "2026-04-30", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577370411601334351", "status": "已发货", "order_time": "2026-04-30", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 17.51}, {"order_id": "577371288350330912", "status": "已发货", "order_time": "2026-05-01", "plat": "TIKTOK SHOP", "shop": "SHS", "site": "US", "seller": "叶容丽", "sku": "TMM022BT08-P18", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 34.0, "amount": 34.0, "total": 22.87}, {"order_id": "577371654931124952", "status": "已发货", "order_time": "2026-05-01", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 29.99, "amount": 29.99, "total": 19.35}, {"order_id": "577372278538735616", "status": "已发货", "order_time": "2026-05-02", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-P11", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 25.02}, {"order_id": "577372487546213274", "status": "已发货", "order_time": "2026-05-02", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 20.44}, {"order_id": "577372987120455888", "status": "已发货", "order_time": "2026-05-02", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-P18", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 23.88}, {"order_id": "PO-210-19176130714233044", "status": "已发货", "order_time": "2026-05-02", "plat": "TEMU", "shop": "RCC", "site": "UK", "seller": "李洁莹", "sku": "TWC001ST30-10B", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577373320173229050", "status": "已发货", "order_time": "2026-05-02", "plat": "TIKTOK SHOP", "shop": "HWM", "site": "US", "seller": "李洁莹", "sku": "TWC001ST30-D61", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 0.0, "amount": 0.0, "total": 0.0}, {"order_id": "577373439269900738", "status": "已发货", "order_time": "2026-05-02", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-001", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 23.93}, {"order_id": "577373489205711433", "status": "已发货", "order_time": "2026-05-03", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM022BT08-P18", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 23.99}, {"order_id": "577373500543832775", "status": "已发货", "order_time": "2026-05-03", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-001", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 18.7}, {"order_id": "577374340564029440", "status": "已发货", "order_time": "2026-05-03", "plat": "TIKTOK SHOP", "shop": "MLHR", "site": "US", "seller": "柯伯霖", "sku": "TMM012BT16-04A", "spu": "TMM012", "name": "16\"一体鸭舌帽大波浪", "qty": 1, "price": 38.98, "amount": 38.98, "total": 25.11}, {"order_id": "577375558984896806", "status": "已发货", "order_time": "2026-05-04", "plat": "TIKTOK SHOP", "shop": "PRM", "site": "US", "seller": "姚红珍", "sku": "TWC001ST30-P52", "spu": "TWC001", "name": "30\"抓夹马尾(直发)", "qty": 1, "price": 31.95, "amount": 31.95, "total": 20.32}, {"order_id": "577375783392481317", "status": "已发货", "order_time": "2026-05-04", "plat": "TIKTOK SHOP", "shop": "SHS", "site": "US", "seller": "叶容丽", "sku": "TMM022BT08-001", "spu": "TMM022", "name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "qty": 1, "price": 34.0, "amount": 34.0, "total": 19.52}, {"order_id": "577376331990405920", "status": "待发货", "order_time": "2026-05-04", "plat": "TIKTOK SHOP", "shop": "HWE", "site": "US", "seller": "黄伟萍", "sku": "TMM021BT08-P18", "spu": "TMM021", "name": "8\"一体米色鸭舌帽子发(卷发)", "qty": 1, "price": 32.85, "amount": 32.85, "total": 26.25}];
+const SALES_MONTHLY = {"2026-03": {"qty": 20, "amount": 68.47, "orders": 20}, "2026-04": {"qty": 97, "amount": 2224.27, "orders": 96}, "2026-05": {"qty": 14, "amount": 403.2, "orders": 14}};
+const SALES_SPU = {"TWC001": {"qty": 63, "amount": 627.8000000000001, "orders": 63, "name": "30\"抓夹马尾(直发)"}, "TMM012": {"qty": 23, "amount": 662.6600000000001, "orders": 23, "name": "16\"一体鸭舌帽大波浪"}, "TMM014": {"qty": 15, "amount": 672.2, "orders": 15, "name": "6\"一体藏蓝色鸭舌帽子发(直发)"}, "TMM022": {"qty": 12, "amount": 333.83000000000004, "orders": 12, "name": "8\"一体藏蓝色鸭舌帽子发(卷发)"}, "TMM021": {"qty": 9, "amount": 296.6, "orders": 9, "name": "8\"一体米色鸭舌帽子发(卷发)"}, "TWC002": {"qty": 8, "amount": 115.45999999999998, "orders": 7, "name": "30\"抓夹马尾(卷发)"}, "TMM023": {"qty": 5, "amount": 131.4, "orders": 5, "name": "8\"一体黑灰色鸭舌帽子发(卷发)"}, "TWC013": {"qty": 1, "amount": 0.0, "orders": 1, "name": "18\"抓夹马尾(卷筒)"}};
+const SALES_SELLER = {"姚红珍": {"qty": 42, "amount": 447.2999999999999, "orders": 42, "spus": ["TMM012", "TWC001"], "plats": ["TIKTOK SHOP"], "shops": ["PRM"]}, "黄伟萍": {"qty": 23, "amount": 657.9500000000002, "orders": 23, "spus": ["TMM021", "TMM022", "TMM023"], "plats": ["TIKTOK SHOP"], "shops": ["HWE"]}, "柯伯霖": {"qty": 22, "amount": 662.6600000000001, "orders": 22, "spus": ["TMM012"], "plats": ["TIKTOK SHOP"], "shops": ["MLHR"]}, "李洁莹": {"qty": 19, "amount": 121.96, "orders": 19, "spus": ["TWC001"], "plats": ["TEMU", "TIKTOK SHOP"], "shops": ["HWM", "RCC"]}, "彭丹丽": {"qty": 14, "amount": 424.59, "orders": 14, "spus": ["TMM014", "TWC001", "TWC002"], "plats": ["SHEIN", "TEMU", "eBay"], "shops": ["ET", "FSC", "HRB"]}, "黄冰妹": {"qty": 6, "amount": 101.15999999999998, "orders": 5, "spus": ["TWC002"], "plats": ["eBay"], "shops": ["HG", "IA"]}, "刘美钗": {"qty": 4, "amount": 127.53999999999999, "orders": 4, "spus": ["TMM014", "TMM022"], "plats": ["TIKTOK SHOP", "eBay"], "shops": ["ESH", "LLCT", "MLYH"]}, "方妙芬": {"qty": 2, "amount": 202.8, "orders": 2, "spus": ["TMM014", "TWC001"], "plats": ["TIKTOK SHOP"], "shops": ["LWS"]}, "叶容丽": {"qty": 2, "amount": 68.0, "orders": 2, "spus": ["TMM022"], "plats": ["TIKTOK SHOP"], "shops": ["SHS"]}, "胡玉娣": {"qty": 1, "amount": 25.99, "orders": 1, "spus": ["TMM014"], "plats": ["线下"], "shops": ["WHDSY-US"]}, "陈兰卿": {"qty": 1, "amount": 0.0, "orders": 1, "spus": ["TWC013"], "plats": ["TIKTOK SHOP"], "shops": ["FHC"]}};
+const SALES_PLAT_QTY = {"TIKTOK SHOP": 110, "eBay": 9, "SHEIN": 11, "TEMU": 5, "线下": 1};
+
+// KPI
+document.getElementById('s-orders').textContent = 135;
+document.getElementById('s-qty').textContent = 136;
+document.getElementById('s-amt').textContent = '$' + 2839.95.toFixed(2);
+document.getElementById('s-skus').textContent = new Set(SALES_ROWS.map(r=>r.sku)).size;
+
+// Month chart
+(function(){
+  const keys=Object.keys(SALES_MONTHLY);
+  const qtys=keys.map(k=>SALES_MONTHLY[k].qty);
+  const amts=keys.map(k=>parseFloat(SALES_MONTHLY[k].amount.toFixed(2)));
+  new Chart(document.getElementById('salesMonthChart'),{
+    type:'bar',
+    data:{labels:keys,datasets:[
+      {label:'销量(件)',data:qtys,backgroundColor:'#818cf8',borderRadius:5,yAxisID:'y'},
+      {label:'金额(USD)',data:amts,type:'line',borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',pointRadius:4,yAxisID:'y1'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{size:11},boxWidth:10}}},
+      scales:{
+        y:{position:'left',grid:{color:'#f5f5f5'},ticks:{font:{size:10}}},
+        y1:{position:'right',grid:{display:false},ticks:{font:{size:10}}}
+      }
+    }
+  });
+})();
+
+// Plat chart
+(function(){
+  const keys=Object.keys(SALES_PLAT_QTY);
+  const vals=keys.map(k=>SALES_PLAT_QTY[k]);
+  new Chart(document.getElementById('salesPlatChart'),{
+    type:'doughnut',
+    data:{labels:keys,datasets:[{data:vals,backgroundColor:['#e53e3e','#48bb78','#f6ad55','#63b3ed','#9f7aea'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{size:11},padding:8,boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}件`}}
+      }
+    }
+  });
+})();
+
+// SPU chart
+(function(){
+  const entries=Object.entries(SALES_SPU).sort((a,b)=>b[1].qty-a[1].qty);
+  const labels=entries.map(e=>e[0]);
+  const vals=entries.map(e=>e[1].qty);
+  new Chart(document.getElementById('salesSpuChart'),{
+    type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:['#6366f1','#10b981','#f59e0b','#3b82f6','#ec4899','#8b5cf6','#06b6d4','#f97316'],borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed}件`}}},
+      scales:{x:{grid:{color:'#f5f5f5'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}
+    }
+  });
+})();
+
+// Seller summary table
+(function(){
+  const pcls={'eBay':'bebay','TEMU':'btemu','TIKTOK SHOP':'btiktok','SHEIN':'bshein'};
+  document.getElementById('sellerSalesTbody').innerHTML=Object.entries(SALES_SELLER).sort((a,b)=>b[1].qty-a[1].qty).map(([k,v])=>`
+    <tr>
+      <td><strong>${k}</strong></td>
+      <td>${v.orders}</td>
+      <td><strong>${v.qty}</strong></td>
+      <td style="color:#f59e0b;font-weight:600">${v.amount>0?'$'+v.amount.toFixed(2):'-'}</td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:3px">${v.spus.map(s=>`<span class="tag tspu" style="font-size:10px;padding:1px 6px">${s}</span>`).join('')}</div></td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:3px">${v.plats.map(p=>`<span class="b ${pcls[p]||''}" style="font-size:10px">${p}</span>`).join('')}</div></td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:3px">${v.shops.map(s=>`<span class="tag tsh" style="font-size:10px;padding:1px 6px">${s}</span>`).join('')}</div></td>
+    </tr>`).join('');
+})();
+
+// Sales detail table
+const salesPlats=[...new Set(SALES_ROWS.map(r=>r.plat))].sort();
+const salesSellers=[...new Set(SALES_ROWS.map(r=>r.seller))].sort();
+const salesSpus=[...new Set(SALES_ROWS.map(r=>r.spu).filter(s=>s!=='-'))].sort();
+salesPlats.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;document.getElementById('sf-plat').appendChild(o);});
+salesSellers.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById('sf-seller').appendChild(o);});
+salesSpus.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById('sf-spu').appendChild(o);});
+
+let salesFiltered=SALES_ROWS, salesCur=1;
+const SPS=20;
+
+function salesGo(p){
+  const fp=document.getElementById('sf-plat').value;
+  const fse=document.getElementById('sf-seller').value;
+  const fsp=document.getElementById('sf-spu').value;
+  const fst=document.getElementById('sf-status').value;
+  salesFiltered=SALES_ROWS.filter(r=>
+    (!fp||r.plat===fp)&&(!fse||r.seller===fse)&&(!fsp||r.spu===fsp)&&(!fst||r.status===fst)
+  );
+  const total=Math.ceil(salesFiltered.length/SPS);
+  salesCur=Math.min(Math.max(p,1),total||1);
+  renderSalesTable();
+}
+
+function renderSalesTable(){
+  const pcls={'eBay':'bebay','TEMU':'btemu','TIKTOK SHOP':'btiktok','SHEIN':'bshein'};
+  const sicls={'US':'bus','UK':'buk'};
+  const stcls={'已发货':'bon','待发货':'btemu','已取消':'bebay'};
+  const start=(salesCur-1)*SPS;
+  document.getElementById('salesTbody').innerHTML=salesFiltered.slice(start,start+SPS).map(r=>`
+    <tr>
+      <td style="font-size:11px;color:#9ca3af">${r.order_time}</td>
+      <td><span class="b ${stcls[r.status]||''}">${r.status}</span></td>
+      <td><span class="b ${pcls[r.plat]||''}">${r.plat}</span></td>
+      <td><strong>${r.shop}</strong></td>
+      <td>${r.site!=='-'?`<span class="b ${sicls[r.site]||''}">${r.site}</span>`:'-'}</td>
+      <td>${r.seller}</td>
+      <td style="font-family:monospace;font-size:11px;color:#6366f1">${r.sku}</td>
+      <td style="font-family:monospace;font-size:11px;color:#d97706;font-weight:600">${r.spu}</td>
+      <td style="font-size:11px;color:#6b7280;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${r.name}">${r.name}</td>
+      <td style="font-weight:600">${r.qty}</td>
+      <td>${r.price>0?'$'+r.price.toFixed(2):'-'}</td>
+      <td style="color:#f59e0b;font-weight:600">${r.amount>0?'$'+r.amount.toFixed(2):'-'}</td>
+    </tr>`).join('');
+  document.getElementById('salesCnt').textContent=`共 ${salesFiltered.length} 条`;
+  const total=Math.ceil(salesFiltered.length/SPS);
+  let h=`<button onclick="salesGo(${salesCur-1})" ${salesCur===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=total;i++){
+    if(i===1||i===total||Math.abs(i-salesCur)<=2)
+      h+=`<button class="${i===salesCur?'cur':''}" onclick="salesGo(${i})">${i}</button>`;
+    else if(Math.abs(i-salesCur)===3) h+=`<span style="padding:0 3px;color:#d1d5db">…</span>`;
+  }
+  h+=`<button onclick="salesGo(${salesCur+1})" ${salesCur===total?'disabled':''}>›</button>`;
+  h+=`<span class="pi">${salesCur}/${total} 页</span>`;
+  document.getElementById('salesPag').innerHTML=h;
+}
+
+salesGo(1);
+
+// ======= FIRST ORDER DATA =======
+const FO_DATA = {"姚红珍": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 70}, "total": 70}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 56}, "total": 56}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 30}, "total": 30}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 46}, "total": 46}, "TLE002": {"name": "一夹八字刘海", "dates": {"04-25": 70}, "total": 70}, "TMM012": {"name": "16\"一体鸭舌帽大波浪", "dates": {"01-08": 250}, "total": 250}, "TMM014": {"name": "6\"一体藏蓝色鸭舌帽子发(直发)", "dates": {"01-27": 30}, "total": 30}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-21": 140}, "total": 140}, "TW-SP": {"name": "世界杯爆炸头造型头套", "dates": {"04-03": 80}, "total": 80}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 108}, "total": 108}, "TWC002": {"name": "24\"抓夹马尾(卷发)", "dates": {"04-25": 180, "01-21": 108}, "total": 288}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-17": 150}, "total": 150}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 32}, "total": 32}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-25": 34, "03-30": 345}, "total": 379}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-21": 120}, "total": 120}}, "姚红珍/陈兰卿/方妙芬": {"TKD004": {"name": "24\"4片11夹卡子发缠管曲", "dates": {"03-24": 1330}, "total": 1330}, "TMM024": {"name": "8\"黑色水滴孔速干鸭舌帽子发(直发)", "dates": {"03-20": 110}, "total": 110}}, "方妙芬": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 100}, "total": 100}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 38}, "total": 38}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 38}, "total": 38}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 32}, "total": 32}, "TLE002": {"name": "一夹八字刘海", "dates": {"04-27": 42}, "total": 42}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-22": 35}, "total": 35}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 30}, "total": 30}, "TWC002": {"name": "24\"抓夹马尾(卷发)", "dates": {"04-24": 48, "01-21": 30}, "total": 78}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-20": 64}, "total": 64}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 20}, "total": 20}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-24": 40, "03-30": 90}, "total": 130}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-22": 56}, "total": 56}}, "起订量补充": {"TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 24}, "total": 24}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 50}, "total": 50}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 20}, "total": 20}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 58}, "total": 58}}, "陈兰卿": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 180}, "total": 180}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 62}, "total": 62}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 62}, "total": 62}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 52}, "total": 52}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-22": 35}, "total": 35}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 66}, "total": 66}, "TWC002": {"name": "30\"抓夹马尾(卷发)", "dates": {"04-27": 60, "01-21": 66}, "total": 126}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-20": 40}, "total": 40}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 20}, "total": 20}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-27": 40, "03-30": 90}, "total": 130}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-22": 35}, "total": 35}}};
+const FO_DATES = ["01-08", "01-19", "01-21", "01-27", "01-30", "03-20", "03-24", "03-30", "04-01", "04-03", "04-10", "04-17", "04-20", "04-21", "04-22", "04-24", "04-25", "04-27"];
+
+const FO_SELLER_COLORS = {
+  '姚红珍':'#6366f1','方妙芬':'#10b981','陈兰卿':'#3b82f6',
+  '姚红珍/陈兰卿/方妙芬':'#f59e0b','起订量补充':'#9ca3af'
+};
+const FO_SELLER_ORDER = ['姚红珍','方妙芬','陈兰卿','姚红珍/陈兰卿/方妙芬','起订量补充'];
+
+let foCurrentView = 1;
+
+function switchFOView(v) {
+  foCurrentView = v;
+  document.getElementById('fo-view-1').style.display = v===1?'block':'none';
+  document.getElementById('fo-view-2').style.display = v===2?'block':'none';
+  const b1=document.getElementById('fo-view-btn-1'), b2=document.getElementById('fo-view-btn-2');
+  b1.style.background=v===1?'#6366f1':'transparent'; b1.style.color=v===1?'#fff':'#6b7280';
+  b2.style.background=v===2?'#6366f1':'transparent'; b2.style.color=v===2?'#fff':'#6b7280';
+  renderFOCurrent();
+}
+
+function renderFOCurrent() {
+  if(foCurrentView===1) renderFO1(); else renderFO2();
+}
+
+function foFilters() {
+  return {
+    seller:(document.getElementById('fo-f-seller').value||'').trim().toLowerCase(),
+    name:  (document.getElementById('fo-f-name').value||'').trim().toLowerCase(),
+    spus:  (document.getElementById('fo-f-spu').value||'').trim().split(/[\s,，]+/).filter(Boolean).map(s=>s.toLowerCase())
+  };
+}
+
+function buildFOThead(theadId, leftHeaders) {
+  const thB='padding:9px 12px;font-size:11px;font-weight:700;color:#475569;white-space:nowrap;border-bottom:2px solid #e2e8f0;background:#f8fafc;text-align:center;position:sticky;top:0;z-index:2';
+  const thL=thB+';text-align:left';
+  document.getElementById(theadId).innerHTML='<tr>'
+    +leftHeaders.map((h,i)=>'<th style="'+thL+(i===0?';position:sticky;left:0;z-index:3':'')+';min-width:'+(i===0?'110':'80')+'px">'+h+'</th>').join('')
+    +FO_DATES.map(d=>'<th style="'+thB+';min-width:52px">'+d+'</th>').join('')
+    +'<th style="'+thB+';color:#f59e0b;font-weight:800;min-width:58px;position:sticky;right:0;z-index:3;background:#f8fafc">总计</th>'
+    +'</tr>';
+}
+
+function cellQty(qty) {
+  if(qty>0) return '<td style="padding:8px 10px;text-align:center;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;background:#eff6ff;color:#1d4ed8;font-weight:700;font-size:13px">'+qty+'</td>';
+  return '<td style="padding:8px 10px;text-align:center;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;color:#e2e8f0"></td>';
+}
+function subtotalCell(qty){
+  return '<td style="padding:8px 10px;text-align:center;font-weight:700;font-size:13px;background:#fffbeb;border-right:1px solid #e2e8f0;border-bottom:2px solid #d1d5db;color:'+(qty>0?'#b45309':'#e5e7eb')+'">'+(qty>0?qty:'')+'</td>';
+}
+function grandCell(qty){
+  return '<td style="padding:9px 10px;text-align:center;font-weight:700;font-size:13px;background:#f8fafc;border-right:1px solid #e2e8f0;color:'+(qty>0?'#6366f1':'#e5e7eb')+'">'+(qty>0?qty:'')+'</td>';
+}
+
+function renderFO1(){
+  const {seller:fSe,name:fNm,spus:fSps}=foFilters();
+  buildFOThead('fo-thead-1',['销售','产品名称','SPU']);
+  let tbody='',grandD={},grandAll=0,rowCount=0;
+  FO_DATES.forEach(d=>grandD[d]=0);
+  const sellers=FO_SELLER_ORDER.filter(s=>FO_DATA[s]).concat(Object.keys(FO_DATA).filter(s=>!FO_SELLER_ORDER.includes(s)).sort());
+  sellers.forEach(seller=>{
+    if(fSe&&!seller.toLowerCase().includes(fSe)) return;
+    const color=FO_SELLER_COLORS[seller]||'#6366f1';
+    const visSpus=Object.keys(FO_DATA[seller]).sort().filter(spu=>{
+      const v=FO_DATA[seller][spu];
+      if(fNm&&!v.name.toLowerCase().includes(fNm)) return false;
+      if(fSps.length&&!fSps.some(f=>spu.toLowerCase().includes(f))) return false;
+      return true;
+    });
+    if(!visSpus.length) return;
+    let subD={},subTotal=0; FO_DATES.forEach(d=>subD[d]=0);
+    visSpus.forEach((spu,idx)=>{
+      const v=FO_DATA[seller][spu]; let rowTotal=0;
+      const dCells=FO_DATES.map(d=>{const q=v.dates[d]||0;subD[d]+=q;grandD[d]+=q;rowTotal+=q;subTotal+=q;grandAll+=q;return cellQty(q);}).join('');
+      const sTd=idx===0?'<td rowspan="'+(visSpus.length+1)+'" style="padding:8px 14px;font-weight:700;font-size:13px;color:'+color+';vertical-align:middle;text-align:center;border-right:2px solid #e2e8f0;border-bottom:2px solid #e2e8f0;background:#fafafa;position:sticky;left:0;z-index:1">'+seller+'</td>':'';
+      tbody+='<tr>'+sTd+'<td style="padding:7px 12px;font-size:12px;color:#374151;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+v.name+'</td><td style="padding:7px 12px;font-family:monospace;font-size:12px;font-weight:600;color:#d97706;border-right:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+spu+'</td>'+dCells+'<td style="padding:7px 12px;text-align:center;font-weight:700;font-size:13px;color:#059669;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;position:sticky;right:0;background:#f0fdf4;z-index:1">'+rowTotal+'</td></tr>';
+      rowCount++;
+    });
+    tbody+='<tr><td colspan="2" style="padding:8px 14px;font-size:11px;font-weight:700;color:#9ca3af;background:#fffbeb;border-right:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;text-align:right;letter-spacing:.5px">小计</td>'+FO_DATES.map(d=>subtotalCell(subD[d])).join('')+'<td style="padding:8px 12px;text-align:center;font-weight:800;font-size:14px;color:#b45309;background:#fffbeb;border-left:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;position:sticky;right:0;z-index:1">'+subTotal+'</td></tr>';
+  });
+  tbody+='<tr><td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;color:#6b7280;background:#f8fafc;border-right:2px solid #e2e8f0;text-align:right;letter-spacing:.5px;position:sticky;left:0;z-index:1">合计</td>'+FO_DATES.map(d=>grandCell(grandD[d])).join('')+'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:15px;color:#6366f1;background:#f8fafc;border-left:2px solid #e2e8f0;position:sticky;right:0;z-index:1">'+grandAll+'</td></tr>';
+  document.getElementById('fo-tbody-1').innerHTML=tbody;
+  document.getElementById('fo-row-cnt').textContent=rowCount+' 条产品行';
+}
+
+function renderFO2(){
+  const {seller:fSe,name:fNm,spus:fSps}=foFilters();
+  buildFOThead('fo-thead-2',['SPU','产品名称','销售']);
+  const prodMap={};
+  Object.keys(FO_DATA).forEach(seller=>{
+    Object.keys(FO_DATA[seller]).forEach(spu=>{
+      const v=FO_DATA[seller][spu];
+      if(!prodMap[spu]) prodMap[spu]={name:v.name,sellers:{}};
+      prodMap[spu].sellers[seller]=v.dates;
+    });
+  });
+  let tbody='',grandD={},grandAll=0,rowCount=0;
+  FO_DATES.forEach(d=>grandD[d]=0);
+  Object.keys(prodMap).sort().forEach(spu=>{
+    const p=prodMap[spu];
+    if(fNm&&!p.name.toLowerCase().includes(fNm)) return;
+    if(fSps.length&&!fSps.some(f=>spu.toLowerCase().includes(f))) return;
+    const visSellers=FO_SELLER_ORDER.filter(s=>p.sellers[s]).concat(Object.keys(p.sellers).filter(s=>!FO_SELLER_ORDER.includes(s)).sort()).filter(s=>!fSe||s.toLowerCase().includes(fSe));
+    if(!visSellers.length) return;
+    let subD={},subTotal=0; FO_DATES.forEach(d=>subD[d]=0);
+    visSellers.forEach((seller,idx)=>{
+      const dates=p.sellers[seller]||{}; let rowTotal=0;
+      const color=FO_SELLER_COLORS[seller]||'#6366f1';
+      const dCells=FO_DATES.map(d=>{const q=dates[d]||0;subD[d]+=q;grandD[d]+=q;rowTotal+=q;subTotal+=q;grandAll+=q;return cellQty(q);}).join('');
+      const spuTd=idx===0?'<td rowspan="'+(visSellers.length+1)+'" style="padding:8px 12px;font-family:monospace;font-size:13px;font-weight:700;color:#d97706;vertical-align:middle;text-align:center;border-right:2px solid #e2e8f0;border-bottom:2px solid #e2e8f0;background:#fafafa;position:sticky;left:0;z-index:1">'+spu+'</td>':'';
+      const nameTd=idx===0?'<td rowspan="'+(visSellers.length+1)+'" style="padding:8px 12px;font-size:12px;color:#374151;vertical-align:middle;border-right:1px solid #f1f5f9;border-bottom:2px solid #e2e8f0;white-space:nowrap">'+p.name+'</td>':'';
+      tbody+='<tr>'+spuTd+nameTd+'<td style="padding:7px 12px;font-size:12px;font-weight:600;color:'+color+';border-right:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+seller+'</td>'+dCells+'<td style="padding:7px 12px;text-align:center;font-weight:700;font-size:13px;color:#059669;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;position:sticky;right:0;background:#f0fdf4;z-index:1">'+rowTotal+'</td></tr>';
+      rowCount++;
+    });
+    tbody+='<tr><td colspan="2" style="padding:8px 14px;font-size:11px;font-weight:700;color:#9ca3af;background:#fffbeb;border-right:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;text-align:right;letter-spacing:.5px">小计</td>'+FO_DATES.map(d=>subtotalCell(subD[d])).join('')+'<td style="padding:8px 12px;text-align:center;font-weight:800;font-size:14px;color:#b45309;background:#fffbeb;border-left:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;position:sticky;right:0;z-index:1">'+subTotal+'</td></tr>';
+  });
+  tbody+='<tr><td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;color:#6b7280;background:#f8fafc;border-right:2px solid #e2e8f0;text-align:right;letter-spacing:.5px;position:sticky;left:0;z-index:1">合计</td>'+FO_DATES.map(d=>grandCell(grandD[d])).join('')+'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:15px;color:#6366f1;background:#f8fafc;border-left:2px solid #e2e8f0;position:sticky;right:0;z-index:1">'+grandAll+'</td></tr>';
+  document.getElementById('fo-tbody-2').innerHTML=tbody;
+  document.getElementById('fo-row-cnt').textContent=rowCount+' 条产品行';
+}
+
+function downloadFOCSV(){
+  const rows=[['销售','产品名称','SPU'].concat(FO_DATES).concat(['总计'])];
+  Object.keys(FO_DATA).forEach(seller=>{
+    Object.keys(FO_DATA[seller]).sort().forEach(spu=>{
+      const v=FO_DATA[seller][spu];
+      const total=FO_DATES.reduce((s,d)=>s+(v.dates[d]||0),0);
+      rows.push([seller,v.name,spu].concat(FO_DATES.map(d=>v.dates[d]||'')).concat([total]));
+    });
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='首单需求明细.csv';a.click();
+}
+
+renderFO1();
+
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#333;font-size:13px}
@@ -293,43 +571,6 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
 
 
 
-    <!-- Filters -->
-    <div style="background:#1f2937;padding:12px 20px;display:flex;gap:10px;flex-wrap:wrap;border-bottom:1px solid #374151">
-      <div style="position:relative">
-        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#6b7280;font-size:12px">👤</span>
-        <input id="fo-f-seller" placeholder="搜索销售名称..." oninput="renderFO()"
-          style="background:#374151;border:1px solid #4b5563;border-radius:7px;padding:7px 10px 7px 28px;font-size:12px;color:#f9fafb;outline:none;width:160px;transition:border .2s"
-          onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#4b5563'">
-      </div>
-      <div style="position:relative">
-        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#6b7280;font-size:12px">🔍</span>
-        <input id="fo-f-name" placeholder="搜索产品名称..." oninput="renderFO()"
-          style="background:#374151;border:1px solid #4b5563;border-radius:7px;padding:7px 10px 7px 28px;font-size:12px;color:#f9fafb;outline:none;width:180px;transition:border .2s"
-          onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#4b5563'">
-      </div>
-      <div style="position:relative">
-        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#6b7280;font-size:12px">🏷</span>
-        <input id="fo-f-spu" placeholder="搜索SPU(多个用空格/逗号)..." oninput="renderFO()"
-          style="background:#374151;border:1px solid #4b5563;border-radius:7px;padding:7px 10px 7px 28px;font-size:12px;color:#f9fafb;outline:none;width:220px;transition:border .2s"
-          onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#4b5563'">
-      </div>
-      <button onclick="document.getElementById('fo-f-seller').value='';document.getElementById('fo-f-name').value='';document.getElementById('fo-f-spu').value='';renderFO()"
-        style="background:#374151;border:1px solid #4b5563;border-radius:7px;padding:7px 14px;font-size:12px;color:#9ca3af;cursor:pointer">重置</button>
-    </div>
-
-    <!-- Table -->
-    <div style="overflow-x:auto;max-height:72vh;overflow-y:auto">
-      <table id="fo-table" style="width:100%;border-collapse:collapse;min-width:900px">
-        <thead id="fo-thead"></thead>
-        <tbody id="fo-tbody"></tbody>
-      </table>
-    </div>
-
-  </div>
-</div>
-
-
-
 <!-- ======= TAB 5: 首单需求明细 ======= -->
 <div id="tab-firstorder" class="tab-panel">
 
@@ -558,190 +799,6 @@ function resetF(){
 buildSummary();
 buildSellerCards();
 go(1);
-
-// ======= FIRST ORDER DATA =======
-const FO_DATA = {"姚红珍": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 70}, "total": 70}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 56}, "total": 56}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 30}, "total": 30}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 46}, "total": 46}, "TLE002": {"name": "一夹八字刘海", "dates": {"04-25": 70}, "total": 70}, "TMM012": {"name": "16\"一体鸭舌帽大波浪", "dates": {"01-08": 250}, "total": 250}, "TMM014": {"name": "6\"一体藏蓝色鸭舌帽子发(直发)", "dates": {"01-27": 30}, "total": 30}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 108}, "total": 108}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-21": 140}, "total": 140}, "TW-SP": {"name": "世界杯爆炸头造型头套", "dates": {"04-03": 80}, "total": 80}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 108}, "total": 108}, "TWC002": {"name": "24\"抓夹马尾(卷发)", "dates": {"04-25": 180, "01-21": 108}, "total": 288}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-17": 150}, "total": 150}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 32}, "total": 32}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-25": 34, "03-30": 345}, "total": 379}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-21": 120}, "total": 120}}, "姚红珍/陈兰卿/方妙芬": {"TKD004": {"name": "24\"4片11夹卡子发缠管曲", "dates": {"03-24": 1330}, "total": 1330}, "TMM024": {"name": "8\"黑色水滴孔速干鸭舌帽子发(直发)", "dates": {"03-20": 110}, "total": 110}}, "方妙芬": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 100}, "total": 100}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 38}, "total": 38}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 38}, "total": 38}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 32}, "total": 32}, "TLE002": {"name": "一夹八字刘海", "dates": {"04-27": 42}, "total": 42}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 18}, "total": 18}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-22": 35}, "total": 35}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 30}, "total": 30}, "TWC002": {"name": "24\"抓夹马尾(卷发)", "dates": {"04-24": 48, "01-21": 30}, "total": 78}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-20": 64}, "total": 64}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 20}, "total": 20}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-24": 40, "03-30": 90}, "total": 130}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-22": 56}, "total": 56}}, "起订量补充": {"TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 24}, "total": 24}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 50}, "total": 50}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 20}, "total": 20}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 58}, "total": 58}}, "陈兰卿": {"TFL008": {"name": "6.5x6.5\"机扎+机制刘海发块(水波纹)", "dates": {"04-10": 180}, "total": 180}, "TFS001": {"name": "6x6\"手勾+机制刘海发块(直发)", "dates": {"04-01": 62}, "total": 62}, "TFS002": {"name": "6x6寸手勾+机制刘海发块(BW)", "dates": {"04-01": 62}, "total": 62}, "TFS003": {"name": "6x6寸手勾+机制刘海发块(水波纹)", "dates": {"04-01": 52}, "total": 52}, "TMM021": {"name": "8\"一体米色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM022": {"name": "8\"一体藏蓝色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TMM023": {"name": "8\"一体黑灰色鸭舌帽子发(卷发)", "dates": {"01-30": 24}, "total": 24}, "TQD013": {"name": "黑人小卷长须发包", "dates": {"04-22": 35}, "total": 35}, "TWC001": {"name": "30\"抓夹马尾(直发)", "dates": {"01-21": 66}, "total": 66}, "TWC002": {"name": "30\"抓夹马尾(卷发)", "dates": {"04-27": 60, "01-21": 66}, "total": 126}, "TWC006": {"name": "12\"抓夹马尾(复古小卷)", "dates": {"04-20": 40}, "total": 40}, "TWC013": {"name": "18\"抓夹马尾(卷筒)", "dates": {"01-19": 20}, "total": 20}, "TWC014": {"name": "30\"抓夹马尾(蓬蓬卷发)", "dates": {"04-27": 40, "03-30": 90}, "total": 130}, "TZA002": {"name": "20\"可调节绳子发(卷发)", "dates": {"04-22": 35}, "total": 35}}};
-const FO_DATES = ["01-08", "01-19", "01-21", "01-27", "01-30", "03-20", "03-24", "03-30", "04-01", "04-03", "04-10", "04-17", "04-20", "04-21", "04-22", "04-24", "04-25", "04-27"];
-
-const FO_SELLER_COLORS = {
-  '姚红珍':'#6366f1','方妙芬':'#10b981','陈兰卿':'#3b82f6',
-  '姚红珍/陈兰卿/方妙芬':'#f59e0b','起订量补充':'#9ca3af'
-};
-const FO_SELLER_ORDER = ['姚红珍','方妙芬','陈兰卿','姚红珍/陈兰卿/方妙芬','起订量补充'];
-
-let foCurrentView = 1;
-
-function switchFOView(v) {
-  foCurrentView = v;
-  document.getElementById('fo-view-1').style.display = v===1 ? 'block' : 'none';
-  document.getElementById('fo-view-2').style.display = v===2 ? 'block' : 'none';
-  const b1=document.getElementById('fo-view-btn-1'), b2=document.getElementById('fo-view-btn-2');
-  b1.style.background = v===1?'#6366f1':'transparent'; b1.style.color = v===1?'#fff':'#6b7280';
-  b2.style.background = v===2?'#6366f1':'transparent'; b2.style.color = v===2?'#fff':'#6b7280';
-  renderFOCurrent();
-}
-
-function renderFOCurrent() {
-  if(foCurrentView===1) renderFO1(); else renderFO2();
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────
-function foFilters() {
-  return {
-    seller: (document.getElementById('fo-f-seller').value||'').trim().toLowerCase(),
-    name:   (document.getElementById('fo-f-name').value||'').trim().toLowerCase(),
-    spus:   (document.getElementById('fo-f-spu').value||'').trim().split(/[\s,，]+/).filter(Boolean).map(s=>s.toLowerCase())
-  };
-}
-
-function buildFOThead(theadId, leftHeaders) {
-  const thB = 'padding:9px 12px;font-size:11px;font-weight:700;color:#475569;white-space:nowrap;border-bottom:2px solid #e2e8f0;background:#f8fafc;text-align:center;position:sticky;top:0;z-index:2';
-  const thL = thB + ';text-align:left';
-  document.getElementById(theadId).innerHTML = '<tr>'
-    + leftHeaders.map((h,i) => '<th style="' + thL + (i===0?';position:sticky;left:0;z-index:3':'') + ';min-width:' + (i===0?'100':'80') + 'px">' + h + '</th>').join('')
-    + FO_DATES.map(d=>'<th style="'+thB+';min-width:52px">'+d+'</th>').join('')
-    + '<th style="'+thB+';color:#f59e0b;font-weight:800;min-width:58px;position:sticky;right:0;z-index:3;background:#f8fafc">总计</th>'
-    + '</tr>';
-}
-
-function cellQty(qty) {
-  if(qty>0) return '<td style="padding:8px 10px;text-align:center;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;background:#eff6ff;color:#1d4ed8;font-weight:700;font-size:13px">'+qty+'</td>';
-  return '<td style="padding:8px 10px;text-align:center;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;color:#e2e8f0"></td>';
-}
-function subtotalCell(qty) {
-  return '<td style="padding:8px 10px;text-align:center;font-weight:700;font-size:13px;background:#fffbeb;border-right:1px solid #e2e8f0;border-bottom:2px solid #d1d5db;color:'+(qty>0?'#b45309':'#e5e7eb')+'">'+(qty>0?qty:'')+'</td>';
-}
-function grandCell(qty) {
-  return '<td style="padding:9px 10px;text-align:center;font-weight:700;font-size:13px;background:#f8fafc;border-right:1px solid #e2e8f0;color:'+(qty>0?'#6366f1':'#e5e7eb')+'">'+(qty>0?qty:'')+'</td>';
-}
-
-// ── View 1: 销售 × 产品 × 日期 ─────────────────────────────────────────
-function renderFO1() {
-  const {seller:fSe, name:fNm, spus:fSps} = foFilters();
-  buildFOThead('fo-thead-1', ['销售','产品名称','SPU']);
-  let tbody='', grandD={}, grandAll=0, rowCount=0;
-  FO_DATES.forEach(d=>grandD[d]=0);
-
-  const sellers = FO_SELLER_ORDER.filter(s=>FO_DATA[s])
-    .concat(Object.keys(FO_DATA).filter(s=>!FO_SELLER_ORDER.includes(s)).sort());
-
-  sellers.forEach(seller=>{
-    if(fSe && !seller.toLowerCase().includes(fSe)) return;
-    const color = FO_SELLER_COLORS[seller]||'#6366f1';
-    const visSpus = Object.keys(FO_DATA[seller]).sort().filter(spu=>{
-      const v=FO_DATA[seller][spu];
-      if(fNm && !v.name.toLowerCase().includes(fNm)) return false;
-      if(fSps.length && !fSps.some(f=>spu.toLowerCase().includes(f))) return false;
-      return true;
-    });
-    if(!visSpus.length) return;
-
-    let subD={}, subTotal=0;
-    FO_DATES.forEach(d=>subD[d]=0);
-
-    visSpus.forEach((spu,idx)=>{
-      const v=FO_DATA[seller][spu]; let rowTotal=0;
-      const dCells=FO_DATES.map(d=>{
-        const q=v.dates[d]||0; subD[d]+=q; grandD[d]+=q; rowTotal+=q; subTotal+=q; grandAll+=q;
-        return cellQty(q);
-      }).join('');
-      const sTd = idx===0 ? '<td rowspan="'+(visSpus.length+1)+'" style="padding:8px 14px;font-weight:700;font-size:13px;color:'+color+';vertical-align:middle;text-align:center;border-right:2px solid #e2e8f0;border-bottom:2px solid #e2e8f0;background:#fafafa;position:sticky;left:0;z-index:1">'+seller+'</td>' : '';
-      tbody+='<tr>'+sTd
-        +'<td style="padding:7px 12px;font-size:12px;color:#374151;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+v.name+'</td>'
-        +'<td style="padding:7px 12px;font-family:monospace;font-size:12px;font-weight:600;color:#d97706;border-right:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+spu+'</td>'
-        +dCells
-        +'<td style="padding:7px 12px;text-align:center;font-weight:700;font-size:13px;color:#059669;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;position:sticky;right:0;background:#f0fdf4;z-index:1">'+rowTotal+'</td>'
-        +'</tr>'; rowCount++;
-    });
-    tbody+='<tr>'
-      +'<td colspan="2" style="padding:8px 14px;font-size:11px;font-weight:700;color:#9ca3af;background:#fffbeb;border-right:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;text-align:right;letter-spacing:.5px">小计</td>'
-      +FO_DATES.map(d=>subtotalCell(subD[d])).join('')
-      +'<td style="padding:8px 12px;text-align:center;font-weight:800;font-size:14px;color:#b45309;background:#fffbeb;border-left:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;position:sticky;right:0;z-index:1">'+subTotal+'</td></tr>';
-  });
-  tbody+='<tr>'
-    +'<td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;color:#6b7280;background:#f8fafc;border-right:2px solid #e2e8f0;text-align:right;letter-spacing:.5px;position:sticky;left:0;z-index:1">合计</td>'
-    +FO_DATES.map(d=>grandCell(grandD[d])).join('')
-    +'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:15px;color:#6366f1;background:#f8fafc;border-left:2px solid #e2e8f0;position:sticky;right:0;z-index:1">'+grandAll+'</td></tr>';
-
-  document.getElementById('fo-tbody-1').innerHTML=tbody;
-  document.getElementById('fo-row-cnt').textContent=rowCount+' 条产品行';
-}
-
-// ── View 2: 产品 × 销售 × 日期 ─────────────────────────────────────────
-function renderFO2() {
-  const {seller:fSe, name:fNm, spus:fSps} = foFilters();
-  buildFOThead('fo-thead-2', ['SPU','产品名称','销售']);
-
-  // Build product → seller → date structure
-  const prodMap = {};
-  Object.keys(FO_DATA).forEach(seller=>{
-    Object.keys(FO_DATA[seller]).forEach(spu=>{
-      const v=FO_DATA[seller][spu];
-      if(!prodMap[spu]) prodMap[spu]={name:v.name, sellers:{}};
-      prodMap[spu].sellers[seller]=v.dates;
-    });
-  });
-
-  let tbody='', grandD={}, grandAll=0, rowCount=0;
-  FO_DATES.forEach(d=>grandD[d]=0);
-
-  Object.keys(prodMap).sort().forEach(spu=>{
-    const p=prodMap[spu];
-    if(fNm && !p.name.toLowerCase().includes(fNm)) return;
-    if(fSps.length && !fSps.some(f=>spu.toLowerCase().includes(f))) return;
-
-    const visSellers = FO_SELLER_ORDER.filter(s=>p.sellers[s])
-      .concat(Object.keys(p.sellers).filter(s=>!FO_SELLER_ORDER.includes(s)).sort())
-      .filter(s=>!fSe || s.toLowerCase().includes(fSe));
-    if(!visSellers.length) return;
-
-    let subD={}, subTotal=0;
-    FO_DATES.forEach(d=>subD[d]=0);
-
-    visSellers.forEach((seller,idx)=>{
-      const dates=p.sellers[seller]||{}; let rowTotal=0;
-      const color=FO_SELLER_COLORS[seller]||'#6366f1';
-      const dCells=FO_DATES.map(d=>{
-        const q=dates[d]||0; subD[d]+=q; grandD[d]+=q; rowTotal+=q; subTotal+=q; grandAll+=q;
-        return cellQty(q);
-      }).join('');
-      const spuTd = idx===0 ? '<td rowspan="'+(visSellers.length+1)+'" style="padding:8px 12px;font-family:monospace;font-size:13px;font-weight:700;color:#d97706;vertical-align:middle;text-align:center;border-right:2px solid #e2e8f0;border-bottom:2px solid #e2e8f0;background:#fafafa;position:sticky;left:0;z-index:1">'+spu+'</td>' : '';
-      const nameTd = idx===0 ? '<td rowspan="'+(visSellers.length+1)+'" style="padding:8px 12px;font-size:12px;color:#374151;vertical-align:middle;border-right:1px solid #f1f5f9;border-bottom:2px solid #e2e8f0;white-space:nowrap">'+p.name+'</td>' : '';
-      tbody+='<tr>'+spuTd+nameTd
-        +'<td style="padding:7px 12px;font-size:12px;font-weight:600;color:'+color+';border-right:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+seller+'</td>'
-        +dCells
-        +'<td style="padding:7px 12px;text-align:center;font-weight:700;font-size:13px;color:#059669;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9;position:sticky;right:0;background:#f0fdf4;z-index:1">'+rowTotal+'</td>'
-        +'</tr>'; rowCount++;
-    });
-    tbody+='<tr>'
-      +'<td colspan="2" style="padding:8px 14px;font-size:11px;font-weight:700;color:#9ca3af;background:#fffbeb;border-right:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;text-align:right;letter-spacing:.5px">小计</td>'
-      +FO_DATES.map(d=>subtotalCell(subD[d])).join('')
-      +'<td style="padding:8px 12px;text-align:center;font-weight:800;font-size:14px;color:#b45309;background:#fffbeb;border-left:2px solid #e2e8f0;border-bottom:2px solid #d1d5db;position:sticky;right:0;z-index:1">'+subTotal+'</td></tr>';
-  });
-  tbody+='<tr>'
-    +'<td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;color:#6b7280;background:#f8fafc;border-right:2px solid #e2e8f0;text-align:right;letter-spacing:.5px;position:sticky;left:0;z-index:1">合计</td>'
-    +FO_DATES.map(d=>grandCell(grandD[d])).join('')
-    +'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:15px;color:#6366f1;background:#f8fafc;border-left:2px solid #e2e8f0;position:sticky;right:0;z-index:1">'+grandAll+'</td></tr>';
-
-  document.getElementById('fo-tbody-2').innerHTML=tbody;
-  document.getElementById('fo-row-cnt').textContent=rowCount+' 条产品行';
-}
-
-function downloadFOCSV() {
-  const rows=[['维度','销售','产品名称','SPU'].concat(FO_DATES).concat(['总计'])];
-  Object.keys(FO_DATA).forEach(seller=>{
-    Object.keys(FO_DATA[seller]).sort().forEach(spu=>{
-      const v=FO_DATA[seller][spu];
-      const total=FO_DATES.reduce((s,d)=>s+(v.dates[d]||0),0);
-      rows.push(['销售×产品',seller,v.name,spu].concat(FO_DATES.map(d=>v.dates[d]||'')).concat([total]));
-    });
-  });
-  const csv=rows.map(r=>r.join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='首单需求明细.csv'; a.click();
-}
-
-renderFO1();
-
 </script>
+</body>
+</html>
