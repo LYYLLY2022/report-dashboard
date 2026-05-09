@@ -109,17 +109,23 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
 ::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
 
 /* ===== TRACKING TABLE ===== */
-.trk-wrap{overflow-x:auto;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);background:#fff}
+.trk-wrap{overflow:auto;max-height:calc(100vh - 290px);border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);background:#fff}
 .trk-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1200px}
 .trk-table th,.trk-table td{padding:7px 10px;white-space:nowrap;border-bottom:1px solid #f1f5f9;border-right:1px solid #e2e8f0}
 .trk-table th:last-child,.trk-table td:last-child{border-right:none}
-.trk-table thead tr:first-child th{color:#fff;font-weight:700;text-align:center;font-size:12px;letter-spacing:.3px}
-.trk-table thead tr:nth-child(2) th{background:#f8fafc;color:#475569;font-weight:600;font-size:11px;text-align:center;border-top:1px solid #e2e8f0}
+.trk-table thead tr:first-child th{position:sticky;top:0;z-index:4;color:#fff;font-weight:700;text-align:center;font-size:12px;letter-spacing:.3px}
+.trk-table thead tr:nth-child(2) th{position:sticky;top:34px;z-index:4;background:#f8fafc;color:#475569;font-weight:600;font-size:11px;text-align:center;border-top:1px solid #e2e8f0}
 .trk-table tbody tr:hover{background:#f0f4ff}
 .trk-table tbody td{color:#374151;vertical-align:middle;text-align:center;font-size:12px}
-.trk-table .sku-col{font-family:monospace;font-size:11px;color:#6366f1;font-weight:600;text-align:left;min-width:140px}
-.trk-table .spu-col{font-family:monospace;font-size:11px;color:#d97706;font-weight:600}
-.trk-table .name-col{text-align:left;max-width:160px;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:#6b7280}
+.trk-table .sku-col{font-family:monospace;font-size:11px;color:#6366f1;font-weight:600;text-align:left;width:145px}
+.trk-table .spu-col{font-family:monospace;font-size:11px;color:#d97706;font-weight:600;width:80px}
+.trk-table .name-col{text-align:left;width:160px;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:#6b7280}
+.trk-table .col-spu{position:sticky;left:0;z-index:2;background:#fff}
+.trk-table .col-sku{position:sticky;left:80px;z-index:2;background:#fff}
+.trk-table .col-name{position:sticky;left:225px;z-index:2;background:#fff;box-shadow:2px 0 5px rgba(0,0,0,.06)}
+.trk-table tbody tr:hover .col-spu,.trk-table tbody tr:hover .col-sku,.trk-table tbody tr:hover .col-name{background:#f0f4ff}
+.trk-table thead tr:first-child .col-spu,.trk-table thead tr:first-child .col-sku,.trk-table thead tr:first-child .col-name,.trk-table thead tr:nth-child(2) .col-spu,.trk-table thead tr:nth-child(2) .col-sku,.trk-table thead tr:nth-child(2) .col-name{z-index:6}
+.trk-table thead tr:nth-child(2) .col-spu,.trk-table thead tr:nth-child(2) .col-sku,.trk-table thead tr:nth-child(2) .col-name{background:#f8fafc}
 .grp-base{background:#1e40af}
 .grp-po{background:#0f766e}
 .grp-cn{background:#7e22ce}
@@ -435,13 +441,13 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
     <table class="trk-table">
       <thead>
         <tr>
-          <th colspan="5" class="grp-base">新品基础信息</th>
+          <th class="grp-base col-spu" style="left:0">SPU</th><th class="grp-base col-sku" style="left:80px">SKU</th><th class="grp-base col-name" style="left:225px">产品名称</th><th colspan="2" class="grp-base"></th>
           <th colspan="8" class="grp-po">采购订单状态</th>
           <th colspan="5" class="grp-cn">CN仓状态</th>
           <th colspan="4" class="grp-winit">万邑通库存状态</th>
         </tr>
         <tr>
-          <th>SPU</th><th>SKU</th><th>产品名称</th><th>颜色</th><th>尺码</th>
+          <th class="col-spu">SPU</th><th class="col-sku">SKU</th><th class="col-name">产品名称</th><th>颜色</th><th>尺码</th>
           <th>采购订单状态</th><th>下单日期</th><th>计划到货时间</th><th>采购数量</th><th>未送货量</th><th>待收货量</th><th>已收货量</th><th>取消数量</th>
           <th>仓库</th><th>在库库存</th><th>可用库存</th><th>在途库存</th><th>待出库库存</th>
           <th>仓库</th><th>在库库存</th><th>可用库存</th><th>winit在途库存</th>
@@ -1094,9 +1100,9 @@ function renderTrkTable(){
   for(var i=0;i<slice.length;i++){
     var r=slice[i];
     html += '<tr>';
-    html += '<td class="spu-col">'+(r.spu||'<span class="empty-val">-</span>')+'</td>';
-    html += '<td class="sku-col">'+r.sku+'</td>';
-    html += '<td class="name-col" title="'+(r.name||'')+'">'+(r.name||'<span class="empty-val">-</span>')+'</td>';
+    html += '<td class="spu-col col-spu">'+(r.spu||'<span class="empty-val">-</span>')+'</td>';
+    html += '<td class="sku-col col-sku">'+r.sku+'</td>';
+    html += '<td class="name-col col-name" title="'+(r.name||'')+'">'+(r.name||'<span class="empty-val">-</span>')+'</td>';
     html += strCell(r.color);
     html += strCell(r.size);
     html += statusBadge(r.orderStatus);
