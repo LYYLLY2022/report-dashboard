@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>新品上架情况</title>
+<title>新品推品进度</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -160,7 +160,7 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
 <div class="hdr">
   <div>
     <div style="font-size:20px;margin-bottom:4px">📦</div>
-    <h1>新品上架情况分析</h1>
+    <h1>新品推品进度</h1>
     <div class="hdr-sub">数据来源：新品上架情况 · 产品管理 · 匹配新品首单SKU</div>
   </div>
   <div class="hdr-stats">
@@ -449,7 +449,7 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
         </tr>
         <tr>
           <th class="col-spu">SPU</th><th class="col-sku">SKU</th><th class="col-name">产品名称</th><th>颜色</th><th>尺码</th>
-          <th>采购订单状态</th><th>下单日期</th><th>计划到货时间</th><th>采购数量</th><th>未送货量</th><th>待收货量</th><th>已收货量</th><th>取消数量</th>
+          <th>采购订单状态</th><th id="trk-sort-date" onclick="trkSortByDate()" style="cursor:pointer;user-select:none" title="点击排序">下单日期 <span id="trk-sort-icon">⇅</span></th><th>计划到货时间</th><th>采购数量</th><th>未送货量</th><th>待收货量</th><th>已收货量</th><th>取消数量</th>
           <th>仓库</th><th>在库库存</th><th>可用库存</th><th>在途库存</th><th>待出库库存</th>
           <th>仓库</th><th>在库库存</th><th>可用库存</th><th>winit在途库存</th>
         </tr>
@@ -1053,6 +1053,7 @@ const TRK_DATA = [{"sku": "TFL008GT20-01B", "spu": "TFL008", "name": "6.5x6.5\"�
 
 var trkFiltered = TRK_DATA.slice();
 var trkPage = 1;
+var trkSortAsc = null;
 var TRK_PS = 50;
 
 function trkFilter(){
@@ -1146,6 +1147,20 @@ function renderTrkTable(){
 }
 
 function trkGo(p){trkPage=p;renderTrkTable();}
+
+function trkSortByDate(){
+  if(trkSortAsc===null||trkSortAsc===false) trkSortAsc=true;
+  else trkSortAsc=false;
+  var icon=document.getElementById('trk-sort-icon');
+  if(icon) icon.textContent=trkSortAsc?'↑':'↓';
+  trkFiltered.sort(function(a,b){
+    var da=a.orderDate||'', db=b.orderDate||'';
+    if(da===db) return 0;
+    if(!da) return 1; if(!db) return -1;
+    return trkSortAsc?(da<db?-1:1):(da>db?-1:1);
+  });
+  trkPage=1; renderTrkTable();
+}
 
 renderTrkTable();
 </script>
