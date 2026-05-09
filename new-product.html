@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>新品推品进度</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -121,6 +122,7 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
 .trk-table .sku-col{font-family:monospace;font-size:11px;color:#6366f1;font-weight:600;text-align:left;width:145px}
 .trk-table .spu-col{font-family:monospace;font-size:11px;color:#d97706;font-weight:600;width:80px}
 .trk-table .name-col{text-align:left;width:160px;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:#6b7280}
+.trk-table .color-col{min-width:80px;max-width:120px;white-space:nowrap}
 .trk-table .col-spu{position:sticky;left:0;z-index:2;background:#fff}
 .trk-table .col-sku{position:sticky;left:80px;z-index:2;background:#fff}
 .trk-table .col-name{position:sticky;left:225px;z-index:2;background:#fff;box-shadow:2px 0 5px rgba(0,0,0,.06)}
@@ -153,6 +155,56 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
 .trk-pag button.cur{background:#6366f1;color:#fff;border-color:#6366f1}
 .trk-pag button:disabled{opacity:.35;cursor:default}
 .trk-pag .pi{font-size:11px;color:#9ca3af;margin-left:8px}
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width:768px){
+  .hdr{padding:12px 16px;gap:10px;flex-wrap:wrap}
+  .hdr h1{font-size:15px}
+  .hdr-stats{margin-left:0;width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .hstat{padding:6px 8px;min-width:0}
+  .hstat-n{font-size:17px}
+
+  .nav{padding:0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-nowrap:nowrap}
+  .nav-btn{padding:10px 12px;font-size:12px;white-space:nowrap;flex-shrink:0}
+
+  .wrap{padding:12px 10px}
+
+  .sum-row{gap:8px}
+  .sum-card{min-width:calc(50% - 8px);flex:1 1 calc(50% - 8px)}
+
+  .seller-grid{grid-template-columns:1fr}
+
+  .card{padding:12px 14px}
+
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:700px}
+
+  .trk-wrap{max-height:70vh;overflow:auto;-webkit-overflow-scrolling:touch}
+
+  .trk-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .trk-kpi-card{min-width:0;padding:8px 10px}
+  .trk-kpi-n{font-size:18px}
+
+  .trk-filter-bar input{width:120px}
+
+  .filters input{width:120px}
+
+  canvas{max-height:220px!important}
+
+  .pag,.trk-pag{flex-wrap:wrap;gap:3px}
+  .pag .pi,.trk-pag .pi{width:100%;text-align:center;margin-left:0;margin-top:4px}
+
+  .fo-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .fo-table{min-width:600px}
+
+  .sc-head{padding:10px 12px}
+  .sc-body{padding:10px 12px}
+}
+@media (max-width:480px){
+  .hdr-stats{grid-template-columns:repeat(2,1fr)}
+  .sum-card{min-width:100%;flex:1 1 100%}
+  .trk-kpi{grid-template-columns:repeat(2,1fr)}
+  .nav-btn{padding:8px 10px;font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -448,7 +500,7 @@ tbody td{padding:8px 12px;color:#374151;vertical-align:middle}
           <th colspan="4" class="grp-winit">万邑通库存状态</th>
         </tr>
         <tr>
-          <th class="col-spu">SPU</th><th class="col-sku">SKU</th><th class="col-name">产品名称</th><th>颜色</th><th>尺码</th>
+          <th class="col-spu">SPU</th><th class="col-sku">SKU</th><th class="col-name">产品名称</th><th class="color-col">颜色</th><th>尺码</th>
           <th>采购订单状态</th><th id="trk-sort-date" onclick="trkSortByDate()" style="cursor:pointer;user-select:none" title="点击排序">下单日期 <span id="trk-sort-icon">⇅</span></th><th>计划到货时间</th><th>采购数量</th><th>未送货量</th><th>待收货量</th><th>已收货量</th><th>取消数量</th>
           <th>仓库</th><th>在库库存</th><th>可用库存</th><th>在途库存</th><th>待出库库存</th>
           <th>仓库</th><th>在库库存</th><th>可用库存</th><th>winit在途库存</th>
@@ -1111,7 +1163,7 @@ function renderTrkTable(){
     html += '<td class="spu-col col-spu">'+(r.spu||'<span class="empty-val">-</span>')+'</td>';
     html += '<td class="sku-col col-sku">'+r.sku+'</td>';
     html += '<td class="name-col col-name" title="'+(r.name||'')+'">'+(r.name||'<span class="empty-val">-</span>')+'</td>';
-    html += strCell(r.color);
+    html += strCell(r.color,'color-col');
     html += strCell(r.size);
     html += statusBadge(r.orderStatus);
     html += strCell(r.orderDate);
