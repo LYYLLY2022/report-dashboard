@@ -38,6 +38,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    cursor: pointer;
+    position: relative;
   }
   .card:hover {
     transform: translateY(-4px);
@@ -47,6 +49,68 @@
   .card .icon { font-size: 2.5rem; }
   .card .title { font-size: 1.2rem; font-weight: 600; }
   .card .desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; }
+  .lock-badge {
+    position: absolute; top: 14px; right: 16px;
+    font-size: 14px; opacity: 0.5;
+  }
+
+  /* ── 密码弹窗 ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #1a1030;
+    border: 1px solid rgba(167,139,250,0.4);
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    width: 340px; max-width: 90vw;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+    display: flex; flex-direction: column; gap: 1.2rem;
+    animation: popIn .18s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+  .modal-title {
+    font-size: 1.1rem; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+    color: #c4b5fd;
+  }
+  .modal-sub { font-size: 0.82rem; color: #94a3b8; margin-top: -8px; }
+  .modal input[type=password] {
+    width: 100%; padding: 10px 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(167,139,250,0.35);
+    border-radius: 10px; color: #e2e8f0; font-size: 15px;
+    outline: none; letter-spacing: 2px;
+    transition: border-color .15s;
+  }
+  .modal input[type=password]:focus { border-color: #a78bfa; }
+  .modal-error {
+    font-size: 12px; color: #f87171;
+    min-height: 16px; margin-top: -8px;
+  }
+  .modal-btns { display: flex; gap: 10px; }
+  .btn-cancel {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: 1px solid rgba(167,139,250,0.3);
+    background: transparent; color: #94a3b8;
+    cursor: pointer; font-size: 14px; transition: background .15s;
+  }
+  .btn-cancel:hover { background: rgba(255,255,255,0.06); }
+  .btn-confirm {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: #fff; cursor: pointer; font-size: 14px; font-weight: 600;
+    transition: opacity .15s;
+  }
+  .btn-confirm:hover { opacity: 0.88; }
+
   @media (max-width: 480px) {
     body { padding: 1.5rem 1rem; }
     h1 { font-size: 1.5rem; }
@@ -55,6 +119,7 @@
     .card { width: 100%; padding: 1.5rem 1.25rem; }
     .card .icon { font-size: 2rem; }
     .card .title { font-size: 1.1rem; }
+    .modal { padding: 1.5rem 1.25rem; }
   }
 </style>
 </head>
@@ -62,31 +127,94 @@
   <h1>惠时尚报表</h1>
   <p class="subtitle">选择要查看的报表</p>
   <div class="cards">
+
     <a class="card" href="./index.html">
       <div class="icon">📊</div>
       <div class="title">平台利润看板</div>
       <div class="desc">多平台利润、退款率、毛利率等财务数据看板</div>
     </a>
+
     <a class="card" href="./sales-channel.html">
       <div class="icon">🏪</div>
       <div class="title">非亚渠道业绩报告</div>
       <div class="desc">非Amazon渠道销售额趋势、运营排名、明细数据</div>
     </a>
-    <a class="card" href="./new-product.html">
+
+    <div class="card" onclick="openModal('./new-product.html','xinpinkaifa123','新品首单分析')">
+      <div class="lock-badge">🔒</div>
       <div class="icon">📦</div>
       <div class="title">新品首单分析</div>
       <div class="desc">新品备货需求、上架跟踪、SKU明细与趋势图表</div>
-    </a>
-    <a class="card" href="./万邑通库存管理.html">
+    </div>
+
+    <div class="card" onclick="openModal('./万邑通库存管理.html','kucunguanli123','万邑通库存管理')">
+      <div class="lock-badge">🔒</div>
       <div class="icon">🗂️</div>
       <div class="title">万邑通库存管理</div>
       <div class="desc">库龄数量分析、库龄成本分析，支持仓库/品类/库龄多维筛选与数据下载</div>
-    </a>
+    </div>
+
     <a class="card" href="./profit-calc/">
       <div class="icon">🧮</div>
       <div class="title">利润计算器</div>
       <div class="desc">TikTok / eBay 多站点利润测算，正向算毛利，反向推采购价，支持批量 Excel 导入导出</div>
     </a>
+
   </div>
+
+  <!-- 密码弹窗 -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal">
+      <div class="modal-title">🔐 <span id="modalTitle">访问验证</span></div>
+      <div class="modal-sub" id="modalSub">请输入访问密码</div>
+      <input type="password" id="pwdInput" placeholder="请输入密码"
+             onkeydown="if(event.key==='Enter')doConfirm()" oninput="clearError()">
+      <div class="modal-error" id="modalError"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">取消</button>
+        <button class="btn-confirm" onclick="doConfirm()">确认进入</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+var _targetUrl = '';
+var _targetPwd = '';
+
+function openModal(url, pwd, title) {
+  _targetUrl = url;
+  _targetPwd = pwd;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent = '请输入密码以访问「' + title + '」';
+  document.getElementById('pwdInput').value = '';
+  document.getElementById('modalError').textContent = '';
+  document.getElementById('modalOverlay').classList.add('show');
+  setTimeout(function(){ document.getElementById('pwdInput').focus(); }, 80);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  _targetUrl = '';
+  _targetPwd = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function clearError() {
+  document.getElementById('modalError').textContent = '';
+}
+
+function doConfirm() {
+  var input = document.getElementById('pwdInput').value;
+  if (input === _targetPwd) {
+    window.location.href = _targetUrl;
+  } else {
+    document.getElementById('modalError').textContent = '密码错误，请重试';
+    document.getElementById('pwdInput').select();
+  }
+}
+</script>
 </body>
 </html>
