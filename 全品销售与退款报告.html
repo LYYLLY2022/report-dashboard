@@ -1,0 +1,1414 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全品销售分析报告 · 2026年4月-5月</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Microsoft YaHei', Arial, sans-serif; background: #f1f5f9; color: #1e293b; min-height: 100vh; }
+
+  .header {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+    padding: 32px 40px; border-bottom: 1px solid #bfdbfe;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-left h1 { font-size: 26px; font-weight: 700; color: #fff; }
+  .header-left p { font-size: 13px; color: #bfdbfe; margin-top: 4px; }
+  .header-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #fff; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 16px; padding: 24px 40px; }
+  .kpi-card {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 12px; padding: 20px 22px; position: relative; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--accent); }
+  .kpi-card .label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; }
+  .kpi-card .value { font-size: 30px; font-weight: 700; color: #0f172a; margin: 8px 0 4px; line-height: 1; }
+  .kpi-card .sub { font-size: 12px; color: #64748b; }
+  .kpi-card .icon { position:absolute; right:16px; top:16px; font-size:22px; opacity:0.15; }
+
+  .section { padding: 0 40px 32px; }
+  .section-title {
+    font-size: 16px; font-weight: 600; color: #334155;
+    padding: 16px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before { content:''; width:4px; height:18px; background:var(--accent,#3b82f6); border-radius:2px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .chart-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .chart-card h3 { font-size: 14px; font-weight: 600; color: #64748b; margin-bottom: 16px; }
+  .chart-wrap { position: relative; }
+
+  .plat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .plat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .plat-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+  .rank-item { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #f8fafc; }
+  .rank-item:last-child { border-bottom: none; }
+  .rank-num { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+  .rank-1 { background:#f59e0b; color:#fff; }
+  .rank-2 { background:#94a3b8; color:#fff; }
+  .rank-3 { background:#b45309; color:#fff; }
+  .rank-4, .rank-5 { background:#e2e8f0; color:#64748b; }
+  .rank-sku { flex:1; overflow:hidden; min-width:0; }
+  .rank-sku-code { display:block; font-size:11px; color:#334155; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-sku-name { display:block; font-size:10px; color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-bar-wrap { width:55px; height:6px; background:#f1f5f9; border-radius:3px; flex-shrink:0; }
+  .rank-bar { height:6px; border-radius:3px; background:var(--plat-color,#3b82f6); }
+  .rank-qty { font-size:12px; color:#94a3b8; width:28px; text-align:right; flex-shrink:0; }
+
+  .insights-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .insight-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:18px 20px; border-left:3px solid var(--c,#3b82f6); box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .insight-card .i-title { font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; }
+  .insight-card .i-body { font-size:13px; color:#334155; line-height:1.6; }
+  .hl { color:#2563eb; font-weight:600; }
+  .hl-r { color:#dc2626; font-weight:600; }
+  .hl-g { color:#16a34a; font-weight:600; }
+  .hl-y { color:#d97706; font-weight:600; }
+
+  .footer { text-align:center; padding:20px; font-size:11px; color:#94a3b8; border-top:1px solid #e2e8f0; background:#fff; }
+
+  /* ===== TAB 3 STYLES ===== */
+  .t3-filter-bar { background:#fff; border-bottom:1px solid #e2e8f0; padding:18px 40px; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+  .t3-filter-row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; }
+  .t3-filter-group { display:flex; flex-direction:column; gap:5px; }
+  .t3-filter-group label { font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.6px; }
+  .t3-search-group { flex:1; min-width:320px; }
+  .t3-search-input { border:1px solid #e2e8f0; border-radius:8px; padding:7px 12px; font-size:13px; color:#334155; outline:none; width:100%; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-search-input:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+  .t3-clear-btn { padding:7px 16px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc; color:#64748b; font-size:13px; cursor:pointer; white-space:nowrap; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-clear-btn:hover { background:#f1f5f9; color:#334155; }
+  .t3-dl-btn { padding:8px 18px; border:none; border-radius:8px; background:#2563eb; color:#fff; font-size:13px; font-weight:600; cursor:pointer; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-dl-btn:hover { background:#1d4ed8; }
+  .t3-dl-btn--excel { background:#16a34a; }
+  .t3-dl-btn--excel:hover { background:#15803d; }
+  .t3-result-info { font-size:13px; color:#64748b; }
+  .t3-result-info strong { color:#334155; }
+
+  /* Multi-select dropdown */
+  .t3-multisel { position:relative; min-width:130px; }
+  .t3-multisel-trigger { border:1px solid #e2e8f0; border-radius:8px; padding:7px 12px; font-size:13px; color:#334155; cursor:pointer; background:#fff; user-select:none; display:flex; justify-content:space-between; align-items:center; gap:8px; white-space:nowrap; }
+  .t3-multisel-trigger:hover { border-color:#94a3b8; }
+  .t3-multisel-trigger.active-filter { border-color:#2563eb; color:#2563eb; background:#eff6ff; }
+  .t3-multisel-menu { display:none; position:absolute; top:calc(100% + 4px); left:0; z-index:200; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.12); min-width:160px; max-height:280px; overflow-y:auto; padding:6px; }
+  .t3-multisel-menu.open { display:block; }
+  .t3-menu-search { width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:5px 8px; font-size:12px; margin-bottom:6px; outline:none; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-menu-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; cursor:pointer; font-size:13px; color:#334155; }
+  .t3-menu-item:hover { background:#f1f5f9; }
+  .t3-menu-item input[type=checkbox] { accent-color:#2563eb; width:14px; height:14px; flex-shrink:0; }
+  .t3-menu-item.select-all { border-bottom:1px solid #f1f5f9; margin-bottom:4px; padding-bottom:8px; color:#2563eb; font-weight:600; }
+
+  /* Table */
+  .t3-table-wrap { padding:0 40px; margin-top:16px; overflow-x:auto; }
+  .t3-table { width:100%; border-collapse:collapse; font-size:13px; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); border:1px solid #e2e8f0; }
+  .t3-table thead { background:#f8fafc; position:sticky; top:0; z-index:10; }
+  .t3-table th { padding:11px 14px; text-align:left; color:#475569; font-weight:600; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+  .t3-table th.num-col { text-align:right; }
+  .t3-table th.sortable { cursor:pointer; user-select:none; }
+  .t3-table th.sortable:hover { color:#2563eb; background:#f0f6ff; }
+  .t3-table th.sort-asc .sort-icon::after, .t3-table th.sort-desc .sort-icon::after { content:''; }
+  .sort-icon { font-size:11px; color:#94a3b8; margin-left:2px; }
+  .t3-table td { padding:9px 14px; border-bottom:1px solid #f1f5f9; color:#334155; vertical-align:middle; }
+  .t3-table td.num-col { text-align:right; font-variant-numeric:tabular-nums; }
+  .t3-table tbody tr:hover td { background:#f8fafc; }
+  .t3-table .sku-cell  { font-family:monospace; font-size:12px; color:#1e40af; white-space:nowrap; }
+  .t3-table .spu-cell  { font-family:monospace; font-size:12px; color:#6d28d9; white-space:nowrap; }
+  .t3-table .name-cell { font-size:12px; color:#334155; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .t3-table .color-cell { font-size:12px; color:#0369a1; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .t3-table .size-cell  { font-size:12px; color:#047857; white-space:nowrap; }
+  .t3-table .no-data   { color:#cbd5e1; }
+  .mom-up   { color:#16a34a; font-weight:600; }
+  .mom-down { color:#dc2626; font-weight:600; }
+  .mom-flat { color:#94a3b8; }
+  .mom-na   { color:#cbd5e1; font-size:12px; }
+  .plat-tag { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap; }
+
+  /* Pagination */
+  .t3-pagination { display:flex; justify-content:center; align-items:center; gap:6px; padding:18px 40px 28px; flex-wrap:wrap; }
+  .t3-pagination button { border:1px solid #e2e8f0; background:#fff; border-radius:6px; padding:5px 12px; font-size:13px; cursor:pointer; color:#475569; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-pagination button:hover { background:#f1f5f9; border-color:#94a3b8; }
+  .t3-pagination button.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+  .t3-pagination .page-info { font-size:13px; color:#64748b; margin:0 8px; }
+
+  /* Tab nav */
+  .tab-nav { display:flex; gap:0; background:#fff; border-bottom:2px solid #e2e8f0; padding:0 40px; }
+  .tab-btn {
+    padding:14px 28px; border:none; background:transparent; cursor:pointer;
+    font-size:14px; font-weight:600; color:#64748b; font-family:'Microsoft YaHei',Arial,sans-serif;
+    border-bottom:3px solid transparent; margin-bottom:-2px; transition:all 0.2s;
+  }
+  .tab-btn:hover { color:#2563eb; background:#f8faff; }
+  .tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; }
+
+  /* Heatmap table */
+  .heat-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .heat-table th { background:#f8fafc; color:#475569; font-weight:600; padding:10px 14px; text-align:center; border:1px solid #e2e8f0; }
+  .heat-table td { padding:9px 14px; text-align:center; border:1px solid #e2e8f0; font-weight:500; font-size:13px; }
+  .heat-table td.row-label { text-align:left; font-weight:700; background:#f8fafc; }
+  .heat-0  { background:#f8fafc; color:#cbd5e1; }
+  .heat-1  { background:#eff6ff; color:#3b82f6; }
+  .heat-2  { background:#dbeafe; color:#2563eb; }
+  .heat-3  { background:#bfdbfe; color:#1d4ed8; }
+  .heat-4  { background:#93c5fd; color:#1e40af; }
+  .heat-5  { background:#60a5fa; color:#fff; }
+  .heat-6  { background:#3b82f6; color:#fff; }
+  .heat-7  { background:#2563eb; color:#fff; }
+
+  /* Seller SKU table */
+  .sku-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .sku-table th { background:#f8fafc; color:#475569; font-weight:600; padding:10px 14px; text-align:left; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+  .sku-table td { padding:9px 14px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+  .sku-table tr:hover td { background:#f8fafc; }
+  .sku-badge { display:inline-block; background:#eff6ff; color:#2563eb; border-radius:4px; padding:2px 7px; font-family:monospace; font-size:11px; margin:2px 3px 2px 0; }
+  .sku-qty { color:#94a3b8; font-size:11px; }
+
+  /* ===== RESPONSIVE — TABLET (≤900px) ===== */
+  @media (max-width: 900px) {
+    .header { padding: 20px 24px; }
+    .kpi-grid { padding: 16px 24px; gap: 12px; }
+    .section { padding: 0 24px 24px; }
+    .t3-filter-bar { padding: 14px 24px; }
+    .t3-table-wrap { padding: 0 16px; }
+    .t3-pagination { padding: 14px 24px 20px; }
+    .tab-nav { padding: 0 16px; }
+    .tab-btn { padding: 12px 18px; font-size: 13px; }
+    .plat-grid { grid-template-columns: repeat(2,1fr); }
+    .insights-grid { grid-template-columns: repeat(2,1fr); }
+  }
+
+  /* ===== RESPONSIVE — MOBILE (≤640px) ===== */
+  @media (max-width: 640px) {
+    /* Header */
+    .header {
+      padding: 14px 16px; flex-wrap: wrap; gap: 8px;
+    }
+    .header-left h1 { font-size: 19px; }
+    .header-left p { font-size: 11px; line-height: 1.5; }
+    .header-badge { padding: 4px 12px; font-size: 11px; }
+
+    /* Tab nav — 横向滚动，不换行 */
+    .tab-nav {
+      padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; white-space: nowrap; display: block;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      display: inline-block; padding: 12px 14px; font-size: 12px; white-space: nowrap;
+    }
+
+    /* KPI grid: 2 列 */
+    .kpi-grid {
+      grid-template-columns: repeat(2,1fr);
+      gap: 8px; padding: 12px 16px;
+    }
+    .kpi-card { padding: 14px 14px; }
+    .kpi-card .value { font-size: 24px; }
+    .kpi-card .label { font-size: 11px; }
+
+    /* Sections */
+    .section { padding: 0 16px 20px; }
+    .section-title { font-size: 14px; padding: 12px 0; margin-bottom: 14px; }
+
+    /* Charts: 单列 + 降低高度 */
+    .grid-2 { grid-template-columns: 1fr; gap: 14px; }
+    .chart-wrap[style*="height:300px"] { height: 220px !important; }
+    .chart-wrap[style*="height:360px"] { height: 240px !important; }
+    .chart-wrap[style*="height:240px"] { height: 200px !important; }
+    .chart-wrap[style*="height:220px"] { height: 180px !important; }
+
+    /* Platform grid: 单列 */
+    .plat-grid { grid-template-columns: 1fr; }
+    .insights-grid { grid-template-columns: 1fr; }
+
+    /* Tab 3 filter bar */
+    .t3-filter-bar { padding: 12px 16px; }
+    .t3-filter-row { gap: 10px; }
+    .t3-filter-group { min-width: calc(50% - 5px); flex-grow: 1; }
+    .t3-multisel { min-width: unset; width: 100%; }
+    .t3-multisel-trigger { min-height: 40px; }
+    .t3-search-input { min-height: 40px; font-size: 16px; } /* iOS 需要≥16px 防止自动缩放 */
+    .t3-search-group { min-width: 100% !important; }
+    .t3-clear-btn, .t3-dl-btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
+
+    /* Tab 3 result info */
+    .t3-result-info { font-size: 12px; line-height: 1.6; }
+
+    /* Tab 3 table */
+    .t3-table-wrap {
+      padding: 0 8px;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+    .t3-table { font-size: 12px; }
+    .t3-table th { padding: 8px 10px; font-size: 11px; }
+    .t3-table td { padding: 7px 10px; }
+    .t3-table .name-cell { max-width: 140px; }
+
+    /* Pagination */
+    .t3-pagination { padding: 12px 16px 18px; gap: 4px; }
+    .t3-pagination button { padding: 6px 10px; font-size: 12px; min-height: 36px; }
+
+    /* Heatmap */
+    .heat-table th, .heat-table td { padding: 6px 8px; font-size: 11px; }
+
+    /* 表格滚动提示 */
+    .t3-table-wrap::before {
+      content: '← 左右滑动查看更多列 →';
+      display: block; text-align: center;
+      font-size: 11px; color: #94a3b8;
+      padding: 4px 0 6px; letter-spacing: 0.3px;
+    }
+  }
+
+  /* ===== RESPONSIVE — SMALL MOBILE (≤400px) ===== */
+  @media (max-width: 400px) {
+    .kpi-card .value { font-size: 20px; }
+    .tab-btn { padding: 11px 12px; font-size: 11px; }
+    .t3-filter-group { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>📊 全品销售分析报告</h1>
+    <!-- GEN:HEADER_P --><p>数据周期：2026年4月1日 — 2026年5月12日 &nbsp;|&nbsp; 来源：订单导出（按平台SKU）&nbsp;|&nbsp; 共 25,069 条记录</p><!-- /GEN:HEADER_P -->
+  </div>
+  <!-- GEN:HEADER_BADGE --><div class="header-badge">42天 · 9平台</div><!-- /GEN:HEADER_BADGE -->
+</div>
+
+<!-- Tab Nav -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab(1)">📦 SKU 销售分析</button>
+  <button class="tab-btn" onclick="switchTab(2)">🏪 平台 · 店铺 · 销售综合分析</button>
+  <button class="tab-btn" onclick="switchTab(3)">📋 SKU 销售明细</button>
+</div>
+
+<div id="tab1">
+<!-- GEN:T1_KPI -->
+<div class="kpi-grid">
+  <div class="kpi-card" style="--accent:#3b82f6">
+    <span class="icon">📋</span>
+    <div class="label">总订单数</div>
+    <div class="value">25,069</div>
+    <div class="sub">有效：24,238 &nbsp; 取消：831</div>
+  </div>
+  <div class="kpi-card" style="--accent:#10b981">
+    <span class="icon">📦</span>
+    <div class="label">总销售量（件）</div>
+    <div class="value">27,852</div>
+    <div class="sub">含TEMU全托管 1,296 件</div>
+  </div>
+  <div class="kpi-card" style="--accent:#6366f1">
+    <span class="icon">🏷️</span>
+    <div class="label">活跃产品SKU数</div>
+    <div class="value">4,202</div>
+    <div class="sub">平台SKU：12,844</div>
+  </div>
+  <div class="kpi-card" style="--accent:#f59e0b">
+    <span class="icon">📅</span>
+    <div class="label">日均订单量</div>
+    <div class="value">577</div>
+    <div class="sub">峰值：706（4月20日）</div>
+  </div>
+  <div class="kpi-card" style="--accent:#ef4444">
+    <span class="icon">❌</span>
+    <div class="label">整体取消率</div>
+    <div class="value">3.3%</div>
+    <div class="sub">831笔取消订单</div>
+  </div>
+</div>
+<!-- /GEN:T1_KPI -->
+
+<!-- Section 1: Daily Trend -->
+<div class="section">
+  <!-- GEN:T1_DAILY_TITLE --><div class="section-title" style="--accent:#3b82f6">每日订单与销售量趋势（2026/04/01 — 2026/05/12）</div><!-- /GEN:T1_DAILY_TITLE -->
+  <div class="chart-card">
+    <div class="chart-wrap" style="height:300px">
+      <canvas id="dailyChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section 2: Top 20 SKU -->
+<div class="section">
+  <div class="section-title" style="--accent:#10b981">Top 20 产品SKU · 销售量 &amp; 销售额排行</div>
+  <div class="chart-card">
+    <div class="chart-wrap" style="height:360px">
+      <canvas id="top20Chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section 3: Platform + Weekly -->
+<div class="section">
+  <div class="section-title" style="--accent:#6366f1">平台订单占比 &amp; Top 6 SKU 周趋势</div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>各平台订单占比（有效订单）</h3>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="platChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Top 6 SKU · 按周销售量（W1=4/1起，每7天一周）</h3>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="weeklyChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 4: Cancel Rate -->
+<div class="section">
+  <!-- GEN:T1_CANCEL_TITLE --><div class="section-title" style="--accent:#ef4444">Top 10 SKU 订单取消率（红色 = 高于均值 3.3%）</div><!-- /GEN:T1_CANCEL_TITLE -->
+  <div class="chart-card">
+    <div class="chart-wrap" style="height:220px">
+      <canvas id="cancelChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section 5: Platform Top SKU -->
+<div class="section">
+  <div class="section-title" style="--accent:#f59e0b">各平台 Top 5 销售SKU（按销售量）</div>
+  <!-- GEN:T1_PLAT_TOP --><div class="plat-grid">
+    <div class="plat-card">
+      <h4 style="color:#ee1d52">🎵 TIKTOK SHOP &nbsp;<small style="color:#64748b;font-weight:400">9,568单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TKAL08001AF5BW200A01</div><div class="rank-sku-name">8"一体鸭舌帽子发波波头卷发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ee1d52"></div></div><div class="rank-qty">287</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-010</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:75%;background:#ee1d52"></div></div><div class="rank-qty">215</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-001</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:61%;background:#ee1d52"></div></div><div class="rank-qty">176</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">T1728</div><div class="rank-sku-name">16"一体鸭舌帽大波浪</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:56%;background:#ee1d52"></div></div><div class="rank-qty">161</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-H43</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:55%;background:#ee1d52"></div></div><div class="rank-qty">159</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#e53238">🛒 eBay &nbsp;<small style="color:#64748b;font-weight:400">8,118单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TH0010&5</div><div class="rank-sku-name">双面胶片(蓝色)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#e53238"></div></div><div class="rank-qty">49</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T1371</div><div class="rank-sku-name">蓬蓬发圈(45g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:88%;background:#e53238"></div></div><div class="rank-qty">43</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1369</div><div class="rank-sku-name">蓬蓬发圈(45g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:82%;background:#e53238"></div></div><div class="rank-qty">40</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">THQ-D04</div><div class="rank-sku-name">空气刘海</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:78%;background:#e53238"></div></div><div class="rank-qty">38</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">T1367</div><div class="rank-sku-name">蓬蓬发圈(45g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:69%;background:#e53238"></div></div><div class="rank-qty">34</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#fa6338">🛍 TEMU &nbsp;<small style="color:#64748b;font-weight:400">2,713单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T1093</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#fa6338"></div></div><div class="rank-qty">42</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">THT2201</div><div class="rank-sku-name">20pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:71%;background:#fa6338"></div></div><div class="rank-qty">30</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">THT2001</div><div class="rank-sku-name">20pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:71%;background:#fa6338"></div></div><div class="rank-qty">30</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">TWD009BT22-P47</div><div class="rank-sku-name">分层曲发抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:60%;background:#fa6338"></div></div><div class="rank-qty">25</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">HGT001SC22-4P27</div><div class="rank-sku-name">20pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:57%;background:#fa6338"></div></div><div class="rank-qty">24</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#ff6a00">🌐 AliExpress &nbsp;<small style="color:#64748b;font-weight:400">1,828单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T430</div><div class="rank-sku-name">20"绳子发曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ff6a00"></div></div><div class="rank-qty">25</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">THEH1001BAA02AAA0033</div><div class="rank-sku-name">手勾鬓角(A型)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:96%;background:#ff6a00"></div></div><div class="rank-qty">24</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1093</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:92%;background:#ff6a00"></div></div><div class="rank-qty">23</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">TFAL18A81AH4AW200A01</div><div class="rank-sku-name">6x6"机扎刘海大发块18"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:84%;background:#ff6a00"></div></div><div class="rank-qty">21</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">TFAL18A96AH4AW200A01</div><div class="rank-sku-name">6x6"机扎刘海大发块18"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:80%;background:#ff6a00"></div></div><div class="rank-qty">20</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#00bcd4">📦 TEMU 全托管 &nbsp;<small style="color:#64748b;font-weight:400">1,296单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TAGL22H53AA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#00bcd4"></div></div><div class="rank-qty">38</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TWD007ST12-01B</div><div class="rank-sku-name">12"长齿插梳抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:92%;background:#00bcd4"></div></div><div class="rank-qty">35</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T2465</div><div class="rank-sku-name">20"绳子发曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:82%;background:#00bcd4"></div></div><div class="rank-qty">31</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">TDG003LT11-P12</div><div class="rank-sku-name">发箍刘海发块</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:71%;background:#00bcd4"></div></div><div class="rank-qty">27</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">TWD007ST12-P43</div><div class="rank-sku-name">12"长齿插梳抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:68%;background:#00bcd4"></div></div><div class="rank-qty">26</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#c94b9e">👗 SHEIN &nbsp;<small style="color:#64748b;font-weight:400">1,114单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T1631</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#c94b9e"></div></div><div class="rank-qty">26</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T1093</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:81%;background:#c94b9e"></div></div><div class="rank-qty">21</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1690</div><div class="rank-sku-name">2夹刘海</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:65%;background:#c94b9e"></div></div><div class="rank-qty">17</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">T1094</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:62%;background:#c94b9e"></div></div><div class="rank-qty">16</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">TWD009BT22-P47</div><div class="rank-sku-name">分层曲发抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:58%;background:#c94b9e"></div></div><div class="rank-qty">15</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#0071ce">🏪 Walmart &nbsp;<small style="color:#64748b;font-weight:400">861单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">THT14-12P613-TT</div><div class="rank-sku-name">10pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#0071ce"></div></div><div class="rank-qty">17</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">HFM038SC10-02</div><div class="rank-sku-name">0.75x6.25"手勾蕾丝发际线(中分款)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:88%;background:#0071ce"></div></div><div class="rank-qty">15</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1633</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:65%;background:#0071ce"></div></div><div class="rank-qty">11</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">T1632</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:65%;background:#0071ce"></div></div><div class="rank-qty">11</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">T1255</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:59%;background:#0071ce"></div></div><div class="rank-qty">10</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#64748b">🏠 线下 &nbsp;<small style="color:#64748b;font-weight:400">34单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T2592</div><div class="rank-sku-name">6"一体鸭舌黑帽子发波波头</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#64748b"></div></div><div class="rank-qty">3</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TMM017GT18-P18</div><div class="rank-sku-name">18"一体米色鸭舌帽子发(水波纹)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#64748b"></div></div><div class="rank-qty">3</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TW1633</div><div class="rank-sku-name">直刘海乐乐造型头套</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:67%;background:#64748b"></div></div><div class="rank-qty">2</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">T1057</div><div class="rank-sku-name">毛毛虫(85g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:67%;background:#64748b"></div></div><div class="rank-qty">2</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">HKE002SG12-2R</div><div class="rank-sku-name">5片7夹蕾丝卡子发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:33%;background:#64748b"></div></div><div class="rank-qty">1</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#96bf48">🟢 Shopify &nbsp;<small style="color:#64748b;font-weight:400">2单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">THID18002AJD2AEB0007</div><div class="rank-sku-name">7x13cm 机扎+机制刘海发块</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#96bf48"></div></div><div class="rank-qty">1</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">THIB18004AID2AEB0007</div><div class="rank-sku-name">7x13cm 机扎+机制中分发块(前额手勾边)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#96bf48"></div></div><div class="rank-qty">1</div></div>
+    </div>
+  </div><!-- /GEN:T1_PLAT_TOP -->
+</div>
+
+<!-- Section 6: Insights -->
+<div class="section">
+  <div class="section-title" style="--accent:#a78bfa">核心洞察</div>
+  <div class="insights-grid">
+    <div class="insight-card" style="--c:#3b82f6">
+      <div class="i-title">🏆 销量冠军</div>
+      <div class="i-body"><span class="hl">TKAL08001AF5BW200A01</span> 以 292 件稳居总销量第一，<span class="hl-g">取消率仅 0.7%</span>，几乎全量来自 TikTok Shop（287件），是当前平台核心爆款。</div>
+    </div>
+    <div class="insight-card" style="--c:#10b981">
+      <div class="i-title">📈 TikTok Shop 主导</div>
+      <div class="i-body">TikTok Shop 以 <span class="hl">9,568 单</span>领跑，占有效订单 <span class="hl">39.5%</span>；eBay（8,118单）紧随，两者合计占比超 <span class="hl">73%</span>。</div>
+    </div>
+    <div class="insight-card" style="--c:#ef4444">
+      <div class="i-title">⚠️ 高取消率预警</div>
+      <div class="i-body"><span class="hl-r">TMM011BT08-010</span> 取消率 <span class="hl-r">6.0%</span>，<span class="hl-y">T1728</span> 达 5.5%，均远超均值 3.3%，需排查供货或定价问题。</div>
+    </div>
+    <div class="insight-card" style="--c:#6366f1">
+      <div class="i-title">🔁 跨平台共鸣SKU</div>
+      <div class="i-body"><span class="hl">T1093</span> 在 TEMU（42件）、AliExpress（23件）、SHEIN（21件）三平台均跻身 Top 3，是最具跨平台竞争力的 SKU。</div>
+    </div>
+    <div class="insight-card" style="--c:#f59e0b">
+      <div class="i-title">📊 峰值日分析</div>
+      <div class="i-body"><span class="hl-y">4月20日</span> 达全期峰值 706 单，较日均高出 <span class="hl">+22%</span>；周末订单量普遍偏低，工作日存在明显周期性规律。</div>
+    </div>
+    <div class="insight-card" style="--c:#34d399">
+      <div class="i-title">🌐 多货币市场格局</div>
+      <div class="i-body">美元订单 13,267 单占比最高，GBP（7,377单）次之，英美为核心市场；欧元（2,117单）及澳元（1,530单）仍有增长空间。</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab1 -->
+
+<!-- ===== TAB 2: 综合分析 ===== -->
+<div id="tab2" style="display:none">
+
+<!-- GEN:T2_KPI -->
+<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+  <div class="kpi-card" style="--accent:#6366f1">
+    <span class="icon">🏪</span>
+    <div class="label">活跃店铺数</div>
+    <div class="value">145+</div>
+    <div class="sub">Top店铺：MLHR（2,121单）</div>
+  </div>
+  <div class="kpi-card" style="--accent:#10b981">
+    <span class="icon">🌍</span>
+    <div class="label">覆盖站点数</div>
+    <div class="value">23</div>
+    <div class="sub">主站：US · UK · AU · DE</div>
+  </div>
+  <div class="kpi-card" style="--accent:#f59e0b">
+    <span class="icon">👤</span>
+    <div class="label">销售人员数</div>
+    <div class="value">43</div>
+    <div class="sub">Top：柯伯霖（2,750件）</div>
+  </div>
+  <div class="kpi-card" style="--accent:#3b82f6">
+    <span class="icon">📊</span>
+    <div class="label">平台数</div>
+    <div class="value">9</div>
+    <div class="sub">TIKTOK SHOP · eBay · TEMU</div>
+  </div>
+</div>
+<!-- /GEN:T2_KPI -->
+
+<!-- Shop + Site -->
+<div class="section">
+  <div class="section-title" style="--accent:#6366f1">店铺订单排行 &amp; 站点分布</div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Top 15 店铺 · 订单量</h3>
+      <div class="chart-wrap" style="height:420px">
+        <canvas id="shopChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>销售站点分布（有效订单量）</h3>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="siteChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Seller analysis -->
+<div class="section">
+  <div class="section-title" style="--accent:#f59e0b">销售人员业绩分析（全员）</div>
+  <div class="chart-card">
+    <h3>各销售 · 销量（按平台拆分堆叠）</h3>
+    <div class="chart-wrap" style="height:1050px">
+      <canvas id="sellerChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Platform x Site heatmap -->
+<div class="section">
+  <div class="section-title" style="--accent:#10b981">平台 × 站点 · 订单热力矩阵</div>
+  <div class="chart-card">
+    <div id="heatmapTable" style="overflow-x:auto"></div>
+  </div>
+</div>
+
+<!-- Shop top SKU cards -->
+<div class="section">
+<!-- GEN:T2_SHOP_TOP --><div class="section-title" style="--accent:#3b82f6">Top 8 店铺 · 主销SKU</div>
+  <div class="plat-grid">
+    <div class="plat-card">
+      <h4 style="color:#6366f1">🏪 MLHR <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 2,121单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TKAL08001AF5BW200A01</div><div class="rank-sku-name">8"一体鸭舌帽子发波波头卷发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#6366f1"></div></div><div class="rank-qty">266</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-001</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:52%;background:#6366f1"></div></div><div class="rank-qty">137</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TKAL0802AAF5BW200A01</div><div class="rank-sku-name">8"一体鸭舌帽子发波波头卷发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:35%;background:#6366f1"></div></div><div class="rank-qty">93</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#3b82f6">🏪 HWM <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 1,441单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T1092</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#3b82f6"></div></div><div class="rank-qty">90</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T1094</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:90%;background:#3b82f6"></div></div><div class="rank-qty">81</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1093</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:77%;background:#3b82f6"></div></div><div class="rank-qty">69</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#ee1d52">🏪 HWE <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 1,360单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-010</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ee1d52"></div></div><div class="rank-qty">85</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T1094</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:61%;background:#ee1d52"></div></div><div class="rank-qty">52</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-H43</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:61%;background:#ee1d52"></div></div><div class="rank-qty">52</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#0071ce">🏪 ULQS <small style="color:#94a3b8;font-weight:400">Walmart · 731单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">THT14-12P613-TT</div><div class="rank-sku-name">10pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#0071ce"></div></div><div class="rank-qty">17</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">HFM038SC10-02</div><div class="rank-sku-name">0.75x6.25"手勾蕾丝发际线(中分款)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:88%;background:#0071ce"></div></div><div class="rank-qty">15</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1632</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:65%;background:#0071ce"></div></div><div class="rank-qty">11</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#14b8a6">🏪 LWS <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 713单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TDG002LT05-001</div><div class="rank-sku-name">发箍刘海</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#14b8a6"></div></div><div class="rank-qty">56</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TDG002LT05-012</div><div class="rank-sku-name">发箍刘海</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:70%;background:#14b8a6"></div></div><div class="rank-qty">39</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TWC011ST08-010</div><div class="rank-sku-name">抓夹蓬蓬马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:52%;background:#14b8a6"></div></div><div class="rank-qty">29</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#f59e0b">🏪 snoilite <small style="color:#94a3b8;font-weight:400">TEMU 全托管 · 695单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TAGL22H53AA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#f59e0b"></div></div><div class="rank-qty">38</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T2465</div><div class="rank-sku-name">20"绳子发曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:82%;background:#f59e0b"></div></div><div class="rank-qty">31</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TWD007ST12-01B</div><div class="rank-sku-name">12"长齿插梳抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:71%;background:#f59e0b"></div></div><div class="rank-qty">27</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#ef4444">🏪 UGW <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 660单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TAGL22H49AA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ef4444"></div></div><div class="rank-qty">35</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TAGL2204AAA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:91%;background:#ef4444"></div></div><div class="rank-qty">32</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TAGL22H51AA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:86%;background:#ef4444"></div></div><div class="rank-qty">30</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#ec4899">🏪 IHE <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 627单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">HYI004SC22-60R</div><div class="rank-sku-name">50pcs铁丝发(35g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ec4899"></div></div><div class="rank-qty">22</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TH-CI2470</div><div class="rank-sku-name">50pcs铁丝发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:77%;background:#ec4899"></div></div><div class="rank-qty">17</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TH-CI2260</div><div class="rank-sku-name">50pcs铁丝发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:73%;background:#ec4899"></div></div><div class="rank-qty">16</div></div>
+    </div>
+  </div><!-- /GEN:T2_SHOP_TOP -->
+</div>
+
+<!-- Seller top SKU table -->
+<div class="section">
+  <div class="section-title" style="--accent:#ec4899">销售人员 Top 8 · 个人主销SKU</div>
+  <div class="chart-card" style="overflow-x:auto">
+    <table id="sellerSkuTable" style="width:100%;border-collapse:collapse;font-size:13px"></table>
+  </div>
+</div>
+
+</div><!-- /tab2 -->
+
+<!-- ===== TAB 3: SKU销售明细 ===== -->
+<div id="tab3" style="display:none">
+
+  <!-- Filter bar -->
+  <div class="t3-filter-bar">
+    <!-- 第一行：筛选框（多选下拉） -->
+    <div class="t3-filter-row">
+      <div class="t3-filter-group">
+        <label>平台</label>
+        <div class="t3-multisel" id="f-plat">
+          <div class="t3-multisel-trigger" onclick="toggleDrop('f-plat')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-plat-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group">
+        <label>店铺</label>
+        <div class="t3-multisel" id="f-shop">
+          <div class="t3-multisel-trigger" onclick="toggleDrop('f-shop')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-shop-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group">
+        <label>站点</label>
+        <div class="t3-multisel" id="f-site">
+          <div class="t3-multisel-trigger" onclick="toggleDrop('f-site')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-site-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group">
+        <label>销售</label>
+        <div class="t3-multisel" id="f-seller">
+          <div class="t3-multisel-trigger" onclick="toggleDrop('f-seller')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-seller-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group">
+        <label>尺码</label>
+        <div class="t3-multisel" id="f-size">
+          <div class="t3-multisel-trigger" onclick="toggleDrop('f-size')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-size-menu"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="t3-clear-btn" onclick="clearAll()">重置</button>
+      </div>
+    </div>
+    <!-- 第二行：搜索框（文本输入） -->
+    <div class="t3-filter-row" style="margin-top:10px">
+      <div class="t3-filter-group t3-search-group" style="flex:1.5;min-width:180px">
+        <label>SKU 精确搜索 <span style="color:#94a3b8;font-weight:400">（多个用逗号或空格分隔）</span></label>
+        <input id="sku-search" class="t3-search-input" type="text" placeholder="例：T1093, TMM011BT08-010" oninput="applyFilters()">
+      </div>
+      <div class="t3-filter-group" style="flex:1;min-width:140px">
+        <label>SPU 搜索</label>
+        <input id="spu-search" class="t3-search-input" type="text" placeholder="例：T-MZ, TMM011" oninput="applyFilters()">
+      </div>
+      <div class="t3-filter-group" style="flex:2;min-width:180px">
+        <label>产品名称搜索</label>
+        <input id="name-search" class="t3-search-input" type="text" placeholder="例：波浪、鸭舌帽" oninput="applyFilters()">
+      </div>
+      <div class="t3-filter-group" style="flex:1;min-width:140px">
+        <label>颜色搜索</label>
+        <input id="color-search" class="t3-search-input" type="text" placeholder="例：黑色、白色" oninput="applyFilters()">
+      </div>
+    </div>
+    <div class="t3-filter-row" style="margin-top:10px;align-items:center;justify-content:space-between">
+      <div class="t3-result-info" id="t3-result-info">加载中…</div>
+      <div style="display:flex;gap:10px">
+        <button class="t3-dl-btn" onclick="downloadCSV()">⬇ 下载 CSV</button>
+        <button class="t3-dl-btn t3-dl-btn--excel" onclick="downloadExcel()">⬇ 下载 Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table: thead generated dynamically by JS -->
+  <div class="t3-table-wrap">
+    <table class="t3-table" id="t3-table">
+      <thead id="t3-thead"></thead>
+      <tbody id="t3-tbody"></tbody>
+    </table>
+  </div>
+  <div class="t3-pagination" id="t3-pagination"></div>
+
+</div><!-- /tab3 -->
+
+<!-- GEN:FOOTER --><div class="footer">生成时间：2026-05-13 17:12 &nbsp;·&nbsp; 数据来源：licheng202605131005订单导出(按照平台SKU导出).xlsx &nbsp;·&nbsp; 25,069 条订单记录 · 42天</div><!-- /GEN:FOOTER -->
+
+<script>
+const C = ['#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1','#ec4899','#14b8a6','#f97316','#a78bfa','#22d3ee','#84cc16','#fb923c','#e879f9','#38bdf8','#4ade80','#facc15','#f472b6','#a3e635','#34d399','#60a5fa'];
+
+// 1. Daily Trend
+const days = ["04-01","04-02","04-03","04-04","04-05","04-06","04-07","04-08","04-09","04-10","04-11","04-12","04-13","04-14","04-15","04-16","04-17","04-18","04-19","04-20","04-21","04-22","04-23","04-24","04-25","04-26","04-27","04-28","04-29","04-30","05-01","05-02","05-03","05-04","05-05","05-06","05-07","05-08","05-09","05-10","05-11","05-12"];
+const dOrders = [607,626,590,519,447,565,548,571,588,534,529,495,657,571,622,600,584,547,532,706,592,603,578,645,506,524,563,596,613,601,603,587,539,613,572,578,646,624,505,529,584,599];
+const dQty = [693,697,733,626,532,619,601,663,706,652,615,573,772,618,695,679,723,637,627,803,699,686,627,821,591,604,649,653,680,699,740,712,632,697,636,663,693,685,564,566,636,655];
+
+new Chart(document.getElementById('dailyChart'), {
+  type: 'bar',
+  data: {
+    labels: days,
+    datasets: [
+      { label:'订单数', data: dOrders, backgroundColor:'rgba(59,130,246,0.45)', borderColor:'#3b82f6', borderWidth:1, yAxisID:'y', order:2 },
+      { label:'销售量（件）', data: dQty, type:'line', borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.08)', borderWidth:2, pointRadius:2, tension:0.3, fill:true, yAxisID:'y1', order:1 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ labels:{ color:'#475569', font:{size:12} } },
+      tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1 }
+    },
+    scales:{
+      x:{ ticks:{ color:'#64748b', font:{size:9}, maxRotation:45 }, grid:{ color:'#f1f5f9' } },
+      y:{ ticks:{ color:'#64748b' }, grid:{ color:'#f1f5f9' }, title:{ display:true, text:'订单数', color:'#64748b' } },
+      y1:{ position:'right', ticks:{ color:'#64748b' }, grid:{ drawOnChartArea:false }, title:{ display:true, text:'销售量（件）', color:'#64748b' } }
+    }
+  }
+});
+
+// 2. Top 20 SKU
+const skus = ["TKAL08001AF5BW200A01","T1093","TMM011BT08-010","T1094","T1092","TMM011BT08-001","T1728","TMM011BT08-H43","TMM011BT08-Z28","T2502","T1255","TKAL0802AAF5BW200A01","TMM011BT08-06A","T1729","TWC011ST08-T45","T2597","TKAL0806AAF5BW200A01","HFM038SC10-02","TWC011ST08-01B","TAGL22H51AA2BW185A03"];
+const qty  = [292,258,220,186,183,178,173,159,138,135,115,112,108,98,97,95,94,87,87,84];
+const amt  = [9999.94,4683.53,6897.01,4479.64,3945.75,4882.99,5507.6,5082.25,3532.18,3077.31,2230.45,3677.26,2993.49,3028.05,2477.61,3008.33,3367.41,2365.6,1710.15,1506.8];
+
+new Chart(document.getElementById('top20Chart'), {
+  type:'bar',
+  data:{
+    labels: skus,
+    datasets:[
+      { label:'销售量（件）', data:qty, backgroundColor: skus.map((_,i)=>C[i]+'bb'), borderColor: skus.map((_,i)=>C[i]), borderWidth:1, yAxisID:'y', order:2 },
+      { label:'销售额（原币合计）', data:amt, type:'line', borderColor:'#fbbf24', backgroundColor:'transparent', borderWidth:2, pointRadius:4, pointBackgroundColor:'#fbbf24', yAxisID:'y1', order:1 }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ labels:{ color:'#475569', font:{size:12} } },
+      tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1 }
+    },
+    scales:{
+      x:{ ticks:{ color:'#64748b', font:{size:9}, maxRotation:35 }, grid:{ color:'#f1f5f9' } },
+      y:{ ticks:{ color:'#64748b' }, grid:{ color:'#f1f5f9' }, title:{ display:true, text:'销售量（件）', color:'#64748b' } },
+      y1:{ position:'right', ticks:{ color:'#64748b' }, grid:{ drawOnChartArea:false }, title:{ display:true, text:'销售额（原币）', color:'#64748b' } }
+    }
+  }
+});
+
+// 3. Platform donut
+new Chart(document.getElementById('platChart'), {
+  type:'doughnut',
+  data:{
+    labels:["TIKTOK SHOP","eBay","TEMU","AliExpress","TEMU 全托管","SHEIN","Walmart","线下","Shopify"],
+    datasets:[{ data:[9568,8118,2713,1828,1296,1114,861,34,2], backgroundColor:["#ee1d52","#e53238","#fa6338","#ff6a00","#00bcd4","#c94b9e","#0071ce","#64748b","#96bf48"], borderColor:'#fff', borderWidth:2 }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ position:'right', labels:{ color:'#475569', font:{size:11}, padding:10 } },
+      tooltip:{
+        backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1,
+        callbacks:{ label: ctx => { const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ` ${ctx.raw.toLocaleString()}单 (${(ctx.raw/t*100).toFixed(1)}%)`; } }
+      }
+    }
+  }
+});
+
+// 4. Weekly trend top 6
+const wLabels = ["W1 (4/1)","W2 (4/8)","W3 (4/15)","W4 (4/22)","W5 (4/29)","W6 (5/6)"];
+const wData = {"TKAL08001AF5BW200A01":[54,56,47,40,42,53],"T1093":[26,59,39,49,47,38],"TMM011BT08-010":[62,28,41,44,18,27],"T1094":[32,32,30,35,33,24],"T1092":[9,32,32,34,40,36],"TMM011BT08-001":[26,20,36,38,32,26]};
+const wC = ['#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1','#ec4899'];
+
+new Chart(document.getElementById('weeklyChart'), {
+  type:'line',
+  data:{
+    labels: wLabels,
+    datasets: Object.entries(wData).map(([sku,d],i)=>({
+      label:sku, data:d, borderColor:wC[i], backgroundColor:'transparent',
+      borderWidth:2, pointRadius:4, pointBackgroundColor:wC[i], tension:0.3
+    }))
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ labels:{ color:'#475569', font:{size:10}, boxWidth:12 } },
+      tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1 }
+    },
+    scales:{
+      x:{ ticks:{ color:'#64748b', font:{size:10} }, grid:{ color:'#f1f5f9' } },
+      y:{ ticks:{ color:'#64748b' }, grid:{ color:'#f1f5f9' }, title:{ display:true, text:'销售量（件）', color:'#64748b' } }
+    }
+  }
+});
+
+// 5. Cancel rate
+const cSkus = ["TKAL08001AF5BW200A01","TMM011BT08-010","T1093","T1094","T1092","T1728","TMM011BT08-001","TMM011BT08-H43","TMM011BT08-Z28","T2502"];
+const cRates = [0.7,6,2.6,1.6,2.2,5.5,1.7,4.2,0.7,1.5];
+const avg = 3.3;
+
+new Chart(document.getElementById('cancelChart'), {
+  type:'bar',
+  data:{
+    labels: cSkus,
+    datasets:[{
+      label:'取消率 (%)', data: cRates,
+      backgroundColor: cRates.map(r=>r>avg?'rgba(239,68,68,0.7)':'rgba(59,130,246,0.6)'),
+      borderColor: cRates.map(r=>r>avg?'#ef4444':'#3b82f6'),
+      borderWidth:1
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ display:false },
+      tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1, callbacks:{ label: ctx=>`取消率: ${ctx.raw}%（均值: ${avg}%）` } }
+    },
+    scales:{
+      x:{ ticks:{ color:'#64748b', font:{size:10}, maxRotation:20 }, grid:{ color:'#f1f5f9' } },
+      y:{ ticks:{ color:'#64748b', callback: v=>v+'%' }, grid:{ color:'#f1f5f9' }, title:{ display:true, text:'取消率 (%)', color:'#64748b' }, max:8,
+        afterDatasetDraw(chart) {
+          const ctx2 = chart.ctx;
+          const yScale = chart.scales.y;
+          const xScale = chart.scales.x;
+          const y = yScale.getPixelForValue(avg);
+          ctx2.save();
+          ctx2.beginPath();
+          ctx2.moveTo(xScale.left, y);
+          ctx2.lineTo(xScale.right, y);
+          ctx2.strokeStyle = '#fbbf24';
+          ctx2.lineWidth = 1.5;
+          ctx2.setLineDash([6,4]);
+          ctx2.stroke();
+          ctx2.fillStyle = '#fbbf24';
+          ctx2.font = '11px Arial';
+          ctx2.fillText('均值 3.3%', xScale.right - 60, y - 4);
+          ctx2.restore();
+        }
+      }
+    }
+  }
+});
+
+// ===== TAB SWITCHING =====
+function switchTab(n) {
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('tab'+i);
+    if(el) el.style.display = n===i ? '' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===n-1));
+  if(n===2 && !window._tab2Init) { initTab2(); window._tab2Init=true; }
+  if(n===3 && !window._tab3Init) { initTab3(); window._tab3Init=true; }
+}
+
+// ===== TAB 3 — 全动态月份框架 =====
+const PLAT_COLORS = {
+  'TIKTOK SHOP': {bg:'#fce7f3',color:'#be185d'},
+  'eBay':        {bg:'#fee2e2',color:'#b91c1c'},
+  'TEMU':        {bg:'#ffedd5',color:'#c2410c'},
+  'AliExpress':  {bg:'#fef3c7',color:'#b45309'},
+  'SHEIN':       {bg:'#f3e8ff',color:'#7e22ce'},
+  'Walmart':     {bg:'#dbeafe',color:'#1d4ed8'},
+  'Shopify':     {bg:'#d1fae5',color:'#065f46'},
+  '线下':        {bg:'#f1f5f9',color:'#475569'},
+};
+
+let t3Filtered = [];
+let t3SortCol  = 'full_last_prev'; // 按上月全月排序
+let t3SortDir  = -1;
+let t3Page     = 1;
+const PAGE_SIZE = 50;
+const filterState = { plat: new Set(), shop: new Set(), site: new Set(), seller: new Set(), size: new Set() };
+
+/* ── 月份工具函数 ── */
+function monthLabel(m, meta) {
+  const [y, mo] = m.split('-');
+  const isLast   = m === meta.lastMonth;
+  const maxDay   = meta.monthDays[m];
+  const daysInMo = new Date(+y, +mo, 0).getDate();
+  const isPartial = isLast && maxDay < daysInMo;
+  return isPartial ? `${+mo}月（1-${maxDay}日）` : `${+mo}月（全月）`;
+}
+function momLabel(m1, m2, meta) {
+  const [,mo1] = m1.split('-');
+  const [,mo2] = m2.split('-');
+  return `${+mo1}→${+mo2}月 环比`;
+}
+function getMomValue(row, m1, m2, meta) {
+  // 如果 m2 是最后一个月（可能不完整），用 cmp（同口径）
+  const useComp = m2 === meta.lastMonth;
+  const a = useComp ? (row.cmp[m1]||0) : (row.full[m1]||0);
+  const b = useComp ? (row.cmp[m2]||0) : (row.full[m2]||0);
+  if (!a) return null;
+  return (b - a) / a * 100;
+}
+function getSortValue(row, col, meta) {
+  if (col === 'spu')    return row.spu   || '';
+  if (col === 'name')   return row.name  || '';
+  if (col === 'sku')    return row.sku;
+  if (col === 'color')  return row.color || '';
+  if (col === 'size')   return row.size  || '';
+  if (col === 'plat')   return row.plat;
+  if (col === 'shop')   return row.shop;
+  if (col === 'site')   return row.site;
+  if (col === 'seller') return row.seller;
+  if (col.startsWith('full_')) return row.full[col.slice(5)]||0;
+  if (col.startsWith('cmp_'))  return row.cmp[col.slice(4)]||0;
+  if (col.startsWith('mom_'))  {
+    const [m1, m2] = col.slice(4).split('__');
+    const v = getMomValue(row, m1, m2, meta);
+    return v === null ? -Infinity : v;
+  }
+  return 0;
+}
+
+/* ── 初始化 ── */
+function initTab3() {
+  const meta  = TAB3_META;
+  const months = meta.months;
+
+  // 构建动态表头
+  buildTableHeader(months, meta);
+
+  // 构建筛选下拉
+  const plats   = [...new Set(TAB3_DATA.map(r=>r.plat).filter(Boolean))].sort();
+  const shops   = [...new Set(TAB3_DATA.map(r=>r.shop).filter(Boolean))].sort();
+  const sites   = [...new Set(TAB3_DATA.map(r=>r.site).filter(Boolean))].sort();
+  const sellers = [...new Set(TAB3_DATA.map(r=>r.seller).filter(Boolean))].sort();
+  const sizes   = [...new Set(TAB3_DATA.map(r=>r.size).filter(Boolean))].sort();
+  buildDropdown('f-plat',   'plat',   plats);
+  buildDropdown('f-shop',   'shop',   shops);
+  buildDropdown('f-site',   'site',   sites);
+  buildDropdown('f-seller', 'seller', sellers);
+  buildDropdown('f-size',   'size',   sizes);
+
+  // 默认排序：按上一个月全月降序
+  const prevMonth = months.length >= 2 ? months[months.length-2] : months[0];
+  t3SortCol = 'full_' + prevMonth;
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.t3-multisel'))
+      document.querySelectorAll('.t3-multisel-menu').forEach(m => m.classList.remove('open'));
+  });
+
+  applyFilters();
+}
+
+function buildTableHeader(months, meta) {
+  // 固定列 + 动态月份列 + 动态环比列
+  const fixedCols = [
+    {key:'spu',    label:'SPU'},
+    {key:'name',   label:'产品名称', wide:true},
+    {key:'sku',    label:'SKU'},
+    {key:'color',  label:'颜色', wide:true},
+    {key:'size',   label:'尺码'},
+    {key:'plat',   label:'平台'},
+    {key:'shop',   label:'店铺'},
+    {key:'site',   label:'站点'},
+    {key:'seller', label:'销售'},
+  ];
+  // 月份列
+  const monthCols = months.map(m => ({
+    key:   'full_' + m,
+    label: monthLabel(m, meta),
+    num:   true,
+  }));
+  // 环比列（每对相邻月之间一列）
+  const momCols = [];
+  for (let i = 1; i < months.length; i++) {
+    momCols.push({
+      key:   'mom_' + months[i-1] + '__' + months[i],
+      label: momLabel(months[i-1], months[i], meta),
+      num:   true, mom: true,
+    });
+  }
+  // 注意：若最后一个月是部分月，还额外显示同口径对比列
+  const isPartial = meta.monthDays[meta.lastMonth] < new Date(+meta.lastMonth.split('-')[0], +meta.lastMonth.split('-')[1], 0).getDate();
+  const extraCols = [];
+  if (isPartial && months.length >= 2) {
+    const prevM = months[months.length-2];
+    const lastM = meta.lastMonth;
+    const d = meta.cmpDay;
+    extraCols.push({key:'cmp_'+prevM, label:`${+prevM.split('-')[1]}月（1-${d}日）`, num:true, cmpHint:true});
+  }
+
+  const allCols = [...fixedCols, ...monthCols, ...extraCols, ...momCols];
+  window._t3Cols = allCols; // 保存供渲染使用
+
+  const tr = document.createElement('tr');
+  allCols.forEach(col => {
+    const th = document.createElement('th');
+    th.className = (col.num ? 'num-col ' : '') + 'sortable';
+    if (col.mom)     th.style.background = '#fafafa';
+    if (col.cmpHint) th.style.background = '#f0f9ff';
+    if (col.wide)    th.style.minWidth = '160px';
+    th.innerHTML = `${col.label} <span class="sort-icon" id="si-${col.key.replace(/[^a-z0-9_]/gi,'_')}">⇅</span>`;
+    th.onclick = () => sortBy(col.key);
+    tr.appendChild(th);
+  });
+  document.getElementById('t3-thead').innerHTML = '';
+  document.getElementById('t3-thead').appendChild(tr);
+}
+
+function buildDropdown(wrapperId, field, values) {
+  const menu = document.getElementById(wrapperId + '-menu');
+  // Search inside dropdown
+  const searchInput = document.createElement('input');
+  searchInput.className = 't3-menu-search';
+  searchInput.placeholder = '搜索…';
+  searchInput.onclick = e => e.stopPropagation();
+  searchInput.oninput = () => {
+    const q = searchInput.value.toLowerCase();
+    menu.querySelectorAll('.t3-menu-item:not(.select-all)').forEach(item => {
+      item.style.display = item.dataset.val.toLowerCase().includes(q) ? '' : 'none';
+    });
+  };
+  menu.appendChild(searchInput);
+
+  // Select all
+  const allItem = document.createElement('div');
+  allItem.className = 't3-menu-item select-all';
+  allItem.innerHTML = '<input type="checkbox" checked> 全选 / 取消全选';
+  allItem.querySelector('input').addEventListener('change', e => {
+    const checked = e.target.checked;
+    menu.querySelectorAll('.t3-menu-item:not(.select-all) input').forEach(cb => {
+      cb.checked = checked;
+    });
+    filterState[field] = checked ? new Set() : new Set(values);
+    updateTriggerLabel(wrapperId, field);
+    applyFilters();
+  });
+  menu.appendChild(allItem);
+
+  values.forEach(v => {
+    const item = document.createElement('div');
+    item.className = 't3-menu-item';
+    item.dataset.val = v;
+    item.innerHTML = `<input type="checkbox" checked> ${v}`;
+    item.querySelector('input').addEventListener('change', e => {
+      if (!e.target.checked) filterState[field].add(v);
+      else filterState[field].delete(v);
+      // update select-all checkbox
+      const allChecked = filterState[field].size === 0;
+      allItem.querySelector('input').checked = allChecked;
+      allItem.querySelector('input').indeterminate = !allChecked && filterState[field].size < values.length;
+      updateTriggerLabel(wrapperId, field);
+      applyFilters();
+    });
+    menu.appendChild(item);
+  });
+}
+
+function toggleDrop(wrapperId) {
+  const menu = document.getElementById(wrapperId + '-menu');
+  const isOpen = menu.classList.contains('open');
+  document.querySelectorAll('.t3-multisel-menu').forEach(m => m.classList.remove('open'));
+  if (!isOpen) {
+    menu.classList.add('open');
+    const si = menu.querySelector('.t3-menu-search');
+    if (si) { si.value=''; si.dispatchEvent(new Event('input')); si.focus(); }
+  }
+}
+
+function updateTriggerLabel(wrapperId, field) {
+  const trigger = document.querySelector('#'+wrapperId+' .t3-multisel-trigger');
+  const excluded = filterState[field];
+  if (excluded.size === 0) {
+    trigger.textContent = '全部 '; trigger.classList.remove('active-filter');
+  } else {
+    const allVals = [...document.querySelectorAll('#'+wrapperId+'-menu .t3-menu-item:not(.select-all)')].map(i=>i.dataset.val);
+    const selected = allVals.filter(v => !excluded.has(v));
+    trigger.textContent = selected.length === 0 ? '(未选)' : selected.length <= 2 ? selected.join(', ') : `已选 ${selected.length} 项`;
+    trigger.classList.toggle('active-filter', selected.length > 0);
+  }
+  // re-add arrow
+  const arrow = document.createElement('span');
+  arrow.className = 'arrow'; arrow.textContent = '▾';
+  trigger.appendChild(arrow);
+}
+
+function applyFilters() {
+  const skuRaw   = (document.getElementById('sku-search')||{}).value || '';
+  const skuTerms = skuRaw.split(/[,\s]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+  const spuRaw   = (document.getElementById('spu-search')||{}).value || '';
+  const spuTerms = spuRaw.split(/[,\s]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+  const nameRaw  = (document.getElementById('name-search')||{}).value || '';
+  const nameTerm = nameRaw.trim().toLowerCase();
+  const colorRaw = (document.getElementById('color-search')||{}).value || '';
+  const colorTerm= colorRaw.trim().toLowerCase();
+  t3Filtered = TAB3_DATA.filter(r => {
+    if (filterState.plat.size   && filterState.plat.has(r.plat))     return false;
+    if (filterState.shop.size   && filterState.shop.has(r.shop))     return false;
+    if (filterState.site.size   && filterState.site.has(r.site))     return false;
+    if (filterState.seller.size && filterState.seller.has(r.seller)) return false;
+    if (filterState.size.size   && filterState.size.has(r.size))     return false;
+    if (skuTerms.length) {
+      const sl = r.sku.toLowerCase();
+      if (!skuTerms.some(t => sl === t || sl.includes(t))) return false;
+    }
+    if (spuTerms.length) {
+      const sl = (r.spu||'').toLowerCase();
+      if (!spuTerms.some(t => sl.includes(t))) return false;
+    }
+    if (nameTerm && !(r.name||'').toLowerCase().includes(nameTerm)) return false;
+    if (colorTerm && !(r.color||'').toLowerCase().includes(colorTerm)) return false;
+    return true;
+  });
+  sortFiltered(); t3Page = 1; renderTable();
+}
+
+function sortFiltered() {
+  const meta = TAB3_META;
+  t3Filtered.sort((a, b) => {
+    let av = getSortValue(a, t3SortCol, meta);
+    let bv = getSortValue(b, t3SortCol, meta);
+    if (av === null || av === -Infinity) av = -Infinity;
+    if (bv === null || bv === -Infinity) bv = -Infinity;
+    if (typeof av === 'string') return t3SortDir * av.localeCompare(bv, 'zh');
+    return t3SortDir * (av - bv);
+  });
+}
+
+function sortBy(col) {
+  if (t3SortCol === col) t3SortDir *= -1; else { t3SortCol = col; t3SortDir = -1; }
+  document.querySelectorAll('.sort-icon').forEach(el => el.textContent = '⇅');
+  const icon = document.getElementById('si-' + col.replace(/[^a-z0-9_]/gi,'_'));
+  if (icon) icon.textContent = t3SortDir === -1 ? '↓' : '↑';
+  sortFiltered(); t3Page = 1; renderTable();
+}
+
+function renderTable() {
+  const meta = TAB3_META, months = meta.months, cols = window._t3Cols || [];
+  const total = t3Filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  t3Page = Math.min(t3Page, totalPages);
+  const slice = t3Filtered.slice((t3Page-1)*PAGE_SIZE, t3Page*PAGE_SIZE);
+
+  // summary bar
+  let infoHtml = `共 <strong>${total.toLocaleString()}</strong> 条`;
+  months.forEach(m => {
+    const s = t3Filtered.reduce((acc,r)=>acc+(r.full[m]||0),0);
+    infoHtml += ` &nbsp;|&nbsp; ${+m.split('-')[1]}月合计：<strong>${s.toLocaleString()}</strong> 件`;
+  });
+  if (months.length >= 2) {
+    const m1=months[months.length-2], m2=meta.lastMonth;
+    const a=t3Filtered.reduce((s,r)=>s+(r.cmp[m1]||0),0);
+    const b=t3Filtered.reduce((s,r)=>s+(r.cmp[m2]||0),0);
+    const mom=a?((b-a)/a*100):null;
+    const color=mom===null?'#94a3b8':mom>=0?'#16a34a':'#dc2626';
+    infoHtml+=` &nbsp;|&nbsp; ${+m1.split('-')[1]}→${+m2.split('-')[1]}月同期环比：<strong style="color:${color}">${mom===null?'N/A':(mom>=0?'+':'')+mom.toFixed(1)+'%'}</strong>`;
+  }
+  document.getElementById('t3-result-info').innerHTML = infoHtml;
+
+  // rows
+  const tbody = document.getElementById('t3-tbody');
+  tbody.innerHTML = slice.map(r => {
+    const pc = PLAT_COLORS[r.plat]||{bg:'#f1f5f9',color:'#475569'};
+    const cells = cols.map(col => {
+      if (col.key==='spu')    return `<td class="spu-cell">${r.spu||'<span class="no-data">—</span>'}</td>`;
+      if (col.key==='name')   return `<td class="name-cell" title="${r.name||''}">${r.name||'<span class="no-data">—</span>'}</td>`;
+      if (col.key==='sku')    return `<td class="sku-cell">${r.sku||'—'}</td>`;
+      if (col.key==='color')  return `<td class="color-cell" title="${r.color||''}">${r.color||'<span class="no-data">—</span>'}</td>`;
+      if (col.key==='size')   return `<td class="size-cell">${r.size||'<span class="no-data">—</span>'}</td>`;
+      if (col.key==='plat')   return `<td><span class="plat-tag" style="background:${pc.bg};color:${pc.color}">${r.plat||'—'}</span></td>`;
+      if (col.key==='shop')   return `<td>${r.shop||'—'}</td>`;
+      if (col.key==='site')   return `<td>${r.site||'—'}</td>`;
+      if (col.key==='seller') return `<td>${r.seller||'—'}</td>`;
+      if (col.key.startsWith('full_')) {
+        const m=col.key.slice(5), v=r.full[m]||0;
+        return `<td class="num-col">${v||'—'}</td>`;
+      }
+      if (col.key.startsWith('cmp_')) {
+        const m=col.key.slice(4), v=r.cmp[m]||0;
+        return `<td class="num-col" style="background:#f0f9ff;font-size:12px">${v||'—'}</td>`;
+      }
+      if (col.key.startsWith('mom_')) {
+        const [m1,m2]=col.key.slice(4).split('__');
+        const v=getMomValue(r,m1,m2,meta);
+        if (v===null) return `<td class="num-col" style="background:#fafafa"><span class="mom-na">—</span></td>`;
+        const cls=v>5?'mom-up':v<-5?'mom-down':'mom-flat';
+        return `<td class="num-col" style="background:#fafafa"><span class="${cls}">${v>=0?'+':''}${v.toFixed(1)}%</span></td>`;
+      }
+      return '<td>—</td>';
+    });
+    return `<tr>${cells.join('')}</tr>`;
+  }).join('');
+
+  // pagination
+  const pag = document.getElementById('t3-pagination');
+  if (totalPages <= 1) { pag.innerHTML=''; return; }
+  const btn=(label,page,dis=false,act=false)=>`<button onclick="goPage(${page})"${dis?' disabled':''}${act?' class="active"':''}>${label}</button>`;
+  pag.innerHTML = btn('«',1,t3Page===1)+btn('‹',t3Page-1,t3Page===1)+
+    `<span class="page-info">第 ${t3Page} / ${totalPages} 页</span>`+
+    btn('›',t3Page+1,t3Page===totalPages)+btn('»',totalPages,t3Page===totalPages);
+}
+
+function goPage(p) { t3Page=p; renderTable(); document.querySelector('.t3-table-wrap').scrollIntoView({behavior:'smooth',block:'start'}); }
+
+function clearAll() {
+  ['sku-search','spu-search','name-search','color-search'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  ['plat','shop','site','seller','size'].forEach(field=>{
+    filterState[field]=new Set();
+    const wid='f-'+field;
+    document.querySelectorAll('#'+wid+'-menu .t3-menu-item:not(.select-all) input').forEach(cb=>cb.checked=true);
+    const allCb=document.querySelector('#'+wid+'-menu .select-all input');
+    if(allCb) allCb.checked=true;
+    updateTriggerLabel(wid,field);
+  });
+  applyFilters();
+}
+
+function getDownloadHeaders() { return (window._t3Cols||[]).map(c=>c.label); }
+function getDownloadRow(r) {
+  const meta=TAB3_META;
+  return (window._t3Cols||[]).map(col=>{
+    if(['spu','name','sku','color','size','plat','shop','site','seller'].includes(col.key)) return r[col.key]||'';
+    if(col.key.startsWith('full_')) return r.full[col.key.slice(5)]||0;
+    if(col.key.startsWith('cmp_'))  return r.cmp[col.key.slice(4)]||0;
+    if(col.key.startsWith('mom_')){
+      const[m1,m2]=col.key.slice(4).split('__');
+      const v=getMomValue(r,m1,m2,meta);
+      return v===null?'':+v.toFixed(2);
+    }
+    return '';
+  });
+}
+
+function downloadCSV() {
+  const headers=getDownloadHeaders();
+  const lines=[headers.map(h=>`"${h}"`).join(',')];
+  t3Filtered.forEach(r=>lines.push(getDownloadRow(r).map(v=>typeof v==='string'?`"${v}"`:v).join(',')));
+  const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='SKU销售明细_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+}
+
+function downloadExcel() {
+  const headers=getDownloadHeaders();
+  let xml=`<?xml version="1.0" encoding="UTF-8"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="SKU销售明细"><Table>\n`;
+  xml+='<Row>'+headers.map(h=>`<Cell><Data ss:Type="String">${h}</Data></Cell>`).join('')+'</Row>\n';
+  t3Filtered.forEach(r=>{
+    const vals=getDownloadRow(r);
+    xml+='<Row>'+vals.map(v=>`<Cell><Data ss:Type="${typeof v==='number'?'Number':'String'}">${v}</Data></Cell>`).join('')+'</Row>\n';
+  });
+  xml+='</Table></Worksheet></Workbook>';
+  const blob=new Blob([xml],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='SKU销售明细_'+new Date().toISOString().slice(0,10)+'.xls'; a.click();
+}
+
+// ===== TAB 2 CHARTS =====
+function initTab2() {
+
+  // 1. Shop bar chart
+  const shopNames = ["MLHR (柯伯霖-TIKTOK SHOP)","HWM (李洁莹-TIKTOK SHOP)","HWE (黄伟萍-TIKTOK SHOP)","ULQS (陈文娥-Walmart)","LWS (方妙芬-TIKTOK SHOP)","snoilite (叶容丽-TEMU 全托管)","UGW (邓春笑-TIKTOK SHOP)","IHE (陈秀贤-TIKTOK SHOP)","FHC (陈兰卿-TIKTOK SHOP)","PRMC (姚红珍-TEMU)","HRB (彭丹丽-SHEIN)","RCC (李洁莹-TEMU)","DHS (柯伯霖-TIKTOK SHOP)","SGM (黄海燕-TIKTOK SHOP)","IA (陈秀贤-eBay)"];
+  const shopOrders = [2121,1441,1360,731,713,695,660,627,616,578,577,563,563,467,451];
+  const shopColors = ["#6366f1","#3b82f6","#ee1d52","#0071ce","#14b8a6","#00bcd4","#f59e0b","#ef4444","#ec4899","#fa6338","#c94b9e","#10b981","#8b5cf6","#e53238","#64748b"];
+
+  new Chart(document.getElementById('shopChart'), {
+    type:'bar',
+    data:{
+      labels: shopNames,
+      datasets:[{ label:'订单数', data:shopOrders,
+        backgroundColor: shopColors.map(c=>c+'cc'), borderColor: shopColors, borderWidth:1 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1,
+          callbacks:{ label: ctx=>' '+ctx.raw.toLocaleString()+' 单' } }
+      },
+      scales:{
+        x:{ ticks:{color:'#64748b'}, grid:{color:'#f1f5f9'} },
+        y:{ ticks:{color:'#334155', font:{size:12}}, grid:{color:'#f1f5f9'},
+            afterFit(scale){ scale.width = Math.max(scale.width, 230); } }
+      }
+    }
+  });
+
+  // 2. Site donut
+  const siteNames = ['US','UK','DE','AU','FR','CA','MX','PL','ES','其他'];
+  const siteOrders = [10697,7170,1914,1454,71,60,44,35,22,17];
+  const siteColors = ['#3b82f6','#6366f1','#f59e0b','#10b981','#ec4899','#ef4444','#14b8a6','#8b5cf6','#f97316','#94a3b8'];
+
+  new Chart(document.getElementById('siteChart'), {
+    type:'doughnut',
+    data:{ labels:siteNames, datasets:[{ data:siteOrders, backgroundColor:siteColors, borderColor:'#fff', borderWidth:2 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'right', labels:{color:'#475569', font:{size:12}, padding:10} },
+        tooltip:{
+          backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1,
+          callbacks:{ label: ctx=>{ const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ` ${ctx.raw.toLocaleString()}单 (${(ctx.raw/t*100).toFixed(1)}%)`; } }
+        }
+      }
+    }
+  });
+
+  // 3. Seller stacked bar
+  const sellerNames = ["柯伯霖","李洁莹","黄伟萍","林小云","姚红珍","彭丹丽","方妙芬","黄冰妹","邓春笑","陈兰卿","叶容丽","陈秀贤","邱晓婷","谭慧玲","刘美钗","朱碧玉","梁淦雅","陈文娥","黄海燕","朱腾腾","黎宇婷","薛婷","蔡婷婷","梁春燕","李晓琳","邱智雯","朱倩婷","李明娟","郭少媚","甘晓燕","余观富","胡玉娣","李芷珊","张绮萍","续倩","刘亚磊","赖珍","田玉凤","吴宝荣","罗文兴","黄海燕2","邓舒芹","魏果然"];
+  const platColors2 = {"TIKTOK SHOP":"#ee1d52","eBay":"#e53238","TEMU":"#fa6338","AliExpress":"#ff6a00","SHEIN":"#c94b9e","Walmart":"#0071ce","TEMU 全托管":"#00bcd4","Shopify":"#96bf48","线下":"#94a3b8"};
+  const sellerPlatData = {"柯伯霖":{"TIKTOK SHOP":2750,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"李洁莹":{"TIKTOK SHOP":1447,"eBay":0,"TEMU":908,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":307,"Shopify":0,"线下":0},"黄伟萍":{"TIKTOK SHOP":1361,"eBay":1071,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"林小云":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":2325,"SHEIN":0,"Walmart":0,"TEMU 全托管":31,"Shopify":0,"线下":0},"姚红珍":{"TIKTOK SHOP":350,"eBay":922,"TEMU":744,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"彭丹丽":{"TIKTOK SHOP":0,"eBay":847,"TEMU":415,"AliExpress":0,"SHEIN":577,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"方妙芬":{"TIKTOK SHOP":713,"eBay":1117,"TEMU":0,"AliExpress":1,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"黄冰妹":{"TIKTOK SHOP":0,"eBay":1130,"TEMU":498,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"邓春笑":{"TIKTOK SHOP":660,"eBay":643,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"陈兰卿":{"TIKTOK SHOP":726,"eBay":430,"TEMU":0,"AliExpress":0,"SHEIN":1,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"叶容丽":{"TIKTOK SHOP":217,"eBay":0,"TEMU":81,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":779,"Shopify":0,"线下":0},"陈秀贤":{"TIKTOK SHOP":627,"eBay":422,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"邱晓婷":{"TIKTOK SHOP":237,"eBay":792,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"谭慧玲":{"TIKTOK SHOP":0,"eBay":0,"TEMU":295,"AliExpress":0,"SHEIN":0,"Walmart":668,"TEMU 全托管":55,"Shopify":0,"线下":0},"刘美钗":{"TIKTOK SHOP":13,"eBay":390,"TEMU":87,"AliExpress":0,"SHEIN":205,"Walmart":0,"TEMU 全托管":124,"Shopify":0,"线下":0},"朱碧玉":{"TIKTOK SHOP":0,"eBay":596,"TEMU":176,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"梁淦雅":{"TIKTOK SHOP":0,"eBay":368,"TEMU":0,"AliExpress":0,"SHEIN":331,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"陈文娥":{"TIKTOK SHOP":0,"eBay":305,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":210,"TEMU 全托管":0,"Shopify":0,"线下":0},"黄海燕":{"TIKTOK SHOP":449,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"朱腾腾":{"TIKTOK SHOP":0,"eBay":105,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"黎宇婷":{"TIKTOK SHOP":0,"eBay":53,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"薛婷":{"TIKTOK SHOP":0,"eBay":52,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"蔡婷婷":{"TIKTOK SHOP":0,"eBay":38,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"梁春燕":{"TIKTOK SHOP":0,"eBay":36,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"李晓琳":{"TIKTOK SHOP":0,"eBay":34,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"邱智雯":{"TIKTOK SHOP":0,"eBay":30,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"朱倩婷":{"TIKTOK SHOP":0,"eBay":20,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"李明娟":{"TIKTOK SHOP":17,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"郭少媚":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":15},"甘晓燕":{"TIKTOK SHOP":0,"eBay":9,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"余观富":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":7,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"胡玉娣":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":7},"李芷珊":{"TIKTOK SHOP":0,"eBay":0,"TEMU":6,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"张绮萍":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":4},"续倩":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":3},"刘亚磊":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":2,"线下":0},"赖珍":{"TIKTOK SHOP":0,"eBay":2,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"田玉凤":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":2},"吴宝荣":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":2},"罗文兴":{"TIKTOK SHOP":0,"eBay":1,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"黄海燕2":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":1},"邓舒芹":{"TIKTOK SHOP":0,"eBay":1,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"魏果然":{"TIKTOK SHOP":1,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0}};
+  const platKeys = Object.keys(platColors2);
+  new Chart(document.getElementById('sellerChart'), {
+    type:'bar',
+    data:{
+      labels: sellerNames,
+      datasets: platKeys.map(plat=>({
+        label: plat,
+        data: sellerNames.map(s => sellerPlatData[s][plat]||0),
+        backgroundColor: platColors2[plat]+'cc',
+        borderColor: platColors2[plat],
+        borderWidth:1
+      }))
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ labels:{ color:'#475569', font:{size:11}, boxWidth:12 } },
+        tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1 }
+      },
+      scales:{
+        x:{ stacked:true, ticks:{color:'#64748b'}, grid:{color:'#f1f5f9'}, title:{display:true, text:'销量（件）', color:'#64748b'} },
+        y:{ stacked:true, ticks:{color:'#334155', font:{size:12}}, grid:{color:'#f1f5f9'},
+            afterFit(scale){ scale.width = Math.max(scale.width, 80); } }
+      }
+    }
+  });
+
+  // 4. Heatmap table
+  const hPlats = ["TIKTOK SHOP","eBay","TEMU","AliExpress","SHEIN","Walmart","TEMU 全托管"];
+  const hSites = ["US","UK","AU","DE","FR","CA","PL","MX","ES"];
+  const hData = {"TIKTOK SHOP":[7385,2153,0,27,3,0,0,0,0],"eBay":[2970,4030,1331,1065,21,0,0,0,0],"TEMU":[48,1768,277,849,54,61,38,47,22],"AliExpress":[0,0,0,0,0,0,0,0,0],"SHEIN":[757,111,65,181,0,0,0,0,0],"Walmart":[0,0,0,0,0,0,0,0,0],"TEMU 全托管":[0,0,0,0,0,0,0,0,0]};
+  const allVals = Object.values(hData).flat().filter(v=>v>0);
+  const maxVal = Math.max(...allVals);
+  function heatClass(v) {
+    if(!v) return 'heat-0';
+    const r = v/maxVal;
+    if(r<0.02) return 'heat-1';
+    if(r<0.05) return 'heat-2';
+    if(r<0.1)  return 'heat-3';
+    if(r<0.2)  return 'heat-4';
+    if(r<0.4)  return 'heat-5';
+    if(r<0.7)  return 'heat-6';
+    return 'heat-7';
+  }
+  const platEmoji = {'TIKTOK SHOP':'🎵','eBay':'🛒','TEMU':'🛍','AliExpress':'🌐','SHEIN':'👗','Walmart':'🏪'};
+  let html = '<table class="heat-table"><thead><tr><th>平台 \\ 站点</th>';
+  hSites.forEach(s => html += `<th>${s}</th>`);
+  html += '</tr></thead><tbody>';
+  hPlats.forEach(p => {
+    html += `<tr><td class="row-label">${platEmoji[p]||''} ${p}</td>`;
+    hData[p].forEach(v => {
+      html += `<td class="${heatClass(v)}">${v ? v.toLocaleString() : '—'}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('heatmapTable').innerHTML = html;
+
+  // 5. Seller SKU table
+  const sellerSkuData = [
+    {name:'柯伯霖', plat:'TikTok Shop', skus:[{sku:'TKAL08001AF5BW200A01',qty:270},{sku:'TMM011BT08-001',qty:137},{sku:'T2502',qty:100}]},
+    {name:'黄伟萍', plat:'eBay+TikTok', skus:[{sku:'TMM011BT08-010',qty:85},{sku:'T1094',qty:52},{sku:'TMM011BT08-H43',qty:52}]},
+    {name:'李洁莹', plat:'TEMU+TikTok', skus:[{sku:'T1093',qty:94},{sku:'T1092',qty:94},{sku:'T1094',qty:84}]},
+    {name:'林小云', plat:'AliExpress',  skus:[{sku:'T430',qty:25},{sku:'THEH1001BAA02AAA0033',qty:24},{sku:'T1093',qty:23}]},
+    {name:'姚红珍', plat:'TEMU+eBay',  skus:[{sku:'TWC011ST08-T45',qty:37},{sku:'THT2001',qty:27},{sku:'THT2201',qty:25}]},
+    {name:'彭丹丽', plat:'eBay+SHEIN', skus:[{sku:'TWD009BT22-P47',qty:39},{sku:'T1093',qty:22},{sku:'T1631',qty:20}]},
+    {name:'方妙芬', plat:'eBay+TikTok', skus:[{sku:'TDG002LT05-001',qty:56},{sku:'TDG002LT05-012',qty:39},{sku:'TWC011ST08-010',qty:29}]},
+    {name:'黄冰妹', plat:'eBay+TEMU',  skus:[{sku:'T815',qty:30},{sku:'TFAL18A97AH4AW200A01',qty:14},{sku:'T496',qty:14}]},
+  ];
+  const totals = [2750,2265,2209,1820,1753,1725,1681,1418];
+  const amts   = [114869,129693,64913,75770,22092,22235,92836,18395];
+  let tbl = '<table class="sku-table"><thead><tr><th>销售</th><th>主要平台</th><th>订单总量</th><th>销售额（原币）</th><th>Top 3 主销SKU（件数）</th></tr></thead><tbody>';
+  sellerSkuData.forEach((r,i) => {
+    tbl += `<tr>
+      <td><strong>${r.name}</strong></td>
+      <td style="color:#64748b">${r.plat}</td>
+      <td><strong>${totals[i].toLocaleString()}</strong></td>
+      <td style="color:#2563eb">¥/$ ${amts[i].toLocaleString()}</td>
+      <td>${r.skus.map(s=>`<span class="sku-badge">${s.sku}</span><span class="sku-qty">×${s.qty}</span>`).join(' ')}</td>
+    </tr>`;
+  });
+  tbl += '</tbody></table>';
+  document.getElementById('sellerSkuTable').innerHTML = tbl;
+}
+</script>
+
+<!-- tab3data.js 移至底部：2.57MB 数据文件，仅 Tab3 懒加载时使用，不阻塞首屏渲染 -->
+<script src="tab3data.js"></script>
+</body>
+</html>
