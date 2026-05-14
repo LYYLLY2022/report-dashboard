@@ -714,6 +714,13 @@
           <div class="t3-multisel-menu" id="f4-size-menu"></div>
         </div>
       </div>
+      <div class="t3-filter-group" style="justify-content:flex-end">
+        <label style="visibility:hidden;font-size:12px">占位</label>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap;height:36px;padding:0 14px;border:1.5px solid #fed7aa;border-radius:8px;background:#fff7ed;color:#b45309;font-size:13px;font-weight:500;user-select:none">
+          <input type="checkbox" id="t4-cross-only" onchange="T4.apply()" style="width:15px;height:15px;cursor:pointer;accent-color:#f97316">
+          只看跨期退款
+        </label>
+      </div>
       <div style="display:flex;align-items:flex-end">
         <button class="t3-clear-btn" onclick="T4.clear()">重置</button>
       </div>
@@ -980,12 +987,18 @@ function makeTabInst(prefix, fp, opts) {
       {key:'size',label:'尺码'},{key:'plat',label:'平台'},
       {key:'shop',label:'店铺'},{key:'site',label:'站点'},{key:'seller',label:'销售'},
     ];
-    const monthCols=months.map(m=>({key:'full_'+m,label:monthLabel(m,meta),num:true}));
+    // skuOnly（退款报告）模式：只显示有退款数据的月份，不显示环比/同期列
+    const refundMonths=(opts&&opts.skuOnly&&typeof REFUND_DATA!=='undefined')?Object.keys(REFUND_DATA).sort():months;
+    const monthCols=(opts&&opts.skuOnly)
+      ? refundMonths.map(m=>({key:'full_'+m,label:monthLabel(m,meta),num:true}))
+      : months.map(m=>({key:'full_'+m,label:monthLabel(m,meta),num:true}));
     const momCols=[];
-    for(let i=1;i<months.length;i++) momCols.push({key:'mom_'+months[i-1]+'__'+months[i],label:momLabel(months[i-1],months[i]),num:true,mom:true});
+    if(!(opts&&opts.skuOnly)){
+      for(let i=1;i<months.length;i++) momCols.push({key:'mom_'+months[i-1]+'__'+months[i],label:momLabel(months[i-1],months[i]),num:true,mom:true});
+    }
     const isPartial=meta.monthDays[meta.lastMonth]<new Date(+meta.lastMonth.split('-')[0],+meta.lastMonth.split('-')[1],0).getDate();
     const extraCols=[];
-    if(isPartial&&months.length>=2){
+    if(!(opts&&opts.skuOnly)&&isPartial&&months.length>=2){
       const prevM=months[months.length-2];
       extraCols.push({key:'cmp_'+prevM,label:`${+prevM.split('-')[1]}月（1-${meta.cmpDay}日）`,num:true,cmpHint:true});
     }
@@ -1097,6 +1110,12 @@ function makeTabInst(prefix, fp, opts) {
         });
       }
       fil=Object.values(skuMap);
+      // 跨期筛选：只保留「有退款且当月销售=0」的 SKU
+      const crossEl=$$(prefix+'-cross-only');
+      if(crossEl&&crossEl.checked&&typeof REFUND_DATA!=='undefined'){
+        const refMs=Object.keys(REFUND_DATA);
+        fil=fil.filter(r=>refMs.some(m=>(REFUND_DATA[m]||{})[r.sku]>0&&(r.full[m]||0)===0));
+      }
     } else {
       fil=TAB3_DATA.filter(r=>{
         if(fs.plat.size&&fs.plat.has(r.plat))return false;
@@ -1191,6 +1210,7 @@ function makeTabInst(prefix, fp, opts) {
 
   function clear(){
     [prefix+'-sku-search',prefix+'-spu-search',prefix+'-name-search',prefix+'-color-search'].forEach(id=>{const el=$$(id);if(el)el.value='';});
+    const crossEl=$$(prefix+'-cross-only');if(crossEl)crossEl.checked=false;
     const fields=(opts&&opts.skuOnly)?['size']:['plat','shop','site','seller','size'];
     fields.forEach(field=>{
       fs[field]=new Set();
