@@ -1157,12 +1157,28 @@ function makeTabInst(prefix, fp, opts) {
     pg=Math.min(pg,totalP);
     const slice=fil.slice((pg-1)*PS,pg*PS);
     let info=`共 <strong>${total.toLocaleString()}</strong> 条`;
-    months.forEach(m=>{const s=fil.reduce((a,r)=>a+(r.full[m]||0),0);info+=` &nbsp;|&nbsp; ${+m.split('-')[1]}月合计：<strong>${s.toLocaleString()}</strong> 件`;});
-    if(months.length>=2){
-      const m1=months[months.length-2],m2=meta.lastMonth;
-      const a=fil.reduce((s,r)=>s+(r.cmp[m1]||0),0),b=fil.reduce((s,r)=>s+(r.cmp[m2]||0),0);
-      const mom=a?((b-a)/a*100):null,c=mom===null?'#94a3b8':mom>=0?'#16a34a':'#dc2626';
-      info+=` &nbsp;|&nbsp; ${+m1.split('-')[1]}→${+m2.split('-')[1]}月同期环比：<strong style="color:${c}">${mom===null?'N/A':(mom>=0?'+':'')+mom.toFixed(1)+'%'}</strong>`;
+    if(opts&&opts.skuOnly&&typeof REFUND_DATA!=='undefined'){
+      // 退款报告：显示各退款月份销售件数、退款件数、总体退货率
+      const refMs=Object.keys(REFUND_DATA).sort();
+      let totalSale=0,totalRef=0;
+      refMs.forEach(m=>{
+        const ms=fil.reduce((a,r)=>a+(r.full[m]||0),0);
+        const mr=fil.reduce((a,r)=>a+((REFUND_DATA[m]||{})[r.sku]||0),0);
+        totalSale+=ms;totalRef+=mr;
+        info+=` &nbsp;|&nbsp; ${+m.split('-')[1]}月销售：<strong>${ms.toLocaleString()}</strong> 件`;
+        info+=` &nbsp;|&nbsp; ${+m.split('-')[1]}月退款：<strong style="color:#92400e">${mr.toLocaleString()}</strong> 件`;
+      });
+      const rate=totalSale>0?(totalRef/totalSale*100):null;
+      const rc=rate===null?'#94a3b8':rate>=50?'#dc2626':rate>=20?'#d97706':'#16a34a';
+      info+=` &nbsp;|&nbsp; 总体退货率：<strong style="color:${rc}">${rate===null?'N/A':rate.toFixed(1)+'%'}</strong>`;
+    } else {
+      months.forEach(m=>{const s=fil.reduce((a,r)=>a+(r.full[m]||0),0);info+=` &nbsp;|&nbsp; ${+m.split('-')[1]}月合计：<strong>${s.toLocaleString()}</strong> 件`;});
+      if(months.length>=2){
+        const m1=months[months.length-2],m2=meta.lastMonth;
+        const a=fil.reduce((s,r)=>s+(r.cmp[m1]||0),0),b=fil.reduce((s,r)=>s+(r.cmp[m2]||0),0);
+        const mom=a?((b-a)/a*100):null,c=mom===null?'#94a3b8':mom>=0?'#16a34a':'#dc2626';
+        info+=` &nbsp;|&nbsp; ${+m1.split('-')[1]}→${+m2.split('-')[1]}月同期环比：<strong style="color:${c}">${mom===null?'N/A':(mom>=0?'+':'')+mom.toFixed(1)+'%'}</strong>`;
+      }
     }
     $$(prefix+'-result-info').innerHTML=info;
     const tbody=$$(prefix+'-tbody');
