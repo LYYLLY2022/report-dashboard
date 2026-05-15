@@ -1617,38 +1617,29 @@ function initGroupCharts(groupIdx, avgTableId, pieKey, pieChartId, pieTitleId, s
   // ── 月度日均销售额对比表格 ──
   const avgTableEl = document.getElementById(avgTableId);
   if (avgTableEl) {
+    const curMonthLabel = RAW.company_monthly_avg.cur_month_label;
+    const histMonths = RAW.company_monthly_avg.hist_months;
+
+    // Build lookup map for each historical month: name -> avg value
+    const histAvgMaps = (gData.hist_avgs || []).map(h => {
+      const m = {};
+      (h.names || []).forEach((n, i) => { m[n] = h.values[i]; });
+      return m;
+    });
+
     const curNames = gData.avg.names;
     const curAvgValues = gData.avg.values;
-    const curAvgMap = {};
-    curNames.forEach((n, i) => { curAvgMap[n] = curAvgValues[i]; });
-    const prevAvgMap = {};
-    if (gData.prev_avg) {
-      gData.prev_avg.names.forEach((n, i) => { prevAvgMap[n] = gData.prev_avg.values[i]; });
-    }
-    const prevPrevAvgMap2 = {};
-    if (gData.prev_prev_avg) {
-      gData.prev_prev_avg.names.forEach((n, i) => { prevPrevAvgMap2[n] = gData.prev_prev_avg.values[i]; });
-    }
     const totalMap = {};
     gData.rank.names.forEach((n, i) => { totalMap[n] = gData.rank.values[i]; });
 
-    const prevMonthLabel = RAW.company_monthly_avg.prev_month_label;
-    const curMonthLabel = RAW.company_monthly_avg.cur_month_label;
-    const prevPrevMonthLabel2 = RAW.ranking.prev_prev_month ? RAW.ranking.prev_prev_month + '月' : null;
+    const rows = curNames.map((name, i) => {
+      const histAvgs = histAvgMaps.map(m => m[name] || 0);
+      const prevAvg = histAvgs[0] || 0;
+      const mom = prevAvg > 0 && curAvgValues[i] > 0 ? ((curAvgValues[i] - prevAvg) / prevAvg * 100).toFixed(1) : null;
+      return { name, total: totalMap[name] || 0, curAvg: curAvgValues[i], histAvgs, mom };
+    }).sort((a, b) => b.curAvg - a.curAvg);
 
-    const rows = curNames.map((name, i) => ({
-      name: name, total: totalMap[name] || 0, curAvg: curAvgValues[i],
-      prevAvg: prevAvgMap[name] || 0, prevPrevAvg: prevPrevAvgMap2[name] || 0,
-    })).sort((a, b) => b.curAvg - a.curAvg);
-
-    rows.forEach(r => {
-      if (r.prevAvg > 0 && r.curAvg > 0) {
-        r.mom = ((r.curAvg - r.prevAvg) / r.prevAvg * 100).toFixed(1);
-      } else {
-        r.mom = null;
-      }
-    });
-
+    const histThs = histMonths.map(h => `<th style="text-align:right;">${h.label}日均销售额<br/><span style="font-weight:normal;font-size:12px;">(USD/天)</span></th>`).join('');
     let html = `<table class="data-table ranking-table">
       <thead>
         <tr>
@@ -1656,8 +1647,7 @@ function initGroupCharts(groupIdx, avgTableId, pieKey, pieChartId, pieTitleId, s
           <th>运营人员</th>
           <th style="text-align:right;">${curMonthLabel}销售额<br/><span style="font-weight:normal;font-size:12px;">(USD)</span></th>
           <th style="text-align:right;">${curMonthLabel}日均销售额<br/><span style="font-weight:normal;font-size:12px;">(USD/天)</span></th>
-          <th style="text-align:right;">${prevMonthLabel}日均销售额<br/><span style="font-weight:normal;font-size:12px;">(USD/天)</span></th>
-          ${prevPrevMonthLabel2 ? `<th style="text-align:right;">${prevPrevMonthLabel2}日均销售额<br/><span style="font-weight:normal;font-size:12px;">(USD/天)</span></th>` : ''}
+          ${histThs}
           <th style="text-align:right;">日均销售额<br/>环比</th>
         </tr>
       </thead>
@@ -1679,13 +1669,13 @@ function initGroupCharts(groupIdx, avgTableId, pieKey, pieChartId, pieTitleId, s
           : parseFloat(row.mom) < 0
             ? `<span style="color:#3FB950;">▼ ${Math.abs(row.mom)}%</span>`
             : `<span style="color:#9CA3AF;">— 0%</span>`;
+      const histTds = row.histAvgs.map(v => `<td style="text-align:right;">${v > 0 ? fmt(v) : '<span style="color:#9CA3AF;">—</span>'}</td>`).join('');
       html += `<tr>
         <td style="text-align:center;">${rankBadge}</td>
         <td style="font-weight:500;">${row.name}</td>
         <td class="num-positive" style="text-align:right;font-size:15px;font-weight:600;">${fmt(row.total)}</td>
         <td class="num-positive" style="text-align:right;">${fmt(row.curAvg)}</td>
-        <td style="text-align:right;">${row.prevAvg > 0 ? fmt(row.prevAvg) : '<span style="color:#9CA3AF;">—</span>'}</td>
-        ${prevPrevMonthLabel2 ? `<td style="text-align:right;">${row.prevPrevAvg > 0 ? fmt(row.prevPrevAvg) : '<span style="color:#9CA3AF;">—</span>'}</td>` : ''}
+        ${histTds}
         <td style="text-align:right;">${momHtml}</td>
       </tr>`;
     });
@@ -1697,7 +1687,7 @@ function initGroupCharts(groupIdx, avgTableId, pieKey, pieChartId, pieTitleId, s
   initGroupShopCompare(shopKey, shopTableId, shopTitleId, groupLabel);
 }
 
-// ── Group Daily Trend Chart (通用函数) ─────────────────────────────────
+
 function initGroupDailyTrend(groupIdx, chartId, groupLabel) {
   const c = makeChart(chartId);
   if (!c) return;
