@@ -38,6 +38,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    position: relative;
   }
   .card:hover {
     transform: translateY(-4px);
@@ -47,6 +48,10 @@
   .card .icon { font-size: 2.5rem; }
   .card .title { font-size: 1.2rem; font-weight: 600; }
   .card .desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; }
+  .lock-badge {
+    position: absolute; top: 14px; right: 16px;
+    font-size: 14px; opacity: 0.45;
+  }
   @media (max-width: 480px) {
     body { padding: 1.5rem 1rem; }
     h1 { font-size: 1.5rem; }
@@ -62,26 +67,49 @@
   <h1>惠时尚报表</h1>
   <p class="subtitle">选择要查看的报表</p>
   <div class="cards">
+
     <a class="card" href="./index.html">
+      <div class="lock-badge">🔒</div>
       <div class="icon">📊</div>
       <div class="title">平台利润看板</div>
       <div class="desc">多平台利润、退款率、毛利率等财务数据看板</div>
     </a>
+
     <a class="card" href="./sales-channel.html">
+      <div class="lock-badge">🔒</div>
       <div class="icon">🏪</div>
       <div class="title">非亚渠道业绩报告</div>
       <div class="desc">非Amazon渠道销售额趋势、运营排名、明细数据</div>
     </a>
+
     <a class="card" href="./new-product.html">
+      <div class="lock-badge">🔒</div>
       <div class="icon">📦</div>
       <div class="title">新品首单分析</div>
       <div class="desc">新品备货需求、上架跟踪、SKU明细与趋势图表</div>
     </a>
+
+    <a class="card" href="./万邑通库存管理.html">
+      <div class="lock-badge">🔒</div>
+      <div class="icon">🗂️</div>
+      <div class="title">万邑通库存管理</div>
+      <div class="desc">库龄数量分析、库龄成本分析，支持仓库/品类/库龄多维筛选与数据下载</div>
+    </a>
+
     <a class="card" href="./profit-calc/">
       <div class="icon">🧮</div>
       <div class="title">利润计算器</div>
       <div class="desc">TikTok / eBay 多站点利润测算，正向算毛利，反向推采购价，支持批量 Excel 导入导出</div>
     </a>
+
+
+    <a class="card" href="./全品销售与退款报告.html">
+      <div class="lock-badge">🔒</div>
+      <div class="icon">📈</div>
+      <div class="title">全品销售与退款报告</div>
+      <div class="desc">多平台销售量趋势、SKU明细、店铺/销售人员业绩、TEMU全托管数据</div>
+    </a>
+
   </div>
 </body>
 </html>

@@ -1,0 +1,1450 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全品销售分析报告 · 2026年4月-5月</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Microsoft YaHei', Arial, sans-serif; background: #f1f5f9; color: #1e293b; min-height: 100vh; }
+
+  .header {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+    padding: 32px 40px; border-bottom: 1px solid #bfdbfe;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-left h1 { font-size: 26px; font-weight: 700; color: #fff; }
+  .header-left p { font-size: 13px; color: #bfdbfe; margin-top: 4px; }
+  .header-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #fff; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 16px; padding: 24px 40px; }
+  .kpi-card {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 12px; padding: 20px 22px; position: relative; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--accent); }
+  .kpi-card .label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; }
+  .kpi-card .value { font-size: 30px; font-weight: 700; color: #0f172a; margin: 8px 0 4px; line-height: 1; }
+  .kpi-card .sub { font-size: 12px; color: #64748b; }
+  .kpi-card .icon { position:absolute; right:16px; top:16px; font-size:22px; opacity:0.15; }
+
+  .section { padding: 0 40px 32px; }
+  .section-title {
+    font-size: 16px; font-weight: 600; color: #334155;
+    padding: 16px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before { content:''; width:4px; height:18px; background:var(--accent,#3b82f6); border-radius:2px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .chart-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .chart-card h3 { font-size: 14px; font-weight: 600; color: #64748b; margin-bottom: 16px; }
+  .chart-wrap { position: relative; }
+
+  .plat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .plat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .plat-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+  .rank-item { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #f8fafc; }
+  .rank-item:last-child { border-bottom: none; }
+  .rank-num { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+  .rank-1 { background:#f59e0b; color:#fff; }
+  .rank-2 { background:#94a3b8; color:#fff; }
+  .rank-3 { background:#b45309; color:#fff; }
+  .rank-4, .rank-5 { background:#e2e8f0; color:#64748b; }
+  .rank-sku { flex:1; overflow:hidden; min-width:0; }
+  .rank-sku-code { display:block; font-size:11px; color:#334155; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-sku-name { display:block; font-size:10px; color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-bar-wrap { width:55px; height:6px; background:#f1f5f9; border-radius:3px; flex-shrink:0; }
+  .rank-bar { height:6px; border-radius:3px; background:var(--plat-color,#3b82f6); }
+  .rank-qty { font-size:12px; color:#94a3b8; width:28px; text-align:right; flex-shrink:0; }
+
+  .insights-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .insight-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:18px 20px; border-left:3px solid var(--c,#3b82f6); box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .insight-card .i-title { font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; }
+  .insight-card .i-body { font-size:13px; color:#334155; line-height:1.6; }
+  .hl { color:#2563eb; font-weight:600; }
+  .hl-r { color:#dc2626; font-weight:600; }
+  .hl-g { color:#16a34a; font-weight:600; }
+  .hl-y { color:#d97706; font-weight:600; }
+
+  .footer { text-align:center; padding:20px; font-size:11px; color:#94a3b8; border-top:1px solid #e2e8f0; background:#fff; }
+
+  /* ===== TAB 3 STYLES ===== */
+  .t3-filter-bar { background:#fff; border-bottom:1px solid #e2e8f0; padding:18px 40px; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+  .t3-filter-row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; }
+  .t3-filter-group { display:flex; flex-direction:column; gap:5px; }
+  .t3-filter-group label { font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.6px; }
+  .t3-search-group { flex:1; min-width:320px; }
+  .t3-search-input { border:1px solid #e2e8f0; border-radius:8px; padding:7px 12px; font-size:13px; color:#334155; outline:none; width:100%; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-search-input:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+  .t3-clear-btn { padding:7px 16px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc; color:#64748b; font-size:13px; cursor:pointer; white-space:nowrap; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-clear-btn:hover { background:#f1f5f9; color:#334155; }
+  .t3-dl-btn { padding:8px 18px; border:none; border-radius:8px; background:#2563eb; color:#fff; font-size:13px; font-weight:600; cursor:pointer; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-dl-btn:hover { background:#1d4ed8; }
+  .t3-dl-btn--excel { background:#16a34a; }
+  .t3-dl-btn--excel:hover { background:#15803d; }
+  .t3-result-info { font-size:13px; color:#64748b; }
+  .t3-result-info strong { color:#334155; }
+
+  /* Multi-select dropdown */
+  .t3-multisel { position:relative; min-width:130px; }
+  .t3-multisel-trigger { border:1px solid #e2e8f0; border-radius:8px; padding:7px 12px; font-size:13px; color:#334155; cursor:pointer; background:#fff; user-select:none; display:flex; justify-content:space-between; align-items:center; gap:8px; white-space:nowrap; }
+  .t3-multisel-trigger:hover { border-color:#94a3b8; }
+  .t3-multisel-trigger.active-filter { border-color:#2563eb; color:#2563eb; background:#eff6ff; }
+  .t3-multisel-menu { display:none; position:absolute; top:calc(100% + 4px); left:0; z-index:200; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.12); min-width:160px; max-height:280px; overflow-y:auto; padding:6px; }
+  .t3-multisel-menu.open { display:block; }
+  .t3-menu-search { width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:5px 8px; font-size:12px; margin-bottom:6px; outline:none; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-menu-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; cursor:pointer; font-size:13px; color:#334155; }
+  .t3-menu-item:hover { background:#f1f5f9; }
+  .t3-menu-item input[type=checkbox] { accent-color:#2563eb; width:14px; height:14px; flex-shrink:0; }
+  .t3-menu-item.select-all { border-bottom:1px solid #f1f5f9; margin-bottom:4px; padding-bottom:8px; color:#2563eb; font-weight:600; }
+
+  /* Table */
+  .t3-table-wrap { padding:0 40px; margin-top:16px; overflow-x:auto; }
+  .t3-table { width:100%; border-collapse:collapse; font-size:13px; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); border:1px solid #e2e8f0; }
+  .t3-table thead { background:#f8fafc; position:sticky; top:0; z-index:10; }
+  .t3-table th { padding:11px 14px; text-align:left; color:#475569; font-weight:600; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+  .t3-table th.num-col { text-align:right; }
+  .t3-table th.sortable { cursor:pointer; user-select:none; }
+  .t3-table th.sortable:hover { color:#2563eb; background:#f0f6ff; }
+  .t3-table th.sort-asc .sort-icon::after, .t3-table th.sort-desc .sort-icon::after { content:''; }
+  .sort-icon { font-size:11px; color:#94a3b8; margin-left:2px; }
+  .t3-table td { padding:9px 14px; border-bottom:1px solid #f1f5f9; color:#334155; vertical-align:middle; }
+  .t3-table td.num-col { text-align:right; font-variant-numeric:tabular-nums; }
+  .t3-table tbody tr:hover td { background:#f8fafc; }
+  .t3-table .sku-cell  { font-family:monospace; font-size:12px; color:#1e40af; white-space:nowrap; }
+  .t3-table .spu-cell  { font-family:monospace; font-size:12px; color:#6d28d9; white-space:nowrap; }
+  .t3-table .name-cell { font-size:12px; color:#334155; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .t3-table .color-cell { font-size:12px; color:#0369a1; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .t3-table .size-cell  { font-size:12px; color:#047857; white-space:nowrap; }
+  .t3-table .no-data   { color:#cbd5e1; }
+  .mom-up   { color:#16a34a; font-weight:600; }
+  .mom-down { color:#dc2626; font-weight:600; }
+  .mom-flat { color:#94a3b8; }
+  .mom-na   { color:#cbd5e1; font-size:12px; }
+  .plat-tag { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap; }
+
+  /* Pagination */
+  .t3-pagination { display:flex; justify-content:center; align-items:center; gap:6px; padding:18px 40px 28px; flex-wrap:wrap; }
+  .t3-pagination button { border:1px solid #e2e8f0; background:#fff; border-radius:6px; padding:5px 12px; font-size:13px; cursor:pointer; color:#475569; font-family:'Microsoft YaHei',Arial,sans-serif; }
+  .t3-pagination button:hover { background:#f1f5f9; border-color:#94a3b8; }
+  .t3-pagination button.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+  .t3-pagination .page-info { font-size:13px; color:#64748b; margin:0 8px; }
+
+  /* Tab nav */
+  .tab-nav { display:flex; gap:0; background:#fff; border-bottom:2px solid #e2e8f0; padding:0 40px; }
+  .tab-btn {
+    padding:14px 28px; border:none; background:transparent; cursor:pointer;
+    font-size:14px; font-weight:600; color:#64748b; font-family:'Microsoft YaHei',Arial,sans-serif;
+    border-bottom:3px solid transparent; margin-bottom:-2px; transition:all 0.2s;
+  }
+  .tab-btn:hover { color:#2563eb; background:#f8faff; }
+  .tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; }
+
+  /* Heatmap table */
+  .heat-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .heat-table th { background:#f8fafc; color:#475569; font-weight:600; padding:10px 14px; text-align:center; border:1px solid #e2e8f0; }
+  .heat-table td { padding:9px 14px; text-align:center; border:1px solid #e2e8f0; font-weight:500; font-size:13px; }
+  .heat-table td.row-label { text-align:left; font-weight:700; background:#f8fafc; }
+  .heat-0  { background:#f8fafc; color:#cbd5e1; }
+  .heat-1  { background:#eff6ff; color:#3b82f6; }
+  .heat-2  { background:#dbeafe; color:#2563eb; }
+  .heat-3  { background:#bfdbfe; color:#1d4ed8; }
+  .heat-4  { background:#93c5fd; color:#1e40af; }
+  .heat-5  { background:#60a5fa; color:#fff; }
+  .heat-6  { background:#3b82f6; color:#fff; }
+  .heat-7  { background:#2563eb; color:#fff; }
+
+  /* Seller SKU table */
+  .sku-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .sku-table th { background:#f8fafc; color:#475569; font-weight:600; padding:10px 14px; text-align:left; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+  .sku-table td { padding:9px 14px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+  .sku-table tr:hover td { background:#f8fafc; }
+  .sku-badge { display:inline-block; background:#eff6ff; color:#2563eb; border-radius:4px; padding:2px 7px; font-family:monospace; font-size:11px; margin:2px 3px 2px 0; }
+  .sku-qty { color:#94a3b8; font-size:11px; }
+
+  /* ===== RESPONSIVE — TABLET (≤900px) ===== */
+  @media (max-width: 900px) {
+    .header { padding: 20px 24px; }
+    .kpi-grid { padding: 16px 24px; gap: 12px; }
+    .section { padding: 0 24px 24px; }
+    .t3-filter-bar { padding: 14px 24px; }
+    .t3-table-wrap { padding: 0 16px; }
+    .t3-pagination { padding: 14px 24px 20px; }
+    .tab-nav { padding: 0 16px; }
+    .tab-btn { padding: 12px 18px; font-size: 13px; }
+    .plat-grid { grid-template-columns: repeat(2,1fr); }
+    .insights-grid { grid-template-columns: repeat(2,1fr); }
+  }
+
+  /* ===== RESPONSIVE — MOBILE (≤640px) ===== */
+  @media (max-width: 640px) {
+    /* Header */
+    .header {
+      padding: 14px 16px; flex-wrap: wrap; gap: 8px;
+    }
+    .header-left h1 { font-size: 19px; }
+    .header-left p { font-size: 11px; line-height: 1.5; }
+    .header-badge { padding: 4px 12px; font-size: 11px; }
+
+    /* Tab nav — 横向滚动，不换行 */
+    .tab-nav {
+      padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; white-space: nowrap; display: block;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      display: inline-block; padding: 12px 14px; font-size: 12px; white-space: nowrap;
+    }
+
+    /* KPI grid: 2 列 */
+    .kpi-grid {
+      grid-template-columns: repeat(2,1fr);
+      gap: 8px; padding: 12px 16px;
+    }
+    .kpi-card { padding: 14px 14px; }
+    .kpi-card .value { font-size: 24px; }
+    .kpi-card .label { font-size: 11px; }
+
+    /* Sections */
+    .section { padding: 0 16px 20px; }
+    .section-title { font-size: 14px; padding: 12px 0; margin-bottom: 14px; }
+
+    /* Charts: 单列 + 降低高度 */
+    .grid-2 { grid-template-columns: 1fr; gap: 14px; }
+    .chart-wrap[style*="height:300px"] { height: 220px !important; }
+    .chart-wrap[style*="height:360px"] { height: 240px !important; }
+    .chart-wrap[style*="height:240px"] { height: 200px !important; }
+    .chart-wrap[style*="height:220px"] { height: 180px !important; }
+
+    /* Platform grid: 单列 */
+    .plat-grid { grid-template-columns: 1fr; }
+    .insights-grid { grid-template-columns: 1fr; }
+
+    /* Tab 3 filter bar */
+    .t3-filter-bar { padding: 12px 16px; }
+    .t3-filter-row { gap: 10px; }
+    .t3-filter-group { min-width: calc(50% - 5px); flex-grow: 1; }
+    .t3-multisel { min-width: unset; width: 100%; }
+    .t3-multisel-trigger { min-height: 40px; }
+    .t3-search-input { min-height: 40px; font-size: 16px; } /* iOS 需要≥16px 防止自动缩放 */
+    .t3-search-group { min-width: 100% !important; }
+    .t3-clear-btn, .t3-dl-btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
+
+    /* Tab 3 result info */
+    .t3-result-info { font-size: 12px; line-height: 1.6; }
+
+    /* Tab 3 table */
+    .t3-table-wrap {
+      padding: 0 8px;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+    .t3-table { font-size: 12px; }
+    .t3-table th { padding: 8px 10px; font-size: 11px; }
+    .t3-table td { padding: 7px 10px; }
+    .t3-table .name-cell { max-width: 140px; }
+
+    /* Pagination */
+    .t3-pagination { padding: 12px 16px 18px; gap: 4px; }
+    .t3-pagination button { padding: 6px 10px; font-size: 12px; min-height: 36px; }
+
+    /* Heatmap */
+    .heat-table th, .heat-table td { padding: 6px 8px; font-size: 11px; }
+
+    /* 表格滚动提示 */
+    .t3-table-wrap::before {
+      content: '← 左右滑动查看更多列 →';
+      display: block; text-align: center;
+      font-size: 11px; color: #94a3b8;
+      padding: 4px 0 6px; letter-spacing: 0.3px;
+    }
+  }
+
+  /* ===== RESPONSIVE — SMALL MOBILE (≤400px) ===== */
+  @media (max-width: 400px) {
+    .kpi-card .value { font-size: 20px; }
+    .tab-btn { padding: 11px 12px; font-size: 11px; }
+    .t3-filter-group { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>📊 全品销售分析报告</h1>
+    <!-- GEN:HEADER_P --><p>数据周期：2026年4月1日 — 2026年5月12日</p><!-- /GEN:HEADER_P -->
+  </div>
+  <!-- GEN:HEADER_BADGE --><div class="header-badge">42天 · 9平台</div><!-- /GEN:HEADER_BADGE -->
+</div>
+
+<!-- Tab Nav -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab(1)">📦 SKU 销售分析</button>
+  <button class="tab-btn" onclick="switchTab(2)">🏪 平台 · 店铺 · 销售综合分析</button>
+  <button class="tab-btn" onclick="switchTab(3)">📋 SKU 销售明细</button>
+  <button class="tab-btn" onclick="switchTab(4)">↩️ 退款报告</button>
+</div>
+
+<div id="tab1">
+<!-- GEN:T1_KPI -->
+<div class="kpi-grid">
+  <div class="kpi-card" style="--accent:#3b82f6">
+    <span class="icon">📋</span>
+    <div class="label">总订单数</div>
+    <div class="value">25,069</div>
+    <div class="sub">有效：24,238 &nbsp; 取消：831</div>
+  </div>
+  <div class="kpi-card" style="--accent:#10b981">
+    <span class="icon">📦</span>
+    <div class="label">总销售量（件）</div>
+    <div class="value">27,852</div>
+    <div class="sub">含TEMU全托管 1,296 件</div>
+  </div>
+  <div class="kpi-card" style="--accent:#6366f1">
+    <span class="icon">🏷️</span>
+    <div class="label">活跃产品SKU数</div>
+    <div class="value">4,202</div>
+    <div class="sub">平台SKU：12,844</div>
+  </div>
+  <div class="kpi-card" style="--accent:#f59e0b">
+    <span class="icon">📅</span>
+    <div class="label">日均订单量</div>
+    <div class="value">577</div>
+    <div class="sub">峰值：706（4月20日）</div>
+  </div>
+  <div class="kpi-card" style="--accent:#ef4444">
+    <span class="icon">❌</span>
+    <div class="label">整体取消率</div>
+    <div class="value">3.3%</div>
+    <div class="sub">831笔取消订单</div>
+  </div>
+</div>
+<!-- /GEN:T1_KPI -->
+
+<!-- Section 1: Daily Trend -->
+<div class="section">
+  <!-- GEN:T1_DAILY_TITLE --><div class="section-title" style="--accent:#3b82f6">每日订单与销售量趋势（2026/04/01 — 2026/05/12）</div><!-- /GEN:T1_DAILY_TITLE -->
+  <div class="chart-card">
+    <div class="chart-wrap" style="height:300px">
+      <canvas id="dailyChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section 2: Top 20 SKU -->
+<div class="section">
+  <div class="section-title" style="--accent:#10b981">Top 20 产品SKU · 销售量 &amp; 销售额排行</div>
+  <div class="chart-card">
+    <div class="chart-wrap" style="height:360px">
+      <canvas id="top20Chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section 3: Platform + Weekly -->
+<div class="section">
+  <div class="section-title" style="--accent:#6366f1">平台订单占比 &amp; Top 6 SKU 周趋势</div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>各平台订单占比（有效订单）</h3>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="platChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Top 6 SKU · 按周销售量（W1=4/1起，每7天一周）</h3>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="weeklyChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 4: Cancel Rate -->
+<div class="section">
+  <!-- GEN:T1_CANCEL_TITLE --><div class="section-title" style="--accent:#ef4444">Top 10 SKU 订单取消率（红色 = 高于均值 3.3%）</div><!-- /GEN:T1_CANCEL_TITLE -->
+  <div class="chart-card">
+    <div class="chart-wrap" style="height:220px">
+      <canvas id="cancelChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section 5: Platform Top SKU -->
+<div class="section">
+  <div class="section-title" style="--accent:#f59e0b">各平台 Top 5 销售SKU（按销售量）</div>
+  <!-- GEN:T1_PLAT_TOP --><div class="plat-grid">
+    <div class="plat-card">
+      <h4 style="color:#ee1d52">🎵 TIKTOK SHOP &nbsp;<small style="color:#64748b;font-weight:400">9,568单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TKAL08001AF5BW200A01</div><div class="rank-sku-name">8"一体鸭舌帽子发波波头卷发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ee1d52"></div></div><div class="rank-qty">287</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-010</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:75%;background:#ee1d52"></div></div><div class="rank-qty">215</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-001</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:61%;background:#ee1d52"></div></div><div class="rank-qty">176</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">T1728</div><div class="rank-sku-name">16"一体鸭舌帽大波浪</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:56%;background:#ee1d52"></div></div><div class="rank-qty">161</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-H43</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:55%;background:#ee1d52"></div></div><div class="rank-qty">159</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#e53238">🛒 eBay &nbsp;<small style="color:#64748b;font-weight:400">8,118单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TH0010&5</div><div class="rank-sku-name">双面胶片(蓝色)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#e53238"></div></div><div class="rank-qty">49</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T1371</div><div class="rank-sku-name">蓬蓬发圈(45g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:88%;background:#e53238"></div></div><div class="rank-qty">43</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1369</div><div class="rank-sku-name">蓬蓬发圈(45g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:82%;background:#e53238"></div></div><div class="rank-qty">40</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">THQ-D04</div><div class="rank-sku-name">空气刘海</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:78%;background:#e53238"></div></div><div class="rank-qty">38</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">T1367</div><div class="rank-sku-name">蓬蓬发圈(45g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:69%;background:#e53238"></div></div><div class="rank-qty">34</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#fa6338">🛍 TEMU &nbsp;<small style="color:#64748b;font-weight:400">2,713单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T1093</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#fa6338"></div></div><div class="rank-qty">42</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">THT2201</div><div class="rank-sku-name">20pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:71%;background:#fa6338"></div></div><div class="rank-qty">30</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">THT2001</div><div class="rank-sku-name">20pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:71%;background:#fa6338"></div></div><div class="rank-qty">30</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">TWD009BT22-P47</div><div class="rank-sku-name">分层曲发抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:60%;background:#fa6338"></div></div><div class="rank-qty">25</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">HGT001SC22-4P27</div><div class="rank-sku-name">20pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:57%;background:#fa6338"></div></div><div class="rank-qty">24</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#ff6a00">🌐 AliExpress &nbsp;<small style="color:#64748b;font-weight:400">1,828单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T430</div><div class="rank-sku-name">20"绳子发曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ff6a00"></div></div><div class="rank-qty">25</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">THEH1001BAA02AAA0033</div><div class="rank-sku-name">手勾鬓角(A型)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:96%;background:#ff6a00"></div></div><div class="rank-qty">24</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1093</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:92%;background:#ff6a00"></div></div><div class="rank-qty">23</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">TFAL18A81AH4AW200A01</div><div class="rank-sku-name">6x6"机扎刘海大发块18"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:84%;background:#ff6a00"></div></div><div class="rank-qty">21</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">TFAL18A96AH4AW200A01</div><div class="rank-sku-name">6x6"机扎刘海大发块18"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:80%;background:#ff6a00"></div></div><div class="rank-qty">20</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#00bcd4">📦 TEMU 全托管 &nbsp;<small style="color:#64748b;font-weight:400">1,296单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TAGL22H53AA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#00bcd4"></div></div><div class="rank-qty">38</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TWD007ST12-01B</div><div class="rank-sku-name">12"长齿插梳抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:92%;background:#00bcd4"></div></div><div class="rank-qty">35</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T2465</div><div class="rank-sku-name">20"绳子发曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:82%;background:#00bcd4"></div></div><div class="rank-qty">31</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">TDG003LT11-P12</div><div class="rank-sku-name">发箍刘海发块</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:71%;background:#00bcd4"></div></div><div class="rank-qty">27</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">TWD007ST12-P43</div><div class="rank-sku-name">12"长齿插梳抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:68%;background:#00bcd4"></div></div><div class="rank-qty">26</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#c94b9e">👗 SHEIN &nbsp;<small style="color:#64748b;font-weight:400">1,114单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T1631</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#c94b9e"></div></div><div class="rank-qty">26</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T1093</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:81%;background:#c94b9e"></div></div><div class="rank-qty">21</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1690</div><div class="rank-sku-name">2夹刘海</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:65%;background:#c94b9e"></div></div><div class="rank-qty">17</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">T1094</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:62%;background:#c94b9e"></div></div><div class="rank-qty">16</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">TWD009BT22-P47</div><div class="rank-sku-name">分层曲发抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:58%;background:#c94b9e"></div></div><div class="rank-qty">15</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#0071ce">🏪 Walmart &nbsp;<small style="color:#64748b;font-weight:400">861单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">THT14-12P613-TT</div><div class="rank-sku-name">10pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#0071ce"></div></div><div class="rank-qty">17</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">HFM038SC10-02</div><div class="rank-sku-name">0.75x6.25"手勾蕾丝发际线(中分款)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:88%;background:#0071ce"></div></div><div class="rank-qty">15</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1633</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:65%;background:#0071ce"></div></div><div class="rank-qty">11</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">T1632</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:65%;background:#0071ce"></div></div><div class="rank-qty">11</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">T1255</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:59%;background:#0071ce"></div></div><div class="rank-qty">10</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#64748b">🏠 线下 &nbsp;<small style="color:#64748b;font-weight:400">34单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T2592</div><div class="rank-sku-name">6"一体鸭舌黑帽子发波波头</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#64748b"></div></div><div class="rank-qty">3</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TMM017GT18-P18</div><div class="rank-sku-name">18"一体米色鸭舌帽子发(水波纹)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#64748b"></div></div><div class="rank-qty">3</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TW1633</div><div class="rank-sku-name">直刘海乐乐造型头套</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:67%;background:#64748b"></div></div><div class="rank-qty">2</div></div>
+      <div class="rank-item"><div class="rank-num rank-4">4</div><div class="rank-sku"><div class="rank-sku-code">T1057</div><div class="rank-sku-name">毛毛虫(85g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:67%;background:#64748b"></div></div><div class="rank-qty">2</div></div>
+      <div class="rank-item"><div class="rank-num rank-5">5</div><div class="rank-sku"><div class="rank-sku-code">HKE002SG12-2R</div><div class="rank-sku-name">5片7夹蕾丝卡子发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:33%;background:#64748b"></div></div><div class="rank-qty">1</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#96bf48">🟢 Shopify &nbsp;<small style="color:#64748b;font-weight:400">2单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">THID18002AJD2AEB0007</div><div class="rank-sku-name">7x13cm 机扎+机制刘海发块</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#96bf48"></div></div><div class="rank-qty">1</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">THIB18004AID2AEB0007</div><div class="rank-sku-name">7x13cm 机扎+机制中分发块(前额手勾边)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#96bf48"></div></div><div class="rank-qty">1</div></div>
+    </div>
+  </div><!-- /GEN:T1_PLAT_TOP -->
+</div>
+
+<!-- Section 6: Insights -->
+<div class="section">
+  <div class="section-title" style="--accent:#a78bfa">核心洞察</div>
+  <div class="insights-grid">
+    <div class="insight-card" style="--c:#3b82f6">
+      <div class="i-title">🏆 销量冠军</div>
+      <div class="i-body"><span class="hl">TKAL08001AF5BW200A01</span> 以 292 件稳居总销量第一，<span class="hl-g">取消率仅 0.7%</span>，几乎全量来自 TikTok Shop（287件），是当前平台核心爆款。</div>
+    </div>
+    <div class="insight-card" style="--c:#10b981">
+      <div class="i-title">📈 TikTok Shop 主导</div>
+      <div class="i-body">TikTok Shop 以 <span class="hl">9,568 单</span>领跑，占有效订单 <span class="hl">39.5%</span>；eBay（8,118单）紧随，两者合计占比超 <span class="hl">73%</span>。</div>
+    </div>
+    <div class="insight-card" style="--c:#ef4444">
+      <div class="i-title">⚠️ 高取消率预警</div>
+      <div class="i-body"><span class="hl-r">TMM011BT08-010</span> 取消率 <span class="hl-r">6.0%</span>，<span class="hl-y">T1728</span> 达 5.5%，均远超均值 3.3%，需排查供货或定价问题。</div>
+    </div>
+    <div class="insight-card" style="--c:#6366f1">
+      <div class="i-title">🔁 跨平台共鸣SKU</div>
+      <div class="i-body"><span class="hl">T1093</span> 在 TEMU（42件）、AliExpress（23件）、SHEIN（21件）三平台均跻身 Top 3，是最具跨平台竞争力的 SKU。</div>
+    </div>
+    <div class="insight-card" style="--c:#f59e0b">
+      <div class="i-title">📊 峰值日分析</div>
+      <div class="i-body"><span class="hl-y">4月20日</span> 达全期峰值 706 单，较日均高出 <span class="hl">+22%</span>；周末订单量普遍偏低，工作日存在明显周期性规律。</div>
+    </div>
+    <div class="insight-card" style="--c:#34d399">
+      <div class="i-title">🌐 多货币市场格局</div>
+      <div class="i-body">美元订单 13,267 单占比最高，GBP（7,377单）次之，英美为核心市场；欧元（2,117单）及澳元（1,530单）仍有增长空间。</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab1 -->
+
+<!-- ===== TAB 2: 综合分析 ===== -->
+<div id="tab2" style="display:none">
+
+<!-- GEN:T2_KPI -->
+<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+  <div class="kpi-card" style="--accent:#6366f1">
+    <span class="icon">🏪</span>
+    <div class="label">活跃店铺数</div>
+    <div class="value">145+</div>
+    <div class="sub">Top店铺：MLHR（2,121单）</div>
+  </div>
+  <div class="kpi-card" style="--accent:#10b981">
+    <span class="icon">🌍</span>
+    <div class="label">覆盖站点数</div>
+    <div class="value">23</div>
+    <div class="sub">主站：US · UK · AU · DE</div>
+  </div>
+  <div class="kpi-card" style="--accent:#f59e0b">
+    <span class="icon">👤</span>
+    <div class="label">销售人员数</div>
+    <div class="value">43</div>
+    <div class="sub">Top：柯伯霖（2,750件）</div>
+  </div>
+  <div class="kpi-card" style="--accent:#3b82f6">
+    <span class="icon">📊</span>
+    <div class="label">平台数</div>
+    <div class="value">9</div>
+    <div class="sub">TIKTOK SHOP · eBay · TEMU</div>
+  </div>
+</div>
+<!-- /GEN:T2_KPI -->
+
+<!-- Shop + Site -->
+<div class="section">
+  <div class="section-title" style="--accent:#6366f1">店铺订单排行 &amp; 站点分布</div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Top 15 店铺 · 订单量</h3>
+      <div class="chart-wrap" style="height:420px">
+        <canvas id="shopChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>销售站点分布（有效订单量）</h3>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="siteChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Seller analysis -->
+<div class="section">
+  <div class="section-title" style="--accent:#f59e0b">销售人员业绩分析（全员）</div>
+  <div class="chart-card">
+    <h3>各销售 · 销量（按平台拆分堆叠）</h3>
+    <div class="chart-wrap" style="height:1050px">
+      <canvas id="sellerChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Platform x Site heatmap -->
+<div class="section">
+  <div class="section-title" style="--accent:#10b981">平台 × 站点 · 订单热力矩阵</div>
+  <div class="chart-card">
+    <div id="heatmapTable" style="overflow-x:auto"></div>
+  </div>
+</div>
+
+<!-- Shop top SKU cards -->
+<div class="section">
+<!-- GEN:T2_SHOP_TOP --><div class="section-title" style="--accent:#3b82f6">Top 8 店铺 · 主销SKU</div>
+  <div class="plat-grid">
+    <div class="plat-card">
+      <h4 style="color:#6366f1">🏪 MLHR <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 2,121单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TKAL08001AF5BW200A01</div><div class="rank-sku-name">8"一体鸭舌帽子发波波头卷发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#6366f1"></div></div><div class="rank-qty">266</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-001</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:52%;background:#6366f1"></div></div><div class="rank-qty">137</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TKAL0802AAF5BW200A01</div><div class="rank-sku-name">8"一体鸭舌帽子发波波头卷发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:35%;background:#6366f1"></div></div><div class="rank-qty">93</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#3b82f6">🏪 HWM <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 1,441单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">T1092</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#3b82f6"></div></div><div class="rank-qty">90</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T1094</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:90%;background:#3b82f6"></div></div><div class="rank-qty">81</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1093</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:77%;background:#3b82f6"></div></div><div class="rank-qty">69</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#ee1d52">🏪 HWE <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 1,360单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-010</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ee1d52"></div></div><div class="rank-qty">85</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T1094</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:61%;background:#ee1d52"></div></div><div class="rank-qty">52</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TMM011BT08-H43</div><div class="rank-sku-name">一体棕色鸭舌帽波波头卷发8"</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:61%;background:#ee1d52"></div></div><div class="rank-qty">52</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#0071ce">🏪 ULQS <small style="color:#94a3b8;font-weight:400">Walmart · 731单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">THT14-12P613-TT</div><div class="rank-sku-name">10pcs刷胶发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#0071ce"></div></div><div class="rank-qty">17</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">HFM038SC10-02</div><div class="rank-sku-name">0.75x6.25"手勾蕾丝发际线(中分款)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:88%;background:#0071ce"></div></div><div class="rank-qty">15</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">T1632</div><div class="rank-sku-name">插梳发包(90g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:65%;background:#0071ce"></div></div><div class="rank-qty">11</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#14b8a6">🏪 LWS <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 713单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TDG002LT05-001</div><div class="rank-sku-name">发箍刘海</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#14b8a6"></div></div><div class="rank-qty">56</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TDG002LT05-012</div><div class="rank-sku-name">发箍刘海</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:70%;background:#14b8a6"></div></div><div class="rank-qty">39</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TWC011ST08-010</div><div class="rank-sku-name">抓夹蓬蓬马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:52%;background:#14b8a6"></div></div><div class="rank-qty">29</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#f59e0b">🏪 snoilite <small style="color:#94a3b8;font-weight:400">TEMU 全托管 · 695单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TAGL22H53AA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#f59e0b"></div></div><div class="rank-qty">38</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">T2465</div><div class="rank-sku-name">20"绳子发曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:82%;background:#f59e0b"></div></div><div class="rank-qty">31</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TWD007ST12-01B</div><div class="rank-sku-name">12"长齿插梳抽绳马尾</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:71%;background:#f59e0b"></div></div><div class="rank-qty">27</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#ef4444">🏪 UGW <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 660单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">TAGL22H49AA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ef4444"></div></div><div class="rank-qty">35</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TAGL2204AAA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:91%;background:#ef4444"></div></div><div class="rank-qty">32</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TAGL22H51AA2BW185A03</div><div class="rank-sku-name">22"卡子发4片11夹曲发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:86%;background:#ef4444"></div></div><div class="rank-qty">30</div></div>
+    </div>
+    <div class="plat-card">
+      <h4 style="color:#ec4899">🏪 IHE <small style="color:#94a3b8;font-weight:400">TIKTOK SHOP · 627单</small></h4>
+      <div class="rank-item"><div class="rank-num rank-1">1</div><div class="rank-sku"><div class="rank-sku-code">HYI004SC22-60R</div><div class="rank-sku-name">50pcs铁丝发(35g)</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:100%;background:#ec4899"></div></div><div class="rank-qty">22</div></div>
+      <div class="rank-item"><div class="rank-num rank-2">2</div><div class="rank-sku"><div class="rank-sku-code">TH-CI2470</div><div class="rank-sku-name">50pcs铁丝发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:77%;background:#ec4899"></div></div><div class="rank-qty">17</div></div>
+      <div class="rank-item"><div class="rank-num rank-3">3</div><div class="rank-sku"><div class="rank-sku-code">TH-CI2260</div><div class="rank-sku-name">50pcs铁丝发</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:73%;background:#ec4899"></div></div><div class="rank-qty">16</div></div>
+    </div>
+  </div><!-- /GEN:T2_SHOP_TOP -->
+</div>
+
+<!-- Seller top SKU table -->
+<div class="section">
+  <div class="section-title" style="--accent:#ec4899">销售人员 Top 8 · 个人主销SKU</div>
+  <div class="chart-card" style="overflow-x:auto">
+    <table id="sellerSkuTable" style="width:100%;border-collapse:collapse;font-size:13px"></table>
+  </div>
+</div>
+
+</div><!-- /tab2 -->
+
+<!-- ===== TAB 3: SKU销售明细 ===== -->
+<div id="tab3" style="display:none">
+
+  <!-- Filter bar -->
+  <div class="t3-filter-bar">
+    <!-- 第一行：筛选框（多选下拉） -->
+    <div class="t3-filter-row">
+      <div class="t3-filter-group">
+        <label>平台</label>
+        <div class="t3-multisel" id="f-plat">
+          <div class="t3-multisel-trigger" onclick="T3.td('f-plat')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-plat-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group">
+        <label>店铺</label>
+        <div class="t3-multisel" id="f-shop">
+          <div class="t3-multisel-trigger" onclick="T3.td('f-shop')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-shop-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group">
+        <label>站点</label>
+        <div class="t3-multisel" id="f-site">
+          <div class="t3-multisel-trigger" onclick="T3.td('f-site')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-site-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group">
+        <label>销售</label>
+        <div class="t3-multisel" id="f-seller">
+          <div class="t3-multisel-trigger" onclick="T3.td('f-seller')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-seller-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group">
+        <label>尺码</label>
+        <div class="t3-multisel" id="f-size">
+          <div class="t3-multisel-trigger" onclick="T3.td('f-size')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f-size-menu"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="t3-clear-btn" onclick="T3.clear()">重置</button>
+      </div>
+    </div>
+    <!-- 第二行：搜索框（文本输入） -->
+    <div class="t3-filter-row" style="margin-top:10px">
+      <div class="t3-filter-group t3-search-group" style="flex:1.5;min-width:180px">
+        <label>SKU 精确搜索 <span style="color:#94a3b8;font-weight:400">（多个用逗号或空格分隔）</span></label>
+        <input id="t3-sku-search" class="t3-search-input" type="text" placeholder="例：T1093, TMM011BT08-010" oninput="T3.apply()">
+      </div>
+      <div class="t3-filter-group" style="flex:1;min-width:140px">
+        <label>SPU 搜索</label>
+        <input id="t3-spu-search" class="t3-search-input" type="text" placeholder="例：T-MZ, TMM011" oninput="T3.apply()">
+      </div>
+      <div class="t3-filter-group" style="flex:2;min-width:180px">
+        <label>产品名称搜索</label>
+        <input id="t3-name-search" class="t3-search-input" type="text" placeholder="例：波浪、鸭舌帽" oninput="T3.apply()">
+      </div>
+      <div class="t3-filter-group" style="flex:1;min-width:140px">
+        <label>颜色搜索</label>
+        <input id="t3-color-search" class="t3-search-input" type="text" placeholder="例：黑色、白色" oninput="T3.apply()">
+      </div>
+    </div>
+    <div class="t3-filter-row" style="margin-top:10px;align-items:center;justify-content:space-between">
+      <div class="t3-result-info" id="t3-result-info">加载中…</div>
+      <div style="display:flex;gap:10px">
+        <button class="t3-dl-btn" onclick="T3.csv()">⬇ 下载 CSV</button>
+        <button class="t3-dl-btn t3-dl-btn--excel" onclick="T3.xlsx()">⬇ 下载 Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table: thead generated dynamically by JS -->
+  <div class="t3-table-wrap" id="t3-table-wrap">
+    <table class="t3-table" id="t3-table">
+      <thead id="t3-thead"></thead>
+      <tbody id="t3-tbody"></tbody>
+    </table>
+  </div>
+  <div class="t3-pagination" id="t3-pagination"></div>
+
+</div><!-- /tab3 -->
+
+<!-- ===== TAB 4: SKU销售明细2 ===== -->
+<div id="tab4" style="display:none">
+  <div class="t3-filter-bar">
+    <div class="t3-filter-row">
+      <div class="t3-filter-group">
+        <label>尺码</label>
+        <div class="t3-multisel" id="f4-size">
+          <div class="t3-multisel-trigger" onclick="T4.td('f4-size')">全部 <span class="arrow">▾</span></div>
+          <div class="t3-multisel-menu" id="f4-size-menu"></div>
+        </div>
+      </div>
+      <div class="t3-filter-group" style="justify-content:flex-end">
+        <label style="visibility:hidden;font-size:12px">占位</label>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap;height:36px;padding:0 14px;border:1.5px solid #fed7aa;border-radius:8px;background:#fff7ed;color:#b45309;font-size:13px;font-weight:500;user-select:none">
+          <input type="checkbox" id="t4-cross-only" onchange="T4.apply()" style="width:15px;height:15px;cursor:pointer;accent-color:#f97316">
+          只看跨期退款
+        </label>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="t3-clear-btn" onclick="T4.clear()">重置</button>
+      </div>
+    </div>
+    <div class="t3-filter-row" style="margin-top:10px">
+      <div class="t3-filter-group t3-search-group" style="flex:1.5;min-width:180px">
+        <label>SKU 精确搜索 <span style="color:#94a3b8;font-weight:400">（多个用逗号或空格分隔）</span></label>
+        <input id="t4-sku-search" class="t3-search-input" type="text" placeholder="例：T1093, TMM011BT08-010" oninput="T4.apply()">
+      </div>
+      <div class="t3-filter-group" style="flex:1;min-width:140px">
+        <label>SPU 搜索</label>
+        <input id="t4-spu-search" class="t3-search-input" type="text" placeholder="例：T-MZ, TMM011" oninput="T4.apply()">
+      </div>
+      <div class="t3-filter-group" style="flex:2;min-width:180px">
+        <label>产品名称搜索</label>
+        <input id="t4-name-search" class="t3-search-input" type="text" placeholder="例：波浪、鸭舌帽" oninput="T4.apply()">
+      </div>
+      <div class="t3-filter-group" style="flex:1;min-width:140px">
+        <label>颜色搜索</label>
+        <input id="t4-color-search" class="t3-search-input" type="text" placeholder="例：黑色、白色" oninput="T4.apply()">
+      </div>
+    </div>
+    <div class="t3-filter-row" style="margin-top:10px;align-items:center;justify-content:space-between">
+      <div class="t3-result-info" id="t4-result-info">加载中…</div>
+      <div style="display:flex;gap:10px">
+        <button class="t3-dl-btn" onclick="T4.csv()">⬇ 下载 CSV</button>
+        <button class="t3-dl-btn t3-dl-btn--excel" onclick="T4.xlsx()">⬇ 下载 Excel</button>
+      </div>
+    </div>
+  </div>
+  <div class="t3-table-wrap" id="t4-table-wrap">
+    <table class="t3-table" id="t4-table">
+      <thead id="t4-thead"></thead>
+      <tbody id="t4-tbody"></tbody>
+    </table>
+  </div>
+  <div class="t3-pagination" id="t4-pagination"></div>
+</div><!-- /tab4 -->
+
+<!-- GEN:FOOTER --><div class="footer">生成时间：2026-05-14 17:59</div><!-- /GEN:FOOTER -->
+
+<script>
+const C = ['#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1','#ec4899','#14b8a6','#f97316','#a78bfa','#22d3ee','#84cc16','#fb923c','#e879f9','#38bdf8','#4ade80','#facc15','#f472b6','#a3e635','#34d399','#60a5fa'];
+
+// 1. Daily Trend
+const days = ["04-01","04-02","04-03","04-04","04-05","04-06","04-07","04-08","04-09","04-10","04-11","04-12","04-13","04-14","04-15","04-16","04-17","04-18","04-19","04-20","04-21","04-22","04-23","04-24","04-25","04-26","04-27","04-28","04-29","04-30","05-01","05-02","05-03","05-04","05-05","05-06","05-07","05-08","05-09","05-10","05-11","05-12"];
+const dOrders = [607,626,590,519,447,565,548,571,588,534,529,495,657,571,622,600,584,547,532,706,592,603,578,645,506,524,563,596,613,601,603,587,539,613,572,578,646,624,505,529,584,599];
+const dQty = [693,697,733,626,532,619,601,663,706,652,615,573,772,618,695,679,723,637,627,803,699,686,627,821,591,604,649,653,680,699,740,712,632,697,636,663,693,685,564,566,636,655];
+
+new Chart(document.getElementById('dailyChart'), {
+  type: 'bar',
+  data: {
+    labels: days,
+    datasets: [
+      { label:'订单数', data: dOrders, backgroundColor:'rgba(59,130,246,0.45)', borderColor:'#3b82f6', borderWidth:1, yAxisID:'y', order:2 },
+      { label:'销售量（件）', data: dQty, type:'line', borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.08)', borderWidth:2, pointRadius:2, tension:0.3, fill:true, yAxisID:'y1', order:1 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ labels:{ color:'#475569', font:{size:12} } },
+      tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1 }
+    },
+    scales:{
+      x:{ ticks:{ color:'#64748b', font:{size:9}, maxRotation:45 }, grid:{ color:'#f1f5f9' } },
+      y:{ ticks:{ color:'#64748b' }, grid:{ color:'#f1f5f9' }, title:{ display:true, text:'订单数', color:'#64748b' } },
+      y1:{ position:'right', ticks:{ color:'#64748b' }, grid:{ drawOnChartArea:false }, title:{ display:true, text:'销售量（件）', color:'#64748b' } }
+    }
+  }
+});
+
+// 2. Top 20 SKU
+const skus = ["TKAL08001AF5BW200A01","T1093","TMM011BT08-010","T1094","T1092","TMM011BT08-001","T1728","TMM011BT08-H43","TMM011BT08-Z28","T2502","T1255","TKAL0802AAF5BW200A01","TMM011BT08-06A","T1729","TWC011ST08-T45","T2597","TKAL0806AAF5BW200A01","HFM038SC10-02","TWC011ST08-01B","TAGL22H51AA2BW185A03"];
+const qty  = [292,258,220,186,183,178,173,159,138,135,115,112,108,98,97,95,94,87,87,84];
+const amt  = [9999.94,4683.53,6897.01,4479.64,3945.75,4882.99,5507.6,5082.25,3532.18,3077.31,2230.45,3677.26,2993.49,3028.05,2477.61,3008.33,3367.41,2365.6,1710.15,1506.8];
+
+new Chart(document.getElementById('top20Chart'), {
+  type:'bar',
+  data:{
+    labels: skus,
+    datasets:[
+      { label:'销售量（件）', data:qty, backgroundColor: skus.map((_,i)=>C[i]+'bb'), borderColor: skus.map((_,i)=>C[i]), borderWidth:1, yAxisID:'y', order:2 },
+      { label:'销售额（原币合计）', data:amt, type:'line', borderColor:'#fbbf24', backgroundColor:'transparent', borderWidth:2, pointRadius:4, pointBackgroundColor:'#fbbf24', yAxisID:'y1', order:1 }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ labels:{ color:'#475569', font:{size:12} } },
+      tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1 }
+    },
+    scales:{
+      x:{ ticks:{ color:'#64748b', font:{size:9}, maxRotation:35 }, grid:{ color:'#f1f5f9' } },
+      y:{ ticks:{ color:'#64748b' }, grid:{ color:'#f1f5f9' }, title:{ display:true, text:'销售量（件）', color:'#64748b' } },
+      y1:{ position:'right', ticks:{ color:'#64748b' }, grid:{ drawOnChartArea:false }, title:{ display:true, text:'销售额（原币）', color:'#64748b' } }
+    }
+  }
+});
+
+// 3. Platform donut
+new Chart(document.getElementById('platChart'), {
+  type:'doughnut',
+  data:{
+    labels:["TIKTOK SHOP","eBay","TEMU","AliExpress","TEMU 全托管","SHEIN","Walmart","线下","Shopify"],
+    datasets:[{ data:[9568,8118,2713,1828,1296,1114,861,34,2], backgroundColor:["#ee1d52","#e53238","#fa6338","#ff6a00","#00bcd4","#c94b9e","#0071ce","#64748b","#96bf48"], borderColor:'#fff', borderWidth:2 }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ position:'right', labels:{ color:'#475569', font:{size:11}, padding:10 } },
+      tooltip:{
+        backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1,
+        callbacks:{ label: ctx => { const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ` ${ctx.raw.toLocaleString()}单 (${(ctx.raw/t*100).toFixed(1)}%)`; } }
+      }
+    }
+  }
+});
+
+// 4. Weekly trend top 6
+const wLabels = ["W1 (4/1)","W2 (4/8)","W3 (4/15)","W4 (4/22)","W5 (4/29)","W6 (5/6)"];
+const wData = {"TKAL08001AF5BW200A01":[54,56,47,40,42,53],"T1093":[26,59,39,49,47,38],"TMM011BT08-010":[62,28,41,44,18,27],"T1094":[32,32,30,35,33,24],"T1092":[9,32,32,34,40,36],"TMM011BT08-001":[26,20,36,38,32,26]};
+const wC = ['#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1','#ec4899'];
+
+new Chart(document.getElementById('weeklyChart'), {
+  type:'line',
+  data:{
+    labels: wLabels,
+    datasets: Object.entries(wData).map(([sku,d],i)=>({
+      label:sku, data:d, borderColor:wC[i], backgroundColor:'transparent',
+      borderWidth:2, pointRadius:4, pointBackgroundColor:wC[i], tension:0.3
+    }))
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ labels:{ color:'#475569', font:{size:10}, boxWidth:12 } },
+      tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1 }
+    },
+    scales:{
+      x:{ ticks:{ color:'#64748b', font:{size:10} }, grid:{ color:'#f1f5f9' } },
+      y:{ ticks:{ color:'#64748b' }, grid:{ color:'#f1f5f9' }, title:{ display:true, text:'销售量（件）', color:'#64748b' } }
+    }
+  }
+});
+
+// 5. Cancel rate
+const cSkus = ["TKAL08001AF5BW200A01","TMM011BT08-010","T1093","T1094","T1092","T1728","TMM011BT08-001","TMM011BT08-H43","TMM011BT08-Z28","T2502"];
+const cRates = [0.7,6,2.6,1.6,2.2,5.5,1.7,4.2,0.7,1.5];
+const avg = 3.3;
+
+new Chart(document.getElementById('cancelChart'), {
+  type:'bar',
+  data:{
+    labels: cSkus,
+    datasets:[{
+      label:'取消率 (%)', data: cRates,
+      backgroundColor: cRates.map(r=>r>avg?'rgba(239,68,68,0.7)':'rgba(59,130,246,0.6)'),
+      borderColor: cRates.map(r=>r>avg?'#ef4444':'#3b82f6'),
+      borderWidth:1
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ display:false },
+      tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1, callbacks:{ label: ctx=>`取消率: ${ctx.raw}%（均值: ${avg}%）` } }
+    },
+    scales:{
+      x:{ ticks:{ color:'#64748b', font:{size:10}, maxRotation:20 }, grid:{ color:'#f1f5f9' } },
+      y:{ ticks:{ color:'#64748b', callback: v=>v+'%' }, grid:{ color:'#f1f5f9' }, title:{ display:true, text:'取消率 (%)', color:'#64748b' }, max:8,
+        afterDatasetDraw(chart) {
+          const ctx2 = chart.ctx;
+          const yScale = chart.scales.y;
+          const xScale = chart.scales.x;
+          const y = yScale.getPixelForValue(avg);
+          ctx2.save();
+          ctx2.beginPath();
+          ctx2.moveTo(xScale.left, y);
+          ctx2.lineTo(xScale.right, y);
+          ctx2.strokeStyle = '#fbbf24';
+          ctx2.lineWidth = 1.5;
+          ctx2.setLineDash([6,4]);
+          ctx2.stroke();
+          ctx2.fillStyle = '#fbbf24';
+          ctx2.font = '11px Arial';
+          ctx2.fillText('均值 3.3%', xScale.right - 60, y - 4);
+          ctx2.restore();
+        }
+      }
+    }
+  }
+});
+
+// ===== TAB SWITCHING =====
+function switchTab(n) {
+  [1,2,3,4].forEach(i => {
+    const el = document.getElementById('tab'+i);
+    if(el) el.style.display = n===i ? '' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===n-1));
+  if(n===2 && !window._tab2Init) { initTab2(); window._tab2Init=true; }
+  if(n===3 && !window._tab3Init) { T3.init(); window._tab3Init=true; }
+  if(n===4 && !window._tab4Init) { T4.init(); window._tab4Init=true; }
+}
+
+// ===== TAB 3 / TAB 4 — 共享工具函数 =====
+const PLAT_COLORS = {
+  'TIKTOK SHOP': {bg:'#fce7f3',color:'#be185d'},
+  'eBay':        {bg:'#fee2e2',color:'#b91c1c'},
+  'TEMU':        {bg:'#ffedd5',color:'#c2410c'},
+  'AliExpress':  {bg:'#fef3c7',color:'#b45309'},
+  'SHEIN':       {bg:'#f3e8ff',color:'#7e22ce'},
+  'Walmart':     {bg:'#dbeafe',color:'#1d4ed8'},
+  'Shopify':     {bg:'#d1fae5',color:'#065f46'},
+  '线下':        {bg:'#f1f5f9',color:'#475569'},
+};
+
+/* ── 月份工具函数（共享） ── */
+function monthLabel(m, meta) {
+  const [y, mo] = m.split('-');
+  const isLast = m === meta.lastMonth, maxDay = meta.monthDays[m];
+  const daysInMo = new Date(+y, +mo, 0).getDate();
+  return (isLast && maxDay < daysInMo) ? `${+mo}月（1-${maxDay}日）` : `${+mo}月（全月）`;
+}
+function momLabel(m1, m2) {
+  return `${+m1.split('-')[1]}→${+m2.split('-')[1]}月 环比`;
+}
+function getMomValue(row, m1, m2, meta) {
+  const useComp = m2 === meta.lastMonth;
+  const a = useComp ? (row.cmp[m1]||0) : (row.full[m1]||0);
+  const b = useComp ? (row.cmp[m2]||0) : (row.full[m2]||0);
+  if (!a) return null;
+  return (b - a) / a * 100;
+}
+function getSortValue(row, col, meta) {
+  if (['spu','name','sku','color','size','plat','shop','site','seller'].includes(col)) return row[col]||'';
+  if (col.startsWith('full_')) return row.full[col.slice(5)]||0;
+  if (col.startsWith('cmp_'))  return row.cmp[col.slice(4)]||0;
+  if (col.startsWith('refund_rate_')) { const m=col.slice(12),ref=(typeof REFUND_DATA!=='undefined'?(REFUND_DATA[m]||{})[row.sku]:0)||0,sale=row.full[m]||0; return sale>0?ref/sale:(ref>0?Infinity:0); }
+  if (col.startsWith('refund_')) { const m=col.slice(7); return (typeof REFUND_DATA!=='undefined'?(REFUND_DATA[m]||{})[row.sku]:0)||0; }
+  if (col.startsWith('mom_'))  { const [m1,m2]=col.slice(4).split('__'); const v=getMomValue(row,m1,m2,meta); return v===null?-Infinity:v; }
+  return 0;
+}
+
+/* ── Tab 实例工厂 ── */
+function makeTabInst(prefix, fp, opts) {
+  const PS=50;
+  let fil=[], sc='', sd=-1, pg=1;
+  const fs={plat:new Set(),shop:new Set(),site:new Set(),seller:new Set(),size:new Set()};
+  let cols=[];
+  let refundColsDef=[];
+
+  function $$(id){return document.getElementById(id);}
+
+  function buildHeader(months,meta){
+    const fixedCols=(opts&&opts.skuOnly)?[
+      {key:'spu',label:'SPU'},{key:'name',label:'产品名称',wide:true},
+      {key:'sku',label:'SKU'},{key:'color',label:'颜色',wide:true},{key:'size',label:'尺码'},
+    ]:[
+      {key:'spu',label:'SPU'},{key:'name',label:'产品名称',wide:true},
+      {key:'sku',label:'SKU'},{key:'color',label:'颜色',wide:true},
+      {key:'size',label:'尺码'},{key:'plat',label:'平台'},
+      {key:'shop',label:'店铺'},{key:'site',label:'站点'},{key:'seller',label:'销售'},
+    ];
+    // skuOnly（退款报告）模式：只显示有退款数据的月份，不显示环比/同期列
+    const refundMonths=(opts&&opts.skuOnly&&typeof REFUND_DATA!=='undefined')?Object.keys(REFUND_DATA).sort():months;
+    const monthCols=(opts&&opts.skuOnly)
+      ? refundMonths.map(m=>({key:'full_'+m,label:monthLabel(m,meta),num:true}))
+      : months.map(m=>({key:'full_'+m,label:monthLabel(m,meta),num:true}));
+    const momCols=[];
+    if(!(opts&&opts.skuOnly)){
+      for(let i=1;i<months.length;i++) momCols.push({key:'mom_'+months[i-1]+'__'+months[i],label:momLabel(months[i-1],months[i]),num:true,mom:true});
+    }
+    const isPartial=meta.monthDays[meta.lastMonth]<new Date(+meta.lastMonth.split('-')[0],+meta.lastMonth.split('-')[1],0).getDate();
+    const extraCols=[];
+    if(!(opts&&opts.skuOnly)&&isPartial&&months.length>=2){
+      const prevM=months[months.length-2];
+      extraCols.push({key:'cmp_'+prevM,label:`${+prevM.split('-')[1]}月（1-${meta.cmpDay}日）`,num:true,cmpHint:true});
+    }
+    cols=[...fixedCols,...monthCols,...extraCols,...refundColsDef,...momCols];
+    const tr=document.createElement('tr');
+    cols.forEach(col=>{
+      const th=document.createElement('th');
+      th.className=(col.num?'num-col ':'')+' sortable';
+      if(col.mom)th.style.background='#fafafa';
+      if(col.cmpHint)th.style.background='#f0f9ff';
+      if(col.refund||col.refundRate)th.style.background='#fff7ed';
+      if(col.wide)th.style.minWidth='160px';
+      const sid=prefix+'-si-'+col.key.replace(/[^a-z0-9]/gi,'_');
+      th.innerHTML=`${col.label} <span class="sort-icon" id="${sid}">⇅</span>`;
+      th.onclick=()=>sortBy(col.key);
+      tr.appendChild(th);
+    });
+    $$(prefix+'-thead').innerHTML='';
+    $$(prefix+'-thead').appendChild(tr);
+  }
+
+  function buildDropdown(wid,field,values){
+    const menu=$$(wid+'-menu');
+    const si=document.createElement('input');
+    si.className='t3-menu-search';si.placeholder='搜索…';si.onclick=e=>e.stopPropagation();
+    si.oninput=()=>{const q=si.value.toLowerCase();menu.querySelectorAll('.t3-menu-item:not(.select-all)').forEach(it=>{it.style.display=it.dataset.val.toLowerCase().includes(q)?'':'none';});};
+    menu.appendChild(si);
+    const allItem=document.createElement('div');
+    allItem.className='t3-menu-item select-all';
+    allItem.innerHTML='<input type="checkbox" checked> 全选 / 取消全选';
+    allItem.querySelector('input').addEventListener('change',e=>{
+      const ck=e.target.checked;
+      menu.querySelectorAll('.t3-menu-item:not(.select-all) input').forEach(cb=>{cb.checked=ck;});
+      fs[field]=ck?new Set():new Set(values);
+      updLabel(wid,field);apply();
+    });
+    menu.appendChild(allItem);
+    values.forEach(v=>{
+      const item=document.createElement('div');
+      item.className='t3-menu-item';item.dataset.val=v;
+      item.innerHTML=`<input type="checkbox" checked> ${v}`;
+      item.querySelector('input').addEventListener('change',e=>{
+        if(!e.target.checked)fs[field].add(v);else fs[field].delete(v);
+        const ac=fs[field].size===0;
+        allItem.querySelector('input').checked=ac;
+        allItem.querySelector('input').indeterminate=!ac&&fs[field].size<values.length;
+        updLabel(wid,field);apply();
+      });
+      menu.appendChild(item);
+    });
+  }
+
+  function td(wid){
+    const menu=$$(wid+'-menu');
+    const isOpen=menu.classList.contains('open');
+    document.querySelectorAll('.t3-multisel-menu').forEach(m=>m.classList.remove('open'));
+    if(!isOpen){menu.classList.add('open');const si=menu.querySelector('.t3-menu-search');if(si){si.value='';si.dispatchEvent(new Event('input'));si.focus();}}
+  }
+
+  function updLabel(wid,field){
+    const trigger=document.querySelector('#'+wid+' .t3-multisel-trigger');
+    const excl=fs[field];
+    if(excl.size===0){trigger.textContent='全部 ';trigger.classList.remove('active-filter');}
+    else{
+      const allVals=[...document.querySelectorAll('#'+wid+'-menu .t3-menu-item:not(.select-all)')].map(i=>i.dataset.val);
+      const sel=allVals.filter(v=>!excl.has(v));
+      trigger.textContent=sel.length===0?'(未选)':sel.length<=2?sel.join(', '):`已选 ${sel.length} 项`;
+      trigger.classList.toggle('active-filter',sel.length>0);
+    }
+    const arrow=document.createElement('span');arrow.className='arrow';arrow.textContent='▾';trigger.appendChild(arrow);
+  }
+
+  function apply(){
+    const skuR=($$(prefix+'-sku-search')||{}).value||'';
+    const skuT=skuR.split(/[,\s]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+    const spuR=($$(prefix+'-spu-search')||{}).value||'';
+    const spuT=spuR.split(/[,\s]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+    const nameT=(($$(prefix+'-name-search')||{}).value||'').trim().toLowerCase();
+    const colorT=(($$(prefix+'-color-search')||{}).value||'').trim().toLowerCase();
+
+    if(opts&&opts.skuOnly){
+      // ── SKU 聚合模式：按 SKU 汇总，去掉平台/店铺/站点/销售维度 ──
+      const months=TAB3_META.months;
+      const skuMap={};
+      // Step1: 过滤 + 按 SKU 聚合销售数据
+      TAB3_DATA.forEach(r=>{
+        if(fs.size.size&&fs.size.has(r.size))return;
+        if(skuT.length){const sl=r.sku.toLowerCase();if(!skuT.some(t=>sl===t||sl.includes(t)))return;}
+        if(spuT.length){const sl=(r.spu||'').toLowerCase();if(!spuT.some(t=>sl.includes(t)))return;}
+        if(nameT&&!(r.name||'').toLowerCase().includes(nameT))return;
+        if(colorT&&!(r.color||'').toLowerCase().includes(colorT))return;
+        if(!skuMap[r.sku]){
+          skuMap[r.sku]={sku:r.sku,spu:r.spu||'',name:r.name||'',color:r.color||'',size:r.size||'',full:{},cmp:{}};
+          months.forEach(m=>{skuMap[r.sku].full[m]=0;skuMap[r.sku].cmp[m]=0;});
+        }
+        months.forEach(m=>{skuMap[r.sku].full[m]+=(r.full[m]||0);skuMap[r.sku].cmp[m]+=(r.cmp[m]||0);});
+      });
+      // Step2: 补入退款文件中有退款但无销售的 SKU（销售量填 0）
+      if(typeof REFUND_DATA!=='undefined'){
+        Object.keys(REFUND_DATA).forEach(month=>{
+          Object.keys(REFUND_DATA[month]).forEach(sku=>{
+            if(sku.includes('|'))return; // 防御：跳过旧版复合 key
+            if(skuMap[sku])return; // 已有销售数据
+            if(skuT.length){const sl=sku.toLowerCase();if(!skuT.some(t=>sl===t||sl.includes(t)))return;}
+            const info=(typeof REFUND_SKU_INFO!=='undefined'?REFUND_SKU_INFO[sku]:null)||{};
+            skuMap[sku]={sku,spu:info.spu||'',name:info.name||'',color:info.color||'',size:info.size||'',full:{},cmp:{}};
+            months.forEach(m=>{skuMap[sku].full[m]=0;skuMap[sku].cmp[m]=0;});
+          });
+        });
+      }
+      fil=Object.values(skuMap);
+      // 跨期筛选：只保留「有退款且当月销售=0」的 SKU
+      const crossEl=$$(prefix+'-cross-only');
+      if(crossEl&&crossEl.checked&&typeof REFUND_DATA!=='undefined'){
+        const refMs=Object.keys(REFUND_DATA);
+        fil=fil.filter(r=>refMs.some(m=>(REFUND_DATA[m]||{})[r.sku]>0&&(r.full[m]||0)===0));
+      }
+    } else {
+      fil=TAB3_DATA.filter(r=>{
+        if(fs.plat.size&&fs.plat.has(r.plat))return false;
+        if(fs.shop.size&&fs.shop.has(r.shop))return false;
+        if(fs.site.size&&fs.site.has(r.site))return false;
+        if(fs.seller.size&&fs.seller.has(r.seller))return false;
+        if(fs.size.size&&fs.size.has(r.size))return false;
+        if(skuT.length){const sl=r.sku.toLowerCase();if(!skuT.some(t=>sl===t||sl.includes(t)))return false;}
+        if(spuT.length){const sl=(r.spu||'').toLowerCase();if(!spuT.some(t=>sl.includes(t)))return false;}
+        if(nameT&&!(r.name||'').toLowerCase().includes(nameT))return false;
+        if(colorT&&!(r.color||'').toLowerCase().includes(colorT))return false;
+        return true;
+      });
+    }
+    sortFil();pg=1;render();
+  }
+
+  function sortFil(){
+    const meta=TAB3_META;
+    fil.sort((a,b)=>{
+      let av=getSortValue(a,sc,meta),bv=getSortValue(b,sc,meta);
+      if(av===null||av===-Infinity)av=-Infinity;if(bv===null||bv===-Infinity)bv=-Infinity;
+      if(typeof av==='string')return sd*av.localeCompare(bv,'zh');
+      return sd*(av-bv);
+    });
+  }
+
+  function sortBy(col){
+    if(sc===col)sd*=-1;else{sc=col;sd=-1;}
+    $$(prefix+'-thead').querySelectorAll('.sort-icon').forEach(e=>e.textContent='⇅');
+    const icon=$$(prefix+'-si-'+col.replace(/[^a-z0-9]/gi,'_'));
+    if(icon)icon.textContent=sd===-1?'↓':'↑';
+    sortFil();pg=1;render();
+  }
+
+  function render(){
+    const meta=TAB3_META,months=meta.months;
+    const total=fil.length,totalP=Math.max(1,Math.ceil(total/PS));
+    pg=Math.min(pg,totalP);
+    const slice=fil.slice((pg-1)*PS,pg*PS);
+    let info=`共 <strong>${total.toLocaleString()}</strong> 条`;
+    if(opts&&opts.skuOnly&&typeof REFUND_DATA!=='undefined'){
+      // 退款报告：显示各退款月份销售件数、退款件数、总体退货率
+      const refMs=Object.keys(REFUND_DATA).sort();
+      let totalSale=0,totalRef=0;
+      refMs.forEach(m=>{
+        const ms=fil.reduce((a,r)=>a+(r.full[m]||0),0);
+        const mr=fil.reduce((a,r)=>a+((REFUND_DATA[m]||{})[r.sku]||0),0);
+        totalSale+=ms;totalRef+=mr;
+        info+=` &nbsp;|&nbsp; ${+m.split('-')[1]}月销售：<strong>${ms.toLocaleString()}</strong> 件`;
+        info+=` &nbsp;|&nbsp; ${+m.split('-')[1]}月退款：<strong style="color:#92400e">${mr.toLocaleString()}</strong> 件`;
+      });
+      const rate=totalSale>0?(totalRef/totalSale*100):null;
+      const rc=rate===null?'#94a3b8':rate>=50?'#dc2626':rate>=20?'#d97706':'#16a34a';
+      info+=` &nbsp;|&nbsp; 总体退货率：<strong style="color:${rc}">${rate===null?'N/A':rate.toFixed(1)+'%'}</strong>`;
+    } else {
+      months.forEach(m=>{const s=fil.reduce((a,r)=>a+(r.full[m]||0),0);info+=` &nbsp;|&nbsp; ${+m.split('-')[1]}月合计：<strong>${s.toLocaleString()}</strong> 件`;});
+      if(months.length>=2){
+        const m1=months[months.length-2],m2=meta.lastMonth;
+        const a=fil.reduce((s,r)=>s+(r.cmp[m1]||0),0),b=fil.reduce((s,r)=>s+(r.cmp[m2]||0),0);
+        const mom=a?((b-a)/a*100):null,c=mom===null?'#94a3b8':mom>=0?'#16a34a':'#dc2626';
+        info+=` &nbsp;|&nbsp; ${+m1.split('-')[1]}→${+m2.split('-')[1]}月同期环比：<strong style="color:${c}">${mom===null?'N/A':(mom>=0?'+':'')+mom.toFixed(1)+'%'}</strong>`;
+      }
+    }
+    $$(prefix+'-result-info').innerHTML=info;
+    const tbody=$$(prefix+'-tbody');
+    tbody.innerHTML=slice.map(r=>{
+      const pc=PLAT_COLORS[r.plat]||{bg:'#f1f5f9',color:'#475569'};
+      return '<tr>'+cols.map(col=>{
+        if(col.key==='spu')    return `<td class="spu-cell">${r.spu||'<span class="no-data">—</span>'}</td>`;
+        if(col.key==='name')   return `<td class="name-cell" title="${r.name||''}">${r.name||'<span class="no-data">—</span>'}</td>`;
+        if(col.key==='sku')    return `<td class="sku-cell">${r.sku||'—'}</td>`;
+        if(col.key==='color')  return `<td class="color-cell" title="${r.color||''}">${r.color||'<span class="no-data">—</span>'}</td>`;
+        if(col.key==='size')   return `<td class="size-cell">${r.size||'<span class="no-data">—</span>'}</td>`;
+        if(col.key==='plat')   return `<td><span class="plat-tag" style="background:${pc.bg};color:${pc.color}">${r.plat||'—'}</span></td>`;
+        if(col.key==='shop')   return `<td>${r.shop||'—'}</td>`;
+        if(col.key==='site')   return `<td>${r.site||'—'}</td>`;
+        if(col.key==='seller') return `<td>${r.seller||'—'}</td>`;
+        if(col.key.startsWith('full_')){const m=col.key.slice(5),v=r.full[m]||0;return `<td class="num-col">${v||'—'}</td>`;}
+        if(col.key.startsWith('cmp_')){const m=col.key.slice(4),v=r.cmp[m]||0;return `<td class="num-col" style="background:#f0f9ff;font-size:12px">${v||'—'}</td>`;}
+        if(col.key.startsWith('refund_rate_')){
+          const m=col.key.slice(12);
+          const ref=(REFUND_DATA[m]||{})[r.sku]||0,sale=r.full[m]||0;
+          if(!ref&&!sale) return `<td class="num-col" style="background:#fff7ed">—</td>`;
+          if(!sale) return `<td class="num-col" style="background:#fff7ed"><span style="color:#b45309;font-style:italic;font-size:11px" title="前期销售，本月退款">跨期</span></td>`;
+          if(!ref)  return `<td class="num-col" style="background:#fff7ed">—</td>`;
+          const pct=ref/sale*100,color=pct>=50?'#dc2626':pct>=20?'#d97706':'#16a34a';
+          return `<td class="num-col" style="background:#fff7ed"><span style="color:${color};font-weight:600">${pct.toFixed(1)}%</span></td>`;
+        }
+        if(col.key.startsWith('refund_')){const m=col.key.slice(7),v=(REFUND_DATA[m]||{})[r.sku]||0;return `<td class="num-col" style="background:#fff7ed;color:#92400e">${v||'—'}</td>`;}
+        if(col.key.startsWith('mom_')){
+          const[m1,m2]=col.key.slice(4).split('__'),v=getMomValue(r,m1,m2,meta);
+          if(v===null)return `<td class="num-col" style="background:#fafafa"><span class="mom-na">—</span></td>`;
+          const cls=v>5?'mom-up':v<-5?'mom-down':'mom-flat';
+          return `<td class="num-col" style="background:#fafafa"><span class="${cls}">${v>=0?'+':''}${v.toFixed(1)}%</span></td>`;
+        }
+        return '<td>—</td>';
+      }).join('')+'</tr>';
+    }).join('');
+    const pag=$$(prefix+'-pagination');
+    if(totalP<=1){pag.innerHTML='';return;}
+    const btn=(lbl,p,dis,act)=>`<button onclick="window['goPage_${prefix}'](${p})"${dis?' disabled':''}${act?' class="active"':''}>${lbl}</button>`;
+    pag.innerHTML=btn('«',1,pg===1)+btn('‹',pg-1,pg===1)+`<span class="page-info">第 ${pg} / ${totalP} 页</span>`+btn('›',pg+1,pg===totalP)+btn('»',totalP,pg===totalP);
+  }
+
+  function goPage(p){pg=p;render();$$(prefix+'-table-wrap').scrollIntoView({behavior:'smooth',block:'start'});}
+  window['goPage_'+prefix]=goPage;
+
+  function clear(){
+    [prefix+'-sku-search',prefix+'-spu-search',prefix+'-name-search',prefix+'-color-search'].forEach(id=>{const el=$$(id);if(el)el.value='';});
+    const crossEl=$$(prefix+'-cross-only');if(crossEl)crossEl.checked=false;
+    const fields=(opts&&opts.skuOnly)?['size']:['plat','shop','site','seller','size'];
+    fields.forEach(field=>{
+      fs[field]=new Set();
+      const wid=fp+'-'+field;
+      document.querySelectorAll('#'+wid+'-menu .t3-menu-item:not(.select-all) input').forEach(cb=>cb.checked=true);
+      const allCb=document.querySelector('#'+wid+'-menu .select-all input');
+      if(allCb)allCb.checked=true;
+      updLabel(wid,field);
+    });
+    apply();
+  }
+
+  function getRow(r){
+    const meta=TAB3_META;
+    return cols.map(col=>{
+      if(['spu','name','sku','color','size','plat','shop','site','seller'].includes(col.key))return r[col.key]||'';
+      if(col.key.startsWith('full_'))return r.full[col.key.slice(5)]||0;
+      if(col.key.startsWith('cmp_'))return r.cmp[col.key.slice(4)]||0;
+      if(col.key.startsWith('refund_rate_')){const m=col.key.slice(12),ref=(REFUND_DATA[m]||{})[r.sku]||0,sale=r.full[m]||0;return !ref&&!sale?'':!sale?'跨期':!ref?'':+(ref/sale*100).toFixed(1)+'%';}
+      if(col.key.startsWith('refund_')){const m=col.key.slice(7);return(REFUND_DATA[m]||{})[r.sku]||0;}
+      if(col.key.startsWith('mom_')){const[m1,m2]=col.key.slice(4).split('__');const v=getMomValue(r,m1,m2,meta);return v===null?'':+v.toFixed(2);}
+      return '';
+    });
+  }
+
+  function csv(){
+    const hdrs=cols.map(c=>c.label),lines=[hdrs.map(h=>`"${h}"`).join(',')];
+    fil.forEach(r=>lines.push(getRow(r).map(v=>typeof v==='string'?`"${v}"`:v).join(',')));
+    const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SKU销售明细_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  }
+
+  function xlsx(){
+    const hdrs=cols.map(c=>c.label);
+    let xml=`<?xml version="1.0" encoding="UTF-8"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="SKU销售明细"><Table>\n`;
+    xml+='<Row>'+hdrs.map(h=>`<Cell><Data ss:Type="String">${h}</Data></Cell>`).join('')+'</Row>\n';
+    fil.forEach(r=>{const vals=getRow(r);xml+='<Row>'+vals.map(v=>`<Cell><Data ss:Type="${typeof v==='number'?'Number':'String'}">${v}</Data></Cell>`).join('')+'</Row>\n';});
+    xml+='</Table></Worksheet></Workbook>';
+    const blob=new Blob([xml],{type:'application/vnd.ms-excel;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SKU销售明细_'+new Date().toISOString().slice(0,10)+'.xls';a.click();
+  }
+
+  function init(){
+    const meta=TAB3_META,months=meta.months;
+    if(opts&&opts.useRefund&&typeof REFUND_DATA!=='undefined'){
+      refundColsDef=Object.keys(REFUND_DATA).sort().flatMap(m=>[
+        {key:'refund_'+m,      label:+m.split('-')[1]+'月退件数量', num:true, refund:true,     month:m},
+        {key:'refund_rate_'+m, label:+m.split('-')[1]+'月退货率',   num:true, refundRate:true, month:m},
+      ]);
+    }
+    buildHeader(months,meta);
+    const sizes=[...new Set(TAB3_DATA.map(r=>r.size).filter(Boolean))].sort();
+    if(!(opts&&opts.skuOnly)){
+      const plats=[...new Set(TAB3_DATA.map(r=>r.plat).filter(Boolean))].sort();
+      const shops=[...new Set(TAB3_DATA.map(r=>r.shop).filter(Boolean))].sort();
+      const sites=[...new Set(TAB3_DATA.map(r=>r.site).filter(Boolean))].sort();
+      const sellers=[...new Set(TAB3_DATA.map(r=>r.seller).filter(Boolean))].sort();
+      buildDropdown(fp+'-plat','plat',plats);buildDropdown(fp+'-shop','shop',shops);
+      buildDropdown(fp+'-site','site',sites);buildDropdown(fp+'-seller','seller',sellers);
+    }
+    buildDropdown(fp+'-size','size',sizes);
+    sc='full_'+(months.length>=2?months[months.length-2]:months[0]);
+    document.addEventListener('click',e=>{if(!e.target.closest('.t3-multisel'))document.querySelectorAll('.t3-multisel-menu').forEach(m=>m.classList.remove('open'));});
+    apply();
+  }
+
+  return {init, apply, td, clear, csv, xlsx};
+}
+
+window.T3 = makeTabInst('t3','f');
+window.T4 = makeTabInst('t4','f4', {useRefund:true, skuOnly:true});
+
+// ===== TAB 2 CHARTS =====
+function initTab2() {
+
+  // 1. Shop bar chart
+  const shopNames = ["MLHR (柯伯霖-TIKTOK SHOP)","HWM (李洁莹-TIKTOK SHOP)","HWE (黄伟萍-TIKTOK SHOP)","ULQS (陈文娥-Walmart)","LWS (方妙芬-TIKTOK SHOP)","snoilite (叶容丽-TEMU 全托管)","UGW (邓春笑-TIKTOK SHOP)","IHE (陈秀贤-TIKTOK SHOP)","FHC (陈兰卿-TIKTOK SHOP)","PRMC (姚红珍-TEMU)","HRB (彭丹丽-SHEIN)","RCC (李洁莹-TEMU)","DHS (柯伯霖-TIKTOK SHOP)","SGM (黄海燕-TIKTOK SHOP)","IA (陈秀贤-eBay)"];
+  const shopOrders = [2121,1441,1360,731,713,695,660,627,616,578,577,563,563,467,451];
+  const shopColors = ["#6366f1","#3b82f6","#ee1d52","#0071ce","#14b8a6","#00bcd4","#f59e0b","#ef4444","#ec4899","#fa6338","#c94b9e","#10b981","#8b5cf6","#e53238","#64748b"];
+
+  new Chart(document.getElementById('shopChart'), {
+    type:'bar',
+    data:{
+      labels: shopNames,
+      datasets:[{ label:'订单数', data:shopOrders,
+        backgroundColor: shopColors.map(c=>c+'cc'), borderColor: shopColors, borderWidth:1 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1,
+          callbacks:{ label: ctx=>' '+ctx.raw.toLocaleString()+' 单' } }
+      },
+      scales:{
+        x:{ ticks:{color:'#64748b'}, grid:{color:'#f1f5f9'} },
+        y:{ ticks:{color:'#334155', font:{size:12}}, grid:{color:'#f1f5f9'},
+            afterFit(scale){ scale.width = Math.max(scale.width, 230); } }
+      }
+    }
+  });
+
+  // 2. Site donut
+  const siteNames = ['US','UK','DE','AU','FR','CA','MX','PL','ES','其他'];
+  const siteOrders = [10697,7170,1914,1454,71,60,44,35,22,17];
+  const siteColors = ['#3b82f6','#6366f1','#f59e0b','#10b981','#ec4899','#ef4444','#14b8a6','#8b5cf6','#f97316','#94a3b8'];
+
+  new Chart(document.getElementById('siteChart'), {
+    type:'doughnut',
+    data:{ labels:siteNames, datasets:[{ data:siteOrders, backgroundColor:siteColors, borderColor:'#fff', borderWidth:2 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'right', labels:{color:'#475569', font:{size:12}, padding:10} },
+        tooltip:{
+          backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1,
+          callbacks:{ label: ctx=>{ const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ` ${ctx.raw.toLocaleString()}单 (${(ctx.raw/t*100).toFixed(1)}%)`; } }
+        }
+      }
+    }
+  });
+
+  // 3. Seller stacked bar
+  const sellerNames = ["柯伯霖","李洁莹","黄伟萍","林小云","姚红珍","彭丹丽","方妙芬","黄冰妹","邓春笑","陈兰卿","叶容丽","陈秀贤","邱晓婷","谭慧玲","刘美钗","朱碧玉","梁淦雅","陈文娥","黄海燕","朱腾腾","黎宇婷","薛婷","蔡婷婷","梁春燕","李晓琳","邱智雯","朱倩婷","李明娟","郭少媚","甘晓燕","余观富","胡玉娣","李芷珊","张绮萍","续倩","刘亚磊","赖珍","田玉凤","吴宝荣","罗文兴","黄海燕2","邓舒芹","魏果然"];
+  const platColors2 = {"TIKTOK SHOP":"#ee1d52","eBay":"#e53238","TEMU":"#fa6338","AliExpress":"#ff6a00","SHEIN":"#c94b9e","Walmart":"#0071ce","TEMU 全托管":"#00bcd4","Shopify":"#96bf48","线下":"#94a3b8"};
+  const sellerPlatData = {"柯伯霖":{"TIKTOK SHOP":2750,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"李洁莹":{"TIKTOK SHOP":1447,"eBay":0,"TEMU":908,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":307,"Shopify":0,"线下":0},"黄伟萍":{"TIKTOK SHOP":1361,"eBay":1071,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"林小云":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":2325,"SHEIN":0,"Walmart":0,"TEMU 全托管":31,"Shopify":0,"线下":0},"姚红珍":{"TIKTOK SHOP":350,"eBay":922,"TEMU":744,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"彭丹丽":{"TIKTOK SHOP":0,"eBay":847,"TEMU":415,"AliExpress":0,"SHEIN":577,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"方妙芬":{"TIKTOK SHOP":713,"eBay":1117,"TEMU":0,"AliExpress":1,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"黄冰妹":{"TIKTOK SHOP":0,"eBay":1130,"TEMU":498,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"邓春笑":{"TIKTOK SHOP":660,"eBay":643,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"陈兰卿":{"TIKTOK SHOP":726,"eBay":430,"TEMU":0,"AliExpress":0,"SHEIN":1,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"叶容丽":{"TIKTOK SHOP":217,"eBay":0,"TEMU":81,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":779,"Shopify":0,"线下":0},"陈秀贤":{"TIKTOK SHOP":627,"eBay":422,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"邱晓婷":{"TIKTOK SHOP":237,"eBay":792,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"谭慧玲":{"TIKTOK SHOP":0,"eBay":0,"TEMU":295,"AliExpress":0,"SHEIN":0,"Walmart":668,"TEMU 全托管":55,"Shopify":0,"线下":0},"刘美钗":{"TIKTOK SHOP":13,"eBay":390,"TEMU":87,"AliExpress":0,"SHEIN":205,"Walmart":0,"TEMU 全托管":124,"Shopify":0,"线下":0},"朱碧玉":{"TIKTOK SHOP":0,"eBay":596,"TEMU":176,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"梁淦雅":{"TIKTOK SHOP":0,"eBay":368,"TEMU":0,"AliExpress":0,"SHEIN":331,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"陈文娥":{"TIKTOK SHOP":0,"eBay":305,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":210,"TEMU 全托管":0,"Shopify":0,"线下":0},"黄海燕":{"TIKTOK SHOP":449,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"朱腾腾":{"TIKTOK SHOP":0,"eBay":105,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"黎宇婷":{"TIKTOK SHOP":0,"eBay":53,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"薛婷":{"TIKTOK SHOP":0,"eBay":52,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"蔡婷婷":{"TIKTOK SHOP":0,"eBay":38,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"梁春燕":{"TIKTOK SHOP":0,"eBay":36,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"李晓琳":{"TIKTOK SHOP":0,"eBay":34,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"邱智雯":{"TIKTOK SHOP":0,"eBay":30,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"朱倩婷":{"TIKTOK SHOP":0,"eBay":20,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"李明娟":{"TIKTOK SHOP":17,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"郭少媚":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":15},"甘晓燕":{"TIKTOK SHOP":0,"eBay":9,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"余观富":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":7,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"胡玉娣":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":7},"李芷珊":{"TIKTOK SHOP":0,"eBay":0,"TEMU":6,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"张绮萍":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":4},"续倩":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":3},"刘亚磊":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":2,"线下":0},"赖珍":{"TIKTOK SHOP":0,"eBay":2,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"田玉凤":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":2},"吴宝荣":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":2},"罗文兴":{"TIKTOK SHOP":0,"eBay":1,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"黄海燕2":{"TIKTOK SHOP":0,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":1},"邓舒芹":{"TIKTOK SHOP":0,"eBay":1,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0},"魏果然":{"TIKTOK SHOP":1,"eBay":0,"TEMU":0,"AliExpress":0,"SHEIN":0,"Walmart":0,"TEMU 全托管":0,"Shopify":0,"线下":0}};
+  const platKeys = Object.keys(platColors2);
+  new Chart(document.getElementById('sellerChart'), {
+    type:'bar',
+    data:{
+      labels: sellerNames,
+      datasets: platKeys.map(plat=>({
+        label: plat,
+        data: sellerNames.map(s => sellerPlatData[s][plat]||0),
+        backgroundColor: platColors2[plat]+'cc',
+        borderColor: platColors2[plat],
+        borderWidth:1
+      }))
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ labels:{ color:'#475569', font:{size:11}, boxWidth:12 } },
+        tooltip:{ backgroundColor:'#fff', titleColor:'#0f172a', bodyColor:'#475569', borderColor:'#e2e8f0', borderWidth:1 }
+      },
+      scales:{
+        x:{ stacked:true, ticks:{color:'#64748b'}, grid:{color:'#f1f5f9'}, title:{display:true, text:'销量（件）', color:'#64748b'} },
+        y:{ stacked:true, ticks:{color:'#334155', font:{size:12}}, grid:{color:'#f1f5f9'},
+            afterFit(scale){ scale.width = Math.max(scale.width, 80); } }
+      }
+    }
+  });
+
+  // 4. Heatmap table
+  const hPlats = ["TIKTOK SHOP","eBay","TEMU","AliExpress","SHEIN","Walmart","TEMU 全托管"];
+  const hSites = ["US","UK","AU","DE","FR","CA","PL","MX","ES"];
+  const hData = {"TIKTOK SHOP":[7385,2153,0,27,3,0,0,0,0],"eBay":[2970,4030,1331,1065,21,0,0,0,0],"TEMU":[48,1768,277,849,54,61,38,47,22],"AliExpress":[0,0,0,0,0,0,0,0,0],"SHEIN":[757,111,65,181,0,0,0,0,0],"Walmart":[0,0,0,0,0,0,0,0,0],"TEMU 全托管":[0,0,0,0,0,0,0,0,0]};
+  const allVals = Object.values(hData).flat().filter(v=>v>0);
+  const maxVal = Math.max(...allVals);
+  function heatClass(v) {
+    if(!v) return 'heat-0';
+    const r = v/maxVal;
+    if(r<0.02) return 'heat-1';
+    if(r<0.05) return 'heat-2';
+    if(r<0.1)  return 'heat-3';
+    if(r<0.2)  return 'heat-4';
+    if(r<0.4)  return 'heat-5';
+    if(r<0.7)  return 'heat-6';
+    return 'heat-7';
+  }
+  const platEmoji = {'TIKTOK SHOP':'🎵','eBay':'🛒','TEMU':'🛍','AliExpress':'🌐','SHEIN':'👗','Walmart':'🏪'};
+  let html = '<table class="heat-table"><thead><tr><th>平台 \\ 站点</th>';
+  hSites.forEach(s => html += `<th>${s}</th>`);
+  html += '</tr></thead><tbody>';
+  hPlats.forEach(p => {
+    html += `<tr><td class="row-label">${platEmoji[p]||''} ${p}</td>`;
+    hData[p].forEach(v => {
+      html += `<td class="${heatClass(v)}">${v ? v.toLocaleString() : '—'}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('heatmapTable').innerHTML = html;
+
+  // 5. Seller SKU table
+  const sellerSkuData = [
+    {name:'柯伯霖', plat:'TikTok Shop', skus:[{sku:'TKAL08001AF5BW200A01',qty:270},{sku:'TMM011BT08-001',qty:137},{sku:'T2502',qty:100}]},
+    {name:'黄伟萍', plat:'eBay+TikTok', skus:[{sku:'TMM011BT08-010',qty:85},{sku:'T1094',qty:52},{sku:'TMM011BT08-H43',qty:52}]},
+    {name:'李洁莹', plat:'TEMU+TikTok', skus:[{sku:'T1093',qty:94},{sku:'T1092',qty:94},{sku:'T1094',qty:84}]},
+    {name:'林小云', plat:'AliExpress',  skus:[{sku:'T430',qty:25},{sku:'THEH1001BAA02AAA0033',qty:24},{sku:'T1093',qty:23}]},
+    {name:'姚红珍', plat:'TEMU+eBay',  skus:[{sku:'TWC011ST08-T45',qty:37},{sku:'THT2001',qty:27},{sku:'THT2201',qty:25}]},
+    {name:'彭丹丽', plat:'eBay+SHEIN', skus:[{sku:'TWD009BT22-P47',qty:39},{sku:'T1093',qty:22},{sku:'T1631',qty:20}]},
+    {name:'方妙芬', plat:'eBay+TikTok', skus:[{sku:'TDG002LT05-001',qty:56},{sku:'TDG002LT05-012',qty:39},{sku:'TWC011ST08-010',qty:29}]},
+    {name:'黄冰妹', plat:'eBay+TEMU',  skus:[{sku:'T815',qty:30},{sku:'TFAL18A97AH4AW200A01',qty:14},{sku:'T496',qty:14}]},
+  ];
+  const totals = [2750,2265,2209,1820,1753,1725,1681,1418];
+  const amts   = [114869,129693,64913,75770,22092,22235,92836,18395];
+  let tbl = '<table class="sku-table"><thead><tr><th>销售</th><th>主要平台</th><th>订单总量</th><th>销售额（原币）</th><th>Top 3 主销SKU（件数）</th></tr></thead><tbody>';
+  sellerSkuData.forEach((r,i) => {
+    tbl += `<tr>
+      <td><strong>${r.name}</strong></td>
+      <td style="color:#64748b">${r.plat}</td>
+      <td><strong>${totals[i].toLocaleString()}</strong></td>
+      <td style="color:#2563eb">¥/$ ${amts[i].toLocaleString()}</td>
+      <td>${r.skus.map(s=>`<span class="sku-badge">${s.sku}</span><span class="sku-qty">×${s.qty}</span>`).join(' ')}</td>
+    </tr>`;
+  });
+  tbl += '</tbody></table>';
+  document.getElementById('sellerSkuTable').innerHTML = tbl;
+}
+</script>
+
+<!-- GEN:REFUND_DATA --><script>const REFUND_DATA = {"2026-04":{"THT2202":6,"HLD004SC00-1B":2,"HYI001SC16-4P27":4,"T2457":1,"THC1227V":2,"TACL18A67AC4BW170A01":1,"HKH008SG10-1B":1,"T1876-BY":1,"TFAJ14-A83":3,"THC1670":1,"T1329":2,"TH24-4P27":2,"T1258":2,"THC2204":3,"HFX005SC12-1B":1,"T1888":1,"T670":1,"HQQ002BC00":1,"THIB14027APD2ABB0007":1,"THID16002AID2AEB0007":1,"THAC20002ADB2ACA0001":2,"T1048":3,"THIA1001BBGD2AAB0907":2,"T854":4,"THS-22":1,"THC18-12P613":1,"THGB20H39AAB2ABA0001":1,"T1287":1,"THT2070":6,"THT2060":12,"T1376":3,"TFAH18-04AF":1,"TH-CI1633":2,"THC18-2T6":1,"THT1801":4,"TH0034":4,"THT18-18P613-TT*2":1,"THT18-18P613":7,"THIA10002BGD2AAB0907":1,"THQ-C60":1,"T1868":2,"HFM037SC00-1B":5,"T469":3,"T1589":1,"TEBG04-04A-BY":1,"TH0005":1,"THC16-4T27":1,"THC80":1,"THT22-4P27-TT":12,"HGJ001SC12-06":1,"THQ-C04":1,"TH0011":1,"HFM047SC00-1B":1,"T1049":1,"T239":1,"T1844":1,"THAA18006AOB2AFA0001":2,"HFW013SC12-27":1,"THC2002":2,"T1043":6,"T1013":2,"TWC011ST08":2,"THL-20-4P27":2,"THC10-18P613":1,"TH-CI2299J":5,"TH-BK2201G":2,"THAC14004ADB2ABA0001":1,"THT2424-TT":1,"TH1602":4,"THC12-18P613V":1,"THIA14004BGD2AAB0907":2,"T1837":1,"THQ-Q1601Z":1,"THC20-12P613":2,"T873":1,"TLS002ST00-613-BY":1,"T2599-BY":1,"TH-BQ2404":2,"TH-CL12-18P613V":2,"THT12-18P613":1,"THQ-C01":1,"THC2004":2,"THQ-D02":11,"TH-BQ2001":1,"T856":2,"HYF001SC24-4P27":1,"THC16-1BT4":1,"TH-CI2024":8,"THD181B":3,"T1693":1,"TMZ001ST11-018":1,"TEBG04-H42-BY":1,"T1729":5,"T1669":3,"THBB16022AAB2ABA0028":2,"THT161B-AA":2,"THT2260":2,"TH-CI2401":3,"THQ-Q14-18P613Z":3,"THC20GREY":1,"TH-CI2001":4,"T2232":1,"T718":2,"THE12-4P27":1,"T2390":2,"T231":2,"T234":1,"TFAH18-A96F":6,"TH-BK2260G":1,"THC20":1,"TH-CI22-18P613":4,"HFL008SC14-18P613":1,"TH-BK2202G":1,"TH-CI18-4T613":3,"THIA1401BBGD2AAB0907":1,"TH-CI2402":1,"TEBG04-T48":2,"THQ-C06":1,"THM1899J":1,"TWD009BT22-04A-BY":2,"T1883":2,"TH-BM-B613":1,"HKH007SC14-1B":2,"THC1002V":2,"T497":1,"THAA18070AOB2AFA0001":1,"HLP003SC07-1B":2,"TH0010":9,"THAA14613AOB2AEA0001":4,"THC1060":2,"THC10GREY":3,"TP03204":1,"TH-CI1824":2,"HFM038SC10-02":7,"THID12004AID2AEB0007":1,"TWC011ST08-04A":4,"THIB1401BALD2AEB0007":1,"TWC011ST08-10B":3,"T2602":1,"T1586-BY":1,"T744-BY":1,"THS-1824":2,"THS-18613":2,"THC80-18P613V":2,"THM14613":2,"THS-2060":1,"HKA006SN24-1B":1,"T2499":2,"T1882":1,"HFS072SC12-613":1,"T1893":1,"THC1004":1,"THT2202-TT":8,"TH-BD18-12P613":1,"THT24613":2,"THIA08P02BGD2AAB0907":2,"T1377-BY":1,"THIB12002ALD2AEB0007":2,"THT18-18P613T613":1,"TP02365Y":1,"THT2270":1,"THC22613":2,"BTH1824":1,"THD2006":1,"TH-CL60-18P613V":3,"T1629*3":1,"HXD002SC00-1B":1,"THT14-18P613":6,"THIB14P07ALD2AEB0007":1,"T234-BY":1,"THM16613":1,"T1370":2,"TH16-4P27":1,"TH2206":2,"T640":2,"TQC003ST12-006":2,"T631-BY":2,"THT12-4P27-TT":1,"HZN001SC16-04":1,"THIA08004BGD2AAB0907":1,"TH-CL60613V":1,"THIA14P02BGD2AAB0907":4,"THIA12P02BGD2AAB0907":4,"T2283":3,"THC1804":1,"THM1802":2,"THQ-D613":3,"TCDL1404AAE2BW140A03-BY":1,"TP021":1,"TH-BQ2402":3,"THC24613":1,"HZA003SN18-18RP613R":1,"TH-BD20-4P27":1,"T2608":1,"THT2002":4,"THT2002-TT":2,"THS-24613":3,"THQ-D06":2,"TH-CI2460":3,"TFAJ14":1,"T1369":1,"THT2227W":2,"HGT001SC24-4P27":4,"TWE098":1,"T497-BY":1,"TH2001":1,"HZN001SC18-06":1,"TH-BM-A1B":1,"TH22613":2,"THQ-C02":3,"THE20-2T6":1,"T932":1,"T776":2,"THM2402":1,"TFAL05A54AB2CW060A03":2,"THC20613":1,"T2214-BY":1,"TH-BD1660":1,"THIA14002BGD2AAB0907":2,"TFAL14D34AE2BW115A03":2,"HXD001SC00-1B":1,"THD2260":1,"THQ-GF1427YZ":1,"HKH007SC16-1B":1,"TH-CI2424/TH-CI2424":12,"TWE097":10,"TH-BK16-18P613G":1,"T1587":4,"THT2001":3,"T1876":1,"HQB004WC00-1B":1,"THC18-18P613":1,"THD2002":1,"TH-BL-A613":1,"HFM038SC10-1B":5,"TFAL14001AE2BW115A03":1,"THC2202":1,"T2502":6,"TH-CL8002V":2,"TH-CL6070V":2,"TH1801":1,"THT1206-TT":3,"THT1260-TT":3,"THT12-18P613-TT":4,"HFM039SC06-1B":1,"T1696":1,"T858":1,"THC14-4P27":1,"THC181B":1,"T1822":1,"THT1860":2,"TH20-18P613":1,"THD1802":1,"T1866-BY":1,"TH-CL80-12P613V":1,"TEBL06H37AF2AW070A03":2,"THAA16001AOB2AEA0001":1,"TP032":1,"T810":1,"THT1402":2,"THM1602":1,"TFAJ14-A96":6,"T635":1,"TCDL14B13AE2BW140A03":1,"THQ-D60":3,"TQC003ST12-B32":1,"T1327":3,"TEAL08A69AJ2ZW100A01":2,"THL-2460":2,"THT14GREY":1,"TH10-12P613":1,"TH-CL4004V":3,"HFM046SC00-1B/TH0010":5,"THQ-D04":2,"THT2024&2V":1,"THIB18002ALD2AFB0007":1,"HFS056SC16-02":1,"TEBL06010AF2AW070A03":1,"TH-BK1404":1,"TEBG04-613":1,"THIA08002BGD2AAB0907":1,"T1053":2,"T1249":2,"T2213-BY":1,"HYI001SC22-27":1,"THD1806":1,"T2115":2,"TH-CI2201":1,"THC2012":1,"THC1402":1,"THD2202":1,"THIB18004ALD2AFB0007":2,"THIB16004ALD2AEB0007":2,"THIB14004APD2ABB0007":1,"TFAL10D34AF2AW050A03":1,"HFM036SC06-1B90Y":1,"TH-CI18-18P613":1,"TH-CI18613":3,"THT22-18P613-R":1,"THT1427":2,"TH-BQ2401":2,"TCDL14TL0AE2BW140A03-BY":1,"T1599":9,"BTH18-12P613":1,"T145-BY/T2441-BY":6,"TH-BM-B12P613":1,"TLS002ST00-001":1,"THM2004":1,"TH-CL10-18P613V":1,"T498":2,"T2435":1,"THC10-4P27":1,"TH-CI2202":16,"TH2401":1,"THIA14P07BGD2AAB0907":1,"THC2260":1,"TACL18A72AB4AW170A01":1,"T1647":1,"THC1001":1,"THC16-4T4P27":2,"THD2060":1,"THC1401":1,"TEBL06006AH5AW053A01":1,"THC241B":1,"T778-BY":1,"THT20-2T6":1,"THQ-Q12-18P613Z":1,"HKL002SC18-12P613":1,"TH-BK1602G":1,"THE10-18P613":1,"THIC08P02AFD2ABB0007":1,"T1327-BY":1,"THT1806":2,"HKA007SN20-1B":1,"TH-CL8027V":4,"TQC003ST12-004":1,"THT18-18P613-TT":1,"THT1202-TT":1,"TQC003ST12-E00":1,"THQ-Q1227Z":1,"THC12-4P27V":1,"THT14-4P27-TT":2,"TH-CI16-18P613":4,"TH-CI2060":1,"TH-BK22":1,"HLQ002SC18-1B":1,"THT2024-AA":1,"TH241B":1,"TEBG04-012":1,"THAA20001AOB2AFA0001":1,"TEBG04-A54":1,"T1865":2,"T1834":1,"TMM007ST06":1,"TLS002ST00-10B-BY":1,"T228":1,"THT1460-TT":1,"THQ-G1602YZ":1,"THID14P08AID2AEB0007":2,"THT1604-TT":1,"THC1830":1,"THE2001":1,"THAA18P02AOB2AFA0001":1,"THD1804":1,"T1371":1,"THIB14002ALD2AEB0007":2,"THD1602":1,"THC22-18P613":2,"THL-24-18P613":1,"HKH007SC20-1B":1,"TP02302":2,"TIBL24P05AB5FW160A01":1,"HGJ001SC14-06":1,"THT22-18P613":2,"HLQ003BC16-2R":1,"TH16-12P613":1,"T1323-BY":1,"TH-CI1802":26,"THIB10002ALD2AEB0007":1,"T468":1,"THC1624":2,"THT14-4T27":2,"THC1204V":1,"THL-2402":1,"TH-CL1270V":1,"THP-10B":1,"HCB003GN22-1B":2,"THC1202V":1,"THP-22&3K":1,"THT2401":1,"TH-CL1260V":1,"HFM038SC10-04":3,"THGB2201BACB2SDA0006":1,"THT1424":1,"THC2206":2,"HFM046SC00-1B":3,"THL-1404V":4,"THIA12002BGD2AAB0907":1,"T1690":1,"TEBG04-001-BY":1,"THC2406":1,"T1813":1,"THC1606":1,"T1674":3,"THM16-4P27":1,"TH0029":3,"THM1804":1,"TH-CL10-12P613V":2,"T1586":3,"THD1660":1,"THE141B":1,"THE1402":1,"THQ-GF12-4P27Y":1,"THQ-Q1002Z":1,"THIGB10-JLT613Z":1,"T1839":1,"THC20-18P613":1,"T1838":1,"T1815":1,"T715":2,"T1557":1,"T1257":2,"THC2201":1,"T2605":1,"THC18-4P27":1,"TH-CE12K":1,"T1836":1,"T226":2,"T1635":1,"THC1404":1,"T2413":1,"THIA12P07BGD2AAB0907":2,"THIA08027BGD2AAB0907":1,"T2489":2,"T896":5,"T1969":1,"TH-BD20-12P613":1,"HFS049SC06-613":2,"THIA06P07BGD2AAB0907":2,"T2465":1,"T1324":1,"T1094":7,"T1843":1,"TH-BM-B04":1,"THIA06027BGD2AAB0907":1,"T1869":2,"T1634":1,"T1322":1,"THT16-4P27-AA":1,"THC8002":1,"T1199":2,"THT18613-AA":4,"T1632":5,"HFS049SC12-613":1,"TH-BC2204":2,"T2471":1,"T897":1,"THIA0601BBGD2AAB0907":1,"TH-BD16-4P27":1,"TH-BD2204":1,"TH-BD2002":1,"THT1802-TT":1,"T1488":1,"T2423":1,"TFAL1404AAE2BW115A03":1,"THIA08P07BGD2AAB0907":1,"THIA10P02BGD2AAB0907":1,"TH-BD2227":1,"T1026":1,"HFM038SC10-613":1,"T1247":4,"THM1606":1,"TH-BK22-18P613":1,"THT18-4P27-AA":4,"THL-1804":1,"T1643":1,"T1835":1,"T1480":1,"TH-CL1004":2,"ULQS-SY-B-T1359":12,"TAGL22H29AA2BW185A03":2,"TFAJ14-04A":9,"TH-CI2270":4,"TMM012BT16-H42":6,"HKF001SG14-60R":1,"TAGL22H43AA2BW185A03":1,"TH-CI22-12P613":2,"TWC011ST08-H43":6,"TDG003LT11-006":1,"TMM011BT08-Z28":6,"THT22-4T27":2,"TFAL1806AAH4AW200A01":1,"HYI001SC24-4P27":1,"TWD009BT22-04A":1,"TFAJ14-01B":5,"THAC20004ADB2ACA0001":1,"T1630":1,"TFAL18A83AH4AW200A01":3,"TEAL0801BAJ2ZW100A01":3,"TWC011ST08-T48":7,"T1631":5,"TKAL08001AF5BW200A01":16,"TKD004CH22-H54":3,"TFAJ14-06A":6,"TMC001BT16-06A":1,"T1095":5,"TFAL18A96AH4AW200A01":2,"TAGL2204AAA2BW185A03":1,"TFAH18-A81F":3,"TH-CI1827":1,"THL-1806":1,"T1092":4,"TWC011ST08-H28":5,"TMC001BT16-010":1,"T1255":4,"HGT002SG24-06":1,"T1097":1,"T1096":1,"TWC011ST08-H64":7,"THT16-18P613":2,"HFS058SC11-1B":7,"TMM011BT08-001":2,"T1093":8,"TH-CI1624":1,"TKAL08PINAF5BW200A01":1,"TKAL16A68AF5BW280A01":2,"HYI004SC22-4R":3,"TH-CI18-12P613":3,"TWC011ST08-T45":8,"TAGL22H51AA2BW185A03":4,"TKAL16P10AF5BW280A01":1,"TWC011ST08-H33":2,"TH-BC1801V":1,"T1728":2,"TMM011BT08-H43":6,"HFM038SC10-6R":1,"TH-CI2470":7,"TMM011BT08-010":9,"HYI004SC22-60R":1,"TDG002LT05-012":2,"HFL011SC12-04":2,"TFAJ14-08B":5,"TKAL0802AAF5BW200A01":3,"T1723":1,"HLS006SC00-1B":1,"HFS057SC11-1B":3,"TMC001BT16-P10":1,"T2593":1,"TBCL3408BAZ5AW140A02":2,"HFS057SC11-02":3,"TMM012BT16-Z28":2,"TFAH18-A83F":3,"TMZ008GT18-018":1,"TWC011ST08-H46":4,"TFJ002TB00-T54":2,"TFJ002TB00-01B":1,"TKD004CH22-613":1,"TH-BC2206":1,"TMM007BT08-006":2,"TKD004CH22-01B":1,"TWC011ST08-012":3,"TMM006BT08-E00":1,"TMM006BT08-Z28":5,"THT20GREY-TTV":1,"THBA20H38ABB2AAA0028":2,"TWD009BT22-001":1,"TMM008BT08-D52":3,"TKAL0806AAF5BW200A01":9,"THT24-4T27":1,"TEAL08A70AJ2ZW100A01":1,"HKA007SN16-1B":3,"THL-20-12P613":1,"TFAL18A97AH4AW200A01":5,"THT2024V":2,"THT2404-TT":2,"TBB017BJ28-01B":14,"TMM008BT08-E00":2,"TFAL18A81AH4AW200A01":1,"HFM036SC06-1B":5,"TMM008BT08-001":2,"THBA22H38ABB2AAA0028":2,"T1200":1,"TAGL22H53AA2BW185A03":1,"HLE002SC00-02":2,"TH-BC22613":3,"HFS058SC11-02":12,"T2509":1,"TAGL22H49AA2BW185A03":2,"TFAL18A82AH4AW200A01":1,"TFAJ14-A82":3,"TH-BC1860":1,"TH-BC18-18P613":1,"TMZ002GT18-P18":1,"HZN001SC16-02":1,"THS-2404":2,"TKD004CH22-0M4":1,"HKA007SN22-1B":2,"HYI004SC24-70":2,"TAGL22H54AA2BW185A03":3,"THT22-12P613":4,"TAGL22613AA2BW185A03":1,"TMM007ST06-P25":1,"TWC011ST08-613":2,"T1725":1,"TMM007ST06-001":1,"TBCL34024AZ5AW150A02":4,"TKD004CH22-H53":1,"HYI001SC18-4P27":3,"TKAL08010AF5BW200A01":3,"TAGL22002AA2BW185A03":2,"HYI004SC24-4R":3,"TAGL22006AA2BW185A03":1,"TKAL1606AAF5BW280A01":1,"TH-BC1802":1,"T2501":4,"TKAL0804AAF5BW200A01":3,"TACL18A67AB4AW170A01":1,"HYI001SC18-1B":3,"TWC011ST08-024":3,"T2504":1,"TMM007BT08-P10":1,"TAGL22H55AA2BW185A03":1,"T1726":1,"TFAL1004AAF2AW050A03":1,"TKAL08P10AF5BW200A01":1,"TH-BQ2406":1,"THAC12002ADB2ABA0001":1,"TBCL34004AZ5AW150A02":2,"TFAH18-06AF":2,"TMM007ST06-P10":1,"TWC011ST08-H37":3,"TAGL22H09AA2BW185A03":1,"TKAL16001AF5BW280A01":4,"THCC16H04AAB2ADB0001":1,"TBCL24D99AB7BW130A02":8,"T1727":3,"T1636":3,"HYI004SC22-4RP27R":1,"TACL18A79AC4BW170A01":1,"TFAL10D46AF2AW050A03":1,"TFAH18-01BF":1,"TKAL08P25AF5BW200A01":1,"TH-BQ24-4P27":4,"TFAL1804AAH4AW200A01":4,"TH-BC2460":1,"TH-BC2401":3,"TFJ002TB00-B29":2,"TAGL22H50AA2BW185A03":2,"T2597":2,"THT1670":1,"TWC011ST08-Z52":3,"THC2060":1,"THAC18P02ADB2ACA0001":1,"TBB017BJ28-350":5,"HYI004SC24-613R":2,"TH-CI20-12P613":1,"TMZ007ST11-001":1,"TKAL16088AF5BW280A01":1,"TWC011ST08-010":3,"TKD004CH22-022":1,"TAGL22022AA2BW185A03":1,"TWD009BT22-P45":1,"HKF001SG12-04":1,"T1044":1,"THT2406":3,"TAGL22H52AA2BW185A03":2,"TH-CI24-18P613":3,"TWC011ST08-E00":2,"HKA007SN18-1B":1,"TEBG04-H33":1,"TMM007ST06-06A":1,"TMM008BT08-Z28":1,"HFL011SC14-4P27":1,"TH-BC2002":1,"T1047":1,"TH-BQ2427":2,"THD22613":1,"TH-CI24-4P27":2,"THT2001V":2,"TWC011ST08-01B":1,"T1058":2,"TMM006BT08-Z29":2,"TH-BC22-18P613":1,"TMZ002GT18-P49":1,"TDG002LT05-P12":1,"TAGL220M4AA2BW185A03":1,"THT2204":2,"THAC16P08ADB2ACA0001":1,"TMZ009GT18-001":1,"T1091":2,"TACL18A78AC4BW170A01":1,"T2492":1,"THT1699J":2,"TMC001BT16-001":1,"HZN001SC16-1B":1,"THT24-12P613-TT":1,"T2592":2,"TMM007ST06-010":1,"THM2099J":1,"TH-BQ2004":4,"THAC18001ADB2ACA0001":1,"HYI001SC24-1B":4,"TMM010CJ25-TN3":1,"T2590":1,"T1025":1,"TWC011ST08-A77":1,"TWC011ST08-88A":1,"THAC16004ADB2ACA0001":1,"TACL18A75AB4AW170A01":1,"THT22613V":2,"TFAL1808BAH4AW200A01":1,"TH-BC241B":3,"THT2224":1,"TH-BC2406":1,"TFAH18-A97F":2,"THD2406":1,"THT1204-TT":2,"THIA12027BGD2AAB0907":1,"TH-BQ2006":1,"TH-BQ2206":2,"TMZ002GT18-004":1,"TWC002BJ18-025":1,"TBB017BJ28-030":5,"TFAJ14-A81":1,"T2660":1,"TFAL05012AB2CW060A03":1,"THT2070-TT":1,"HYI004SC18-01":2,"THS-20-4P27":1,"TDG002LT05-001":1}};</script><!-- /GEN:REFUND_DATA -->
+
+<!-- GEN:REFUND_SKU_INFO --><script>const REFUND_SKU_INFO = {"THT2202":{"spu":"THT","name":"20pcs刷胶发","color":"02","size":"22"},"HLD004SC00-1B":{"spu":"HLD004","name":"3D手勾刘海(空气刘海)","color":"1B","size":""},"HYI001SC16-4P27":{"spu":"HYI001","name":"50pcs铁丝发","color":"4P27","size":"16"},"T2457":{"spu":"T-SZ","name":"20\"绳子发曲发","color":"12H18","size":"02"},"THC1227V":{"spu":"THC-V","name":"8片18夹卡子发(减重)","color":"27","size":"12"},"TACL18A67AC4BW170A01":{"spu":"T-AC-AC","name":"18\"V型卡子发1片5卡曲发","color":"850A","size":"18"},"HKH008SG10-1B":{"spu":"HKH008","name":"8片18夹卡子发(减重)","color":"1B","size":"10"},"T1876-BY":{"spu":"T-FQ","name":"薄发圈(25g)","color":"24","size":"05"},"TFAJ14-A83":{"spu":"TF-AJ-S","name":"6x6\"机扎刘海发块(八字刘海)(减薄款)","color":"27MT60/60A","size":"14"},"THC1670":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"70","size":"16"},"T1329":{"spu":"T-ZJ","name":"12\"抓夹可弯曲马尾","color":"26/613","size":"12"},"TH24-4P27":{"spu":"TH","name":"8片18夹卡子发","color":"4P27","size":"24"},"T1258":{"spu":"T-CFB","name":"插梳发包(90g)","color":"12H24","size":"/"},"THC2204":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"04","size":"22"},"HFX005SC12-1B":{"spu":"HFX005","name":"8.5x8.5cm Mono圆顶带旋发块","color":"1B","size":"12"},"T1888":{"spu":"T-FQ","name":"加厚发圈(35g)","color":"16","size":"05"},"T670":{"spu":"T-BJ","name":"17\"卡子发8件套曲发","color":"613C","size":"17"},"HQQ002BC00":{"spu":"","name":"","color":"","size":""},"THIB14027APD2ABB0007":{"spu":"THIB-AP-A","name":"13x15cm 机扎+机制中分发块","color":"27","size":"14"},"THID16002AID2AEB0007":{"spu":"THID-AI-A","name":"10x12cm 机扎+机制刘海发块","color":"02","size":"16"},"THAC20002ADB2ACA0001":{"spu":"THAC-AD-A","name":"1片5夹V型卡子发","color":"02","size":"20"},"T1048":{"spu":"T-FQ","name":"加厚发圈(35g)","color":"4A","size":"05"},"THIA1001BBGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"1B","size":"10"},"T854":{"spu":"T-LH","name":"2夹刘海","color":"M130M","size":"06"},"THS-22":{"spu":"","name":"","color":"","size":""},"THC18-12P613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"12P613","size":"18"},"THGB20H39AAB2ABA0001":{"spu":"THGB-AA-A","name":"50pcs鱼线发","color":"1BT4P60","size":"20"},"T1287":{"spu":"T-SBW","name":"8\"双色Water Wave发把(3pcs)","color":"W2-4","size":"08"},"THT2070":{"spu":"THT","name":"20pcs刷胶发","color":"70","size":"20"},"THT2060":{"spu":"THT","name":"20pcs刷胶发","color":"60","size":"20"},"T1376":{"spu":"T-ZJ","name":"12\"抓夹马尾曲发","color":"4A","size":"12"},"TFAH18-04AF":{"spu":"TF-AH-F","name":"6x6\"机扎刘海大发块曲发(八字刘海)","color":"4A","size":"18"},"TH-CI1633":{"spu":"TH-CI","name":"50pcs铁丝发","color":"33","size":"16"},"THC18-2T6":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"2T6","size":"18"},"THT1801":{"spu":"THT","name":"20pcs刷胶发","color":"01","size":"18"},"TH0034":{"spu":"PJ-TH-CI","name":"200pcs接发环(米黄色)","color":"Beige","size":"/"},"THT18-18P613-TT*2":{"spu":"THT---TT","name":"10pcs刷胶发","color":"18P613","size":"18"},"THT18-18P613":{"spu":"THT","name":"20pcs刷胶发","color":"18P613","size":"18"},"THIA10002BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"02","size":"10"},"THQ-C60":{"spu":"THQ-C","name":"三角刘海","color":"60","size":"00"},"T1868":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"30","size":"/"},"HFM037SC00-1B":{"spu":"HFM037","name":"13x18cm PU男士发块(袋装)","color":"1B","size":"00"},"T469":{"spu":"T-ZJ","name":"24\"抓夹马尾大波浪(间色)","color":"12P24","size":"24"},"T1589":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"4/144B","size":"06"},"TEBG04-04A-BY":{"spu":"","name":"","color":"","size":""},"TH0005":{"spu":"THC-PJ","name":"夹子(黑色)","color":"黑色","size":"/"},"THC16-4T27":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"4T27","size":"16"},"THC80":{"spu":"","name":"","color":"","size":""},"THT22-4P27-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"4P27","size":"22"},"HGJ001SC12-06":{"spu":"HGJ001","name":"10pcs刷胶发","color":"06","size":"12"},"THQ-C04":{"spu":"THQ-C","name":"三角刘海","color":"04","size":"00"},"TH0011":{"spu":"THT-PJ","name":"男士发块双面胶片(白色)","color":"白色","size":"/"},"HFM047SC00-1B":{"spu":"HFM047","name":"15x20cm PU男士发块(大背头造型)","color":"1B","size":""},"T1049":{"spu":"T-FQ","name":"加厚发圈(35g)","color":"M4","size":"05"},"T239":{"spu":"T-LH","name":"2夹刘海","color":"24/613","size":"06"},"T1844":{"spu":"T-FQ","name":"发圈马尾","color":"12H24","size":"06"},"THAA18006AOB2AFA0001":{"spu":"THAA-AO-A","name":"8片18夹双帘卡子发(退短毛)","color":"06","size":"18"},"HFW013SC12-27":{"spu":"HFW013","name":"10x12cm 机扎+机制中分发块","color":"27","size":"12"},"THC2002":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"02","size":"20"},"T1043":{"spu":"T-DBZ","name":"24\"黑人大辫子100g","color":"613","size":"24"},"T1013":{"spu":"T-DBZ","name":"24\"黑人大辫子100g","color":"24","size":"24"},"TWC011ST08":{"spu":"","name":"","color":"","size":""},"THL-20-4P27":{"spu":"THL","name":"50pcs U形指甲发","color":"4P27","size":"20"},"THC10-18P613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"18P613","size":"10"},"TH-CI2299J":{"spu":"TH-CI","name":"50pcs铁丝发","color":"99J","size":"22"},"TH-BK2201G":{"spu":"TH-BK-G","name":"22\"魔术贴马尾","color":"01","size":"22"},"THAC14004ADB2ABA0001":{"spu":"THAC-AD-A","name":"1片5夹V型卡子发","color":"04","size":"14"},"THT2424-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"24","size":"24"},"TH1602":{"spu":"TH","name":"8片18夹卡子发","color":"02","size":"16"},"THC12-18P613V":{"spu":"THC-V","name":"8片18夹卡子发(减重)","color":"18P613","size":"12"},"THIA14004BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"04","size":"14"},"T1837":{"spu":"T-FQ","name":"发圈马尾","color":"27T613","size":"06"},"THQ-Q1601Z":{"spu":"THQ-Q---Z","name":"8.5x8.5cm Mono圆顶带旋发块","color":"01","size":"16"},"THC20-12P613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"12P613","size":"20"},"T873":{"spu":"T-BJ","name":"23\"卡子发8件套直发","color":"30","size":"23"},"TLS002ST00-613-BY":{"spu":"","name":"","color":"","size":""},"T2599-BY":{"spu":"T-LH","name":"法式刘海","color":"1","size":"/"},"TH-BQ2404":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"04","size":"24"},"TH-CL12-18P613V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"18P613","size":"12"},"THT12-18P613":{"spu":"THT","name":"20pcs刷胶发","color":"18P613","size":"12"},"THQ-C01":{"spu":"THQ-C","name":"三角刘海","color":"01","size":"00"},"THC2004":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"04","size":"20"},"THQ-D02":{"spu":"THQ-D","name":"空气刘海","color":"02","size":"00"},"TH-BQ2001":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"01","size":"20"},"T856":{"spu":"T-BJ","name":"23\"卡子发8件套直发","color":"88","size":"23"},"HYF001SC24-4P27":{"spu":"HYF001","name":"50pcs鱼线发","color":"4P27","size":"24"},"THC16-1BT4":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"1BT4","size":"16"},"TH-CI2024":{"spu":"TH-CI","name":"50pcs铁丝发","color":"24","size":"20"},"THD181B":{"spu":"THD","name":"1片5夹加厚卡子发","color":"1B","size":"18"},"T1693":{"spu":"T-LH","name":"2夹刘海","color":"16","size":"06"},"TMZ001ST11-018":{"spu":"TMZ001","name":"针织帽子发(直发款)","color":"18","size":"11"},"TEBG04-H42-BY":{"spu":"","name":"","color":"","size":""},"T1729":{"spu":"T-MZ","name":"16\"一体鸭舌帽大波浪","color":"12P24","size":"16"},"T1669":{"spu":"T-FB","name":"11\"黑人蓬松爆炸发把","color":"1","size":"11"},"THBB16022AAB2ABA0028":{"spu":"THT---Y-V","name":"20pcs刷胶发","color":"22","size":"16"},"THT161B-AA":{"spu":"THT---AA","name":"20pcs刷胶发(减薄款)","color":"1B","size":"16"},"THT2260":{"spu":"THT","name":"20pcs刷胶发","color":"60","size":"22"},"TH-CI2401":{"spu":"TH-CI","name":"50pcs铁丝发","color":"01","size":"24"},"THQ-Q14-18P613Z":{"spu":"THQ-Q---Z","name":"8.5x8.5cm Mono圆顶带旋发块","color":"18P613","size":"14"},"THC20GREY":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"GREY","size":"20"},"TH-CI2001":{"spu":"TH-CI","name":"50pcs铁丝发","color":"01","size":"20"},"T2232":{"spu":"T-CS","name":"24\"抽绳马尾大波浪","color":"2A","size":"24"},"T718":{"spu":"T-BJ","name":"23\"卡子发8件套直发","color":"M4","size":"23"},"THE12-4P27":{"spu":"THE","name":"8片18夹双帘卡子发","color":"4P27","size":"12"},"T2390":{"spu":"T-BJ","name":"26\"卡子发8件套直发","color":"24/613","size":"26"},"T231":{"spu":"T-BJ","name":"24\"卡子发8件套曲发","color":"16P613","size":"24"},"T234":{"spu":"T-BJ","name":"24\"卡子发8件套曲发","color":"4AP24A","size":"24"},"TFAH18-A96F":{"spu":"TF-AH-F","name":"6x6\"机扎刘海大发块曲发(八字刘海)","color":"27GT60L","size":"18"},"TH-BK2260G":{"spu":"TH-BK-G","name":"22\"魔术贴马尾","color":"60","size":"22"},"THC20":{"spu":"","name":"","color":"","size":""},"TH-CI22-18P613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"18P613","size":"22"},"HFL008SC14-18P613":{"spu":"HFL008","name":"10x12cm 机扎+机制刘海发块","color":"18P613","size":"14"},"TH-BK2202G":{"spu":"TH-BK-G","name":"22\"魔术贴马尾","color":"02","size":"22"},"TH-CI18-4T613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"4T613","size":"18"},"THIA1401BBGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"1B","size":"14"},"TH-CI2402":{"spu":"TH-CI","name":"50pcs铁丝发","color":"02","size":"24"},"TEBG04-T48":{"spu":"T-CXFQ","name":"抓夹长须发圈(75g)(改良版)","color":"24T613","size":"04"},"THQ-C06":{"spu":"THQ-C","name":"三角刘海","color":"06","size":"00"},"THM1899J":{"spu":"THM","name":"1片5夹卡子发","color":"99J","size":"18"},"TWD009BT22-04A-BY":{"spu":"","name":"","color":"","size":""},"T1883":{"spu":"T-FQ","name":"薄发圈(25g)","color":"24/613","size":"05"},"TH-BM-B613":{"spu":"TH-BM-B","name":"卷发圈(23g)","color":"613","size":"00"},"HKH007SC14-1B":{"spu":"HKH007","name":"8片18夹卡子发(减重)","color":"1B","size":"14"},"THC1002V":{"spu":"THC-V","name":"8片18夹卡子发(减重)","color":"02","size":"10"},"T497":{"spu":"T-FQ","name":"薄发圈(25g)","color":"1B","size":"05"},"THAA18070AOB2AFA0001":{"spu":"THAA-AO-A","name":"8片18夹双帘卡子发(退短毛)","color":"70","size":"18"},"HLP003SC07-1B":{"spu":"HLP003","name":"3x3x4cm PU补发块","color":"1B","size":"07"},"TH0010":{"spu":"THT-PJ","name":"双面胶片(蓝色)","color":"蓝色","size":"/"},"THAA14613AOB2AEA0001":{"spu":"THAA-AO-A","name":"8片18夹双帘卡子发(退短毛)","color":"613","size":"14"},"THC1060":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"60","size":"10"},"THC10GREY":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"GREY","size":"10"},"TP03204":{"spu":"TP032","name":"7x15cm PU发际线","color":"04","size":"06"},"TH-CI1824":{"spu":"TH-CI","name":"50pcs铁丝发","color":"24","size":"18"},"HFM038SC10-02":{"spu":"HFM038","name":"0.75x6.25\"手勾蕾丝发际线(中分款)","color":"02","size":"10"},"THID12004AID2AEB0007":{"spu":"THID-AI-A","name":"10x12cm 机扎+机制刘海发块","color":"04","size":"12"},"TWC011ST08-04A":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"4A","size":"08"},"THIB1401BALD2AEB0007":{"spu":"THIB-AL-A","name":"10x12cm 机扎+机制中分发块","color":"1B","size":"14"},"TWC011ST08-10B":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"10B","size":"08"},"T2602":{"spu":"T-LH","name":"法式刘海","color":"M4","size":"/"},"T1586-BY":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"银灰","size":"06"},"T744-BY":{"spu":"T-LH","name":"2夹刘海","color":"24","size":"06"},"THS-1824":{"spu":"THS","name":"100pcs U形指甲发","color":"24","size":"18"},"THS-18613":{"spu":"THS","name":"100pcs U形指甲发","color":"613","size":"18"},"THC80-18P613V":{"spu":"THC-V","name":"8片18夹卡子发(减重)","color":"18P613","size":"08"},"THM14613":{"spu":"THM","name":"1片5夹卡子发","color":"613","size":"14"},"THS-2060":{"spu":"THS","name":"100pcs U形指甲发","color":"60","size":"20"},"HKA006SN24-1B":{"spu":"HKA006","name":"1片5夹卡子发","color":"1B","size":"24"},"T2499":{"spu":"T-WJ","name":"24\"卡子发1片5夹曲发","color":"4A","size":"24"},"T1882":{"spu":"T-FQ","name":"薄发圈(25g)","color":"6T27","size":"05"},"HFS072SC12-613":{"spu":"HFS072","name":"13×2\"鱼线手勾发块","color":"613","size":"12"},"T1893":{"spu":"T-FQ","name":"加厚发圈(35g)","color":"4A/30","size":"05"},"THC1004":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"04","size":"10"},"THT2202-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"02","size":"22"},"TH-BD18-12P613":{"spu":"TH-BD","name":"绳子发","color":"12P613","size":"18"},"THT24613":{"spu":"THT","name":"20pcs刷胶发","color":"613","size":"24"},"THIA08P02BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"4P27","size":"08"},"T1377-BY":{"spu":"T-ZJ","name":"12\"抓夹马尾曲发","color":"M4","size":"12"},"THIB12002ALD2AEB0007":{"spu":"THIB-AL-A","name":"10x12cm 机扎+机制中分发块","color":"02","size":"12"},"THT18-18P613T613":{"spu":"THT","name":"20pcs刷胶发","color":"18P613T613","size":"18"},"TP02365Y":{"spu":"TP023","name":"8x10\"PU男士发块(混65%真人白发)","color":"1B65Y","size":"06"},"THT2270":{"spu":"THT","name":"20pcs刷胶发","color":"70","size":"22"},"THC22613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"613","size":"22"},"BTH1824":{"spu":"BTH","name":"8片18夹混毛卡子发","color":"24","size":"18"},"THD2006":{"spu":"THD","name":"1片5夹加厚卡子发","color":"06","size":"20"},"TH-CL60-18P613V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"18P613","size":"06"},"T1629*3":{"spu":"T-DBZ","name":"24\"黑人大辫子100g(四色)","color":"紫-蓝-黄-橙","size":"24"},"HXD002SC00-1B":{"spu":"HXD002","name":"手勾络腮胡(O型胡)","color":"1B","size":"0"},"THT14-18P613":{"spu":"THT","name":"20pcs刷胶发","color":"18P613","size":"14"},"THIB14P07ALD2AEB0007":{"spu":"THIB-AL-A","name":"10x12cm 机扎+机制中分发块","color":"12P613","size":"14"},"T234-BY":{"spu":"T-BJ","name":"24\"卡子发8件套曲发","color":"4AP24A","size":"24"},"THM16613":{"spu":"THM","name":"1片5夹卡子发","color":"613","size":"16"},"T1370":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"30T4","size":"/"},"TH16-4P27":{"spu":"TH","name":"8片18夹卡子发","color":"4P27","size":"16"},"TH2206":{"spu":"TH","name":"8片18夹卡子发","color":"06","size":"22"},"T640":{"spu":"T-ZJ","name":"18\"抓夹马尾大波浪","color":"613C","size":"18"},"TQC003ST12-006":{"spu":"TQC003","name":"抓夹蓬松发圈(60g)","color":"06","size":"12"},"T631-BY":{"spu":"T-ZJ","name":"21\"抓夹马尾直发","color":"1","size":"21"},"THT12-4P27-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"4P27","size":"12"},"HZN001SC16-04":{"spu":"HZN001","name":"绳子发","color":"4","size":"16"},"THIA08004BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"04","size":"08"},"TH-CL60613V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"613","size":"06"},"THIA14P02BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"4P27","size":"14"},"THIA12P02BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"4P27","size":"12"},"T2283":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"8H613","size":"/"},"THC1804":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"04","size":"18"},"THM1802":{"spu":"THM","name":"1片5夹卡子发","color":"02","size":"18"},"THQ-D613":{"spu":"THQ-D","name":"空气刘海","color":"613","size":"00"},"TCDL1404AAE2BW140A03-BY":{"spu":"","name":"","color":"","size":""},"TP021":{"spu":"TP021","name":"PU男士发块","color":"1B","size":"08"},"TH-BQ2402":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"02","size":"24"},"THC24613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"613","size":"24"},"HZA003SN18-18RP613R":{"spu":"HZA003","name":"可调节绳子发","color":"18RP613R","size":"18"},"TH-BD20-4P27":{"spu":"TH-BD","name":"绳子发","color":"4P27","size":"20"},"T2608":{"spu":"T-LH","name":"法式刘海","color":"银灰","size":"/"},"THT2002":{"spu":"THT","name":"20pcs刷胶发","color":"02","size":"20"},"THT2002-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"02","size":"20"},"THS-24613":{"spu":"THS","name":"100pcs U形指甲发","color":"613","size":"24"},"THQ-D06":{"spu":"THQ-D","name":"空气刘海","color":"06","size":"00"},"TH-CI2460":{"spu":"TH-CI","name":"50pcs铁丝发","color":"60","size":"24"},"TFAJ14":{"spu":"","name":"","color":"","size":""},"T1369":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"27T613","size":"/"},"THT2227W":{"spu":"THT---W","name":"20pcs刷胶发(BW)","color":"27","size":"22"},"HGT001SC24-4P27":{"spu":"HGT001","name":"20pcs刷胶发","color":"4P27","size":"24"},"TWE098":{"spu":"TH00","name":"2pcs木柄带舌钩针","color":"木质","size":"/"},"T497-BY":{"spu":"T-FQ","name":"薄发圈(25g)","color":"1B","size":"05"},"TH2001":{"spu":"TH","name":"8片18夹卡子发","color":"01","size":"20"},"HZN001SC18-06":{"spu":"HZN001","name":"绳子发","color":"06","size":"18"},"TH-BM-A1B":{"spu":"TH-BM-A","name":"直发圈(17g)","color":"1B","size":"00"},"TH22613":{"spu":"TH","name":"8片18夹卡子发","color":"613","size":"22"},"THQ-C02":{"spu":"THQ-C","name":"三角刘海","color":"02","size":"00"},"THE20-2T6":{"spu":"THE","name":"8片18夹双帘卡子发","color":"2T6","size":"20"},"T932":{"spu":"T-BJ","name":"23\"卡子发8件套直发","color":"10/613","size":"23"},"T776":{"spu":"T-WJ","name":"27\"卡子发1片5夹曲发","color":"1","size":"27"},"THM2402":{"spu":"THM","name":"1片5夹卡子发","color":"02","size":"24"},"TFAL05A54AB2CW060A03":{"spu":"T-FK","name":"13x13cm 机扎头旋发块(短玉米烫)","color":"银灰","size":"05"},"THC20613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"613","size":"20"},"T2214-BY":{"spu":"T-FK","name":"7x5cm 机扎刘海小发块10\"","color":"10/144/613C","size":"1\""},"TH-BD1660":{"spu":"TH-BD","name":"绳子发","color":"60","size":"16"},"THIA14002BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"02","size":"14"},"TFAL14D34AE2BW115A03":{"spu":"TFA-AE-B","name":"13.5x13cm 机扎刘海发块曲发14\"","color":"10/144/613C","size":"14"},"HXD001SC00-1B":{"spu":"HXD001","name":"手勾络腮胡(Van Dyke胡须)","color":"1B","size":"0"},"THD2260":{"spu":"THD","name":"1片5夹加厚卡子发","color":"60","size":"22"},"THQ-GF1427YZ":{"spu":"THQ-GF---YZ","name":"10x12cm女士发块(刘海款)(盒装)","color":"27","size":"14"},"HKH007SC16-1B":{"spu":"HKH007","name":"8片18夹卡子发(减重)","color":"1B","size":"16"},"TH-CI2424/TH-CI2424":{"spu":"TH-CI","name":"50pcs铁丝发","color":"24","size":"24"},"TWE097":{"spu":"TH00","name":"5pcs钢丝钩针(彩色)","color":"混色","size":"/"},"TH-BK16-18P613G":{"spu":"TH-BK-G","name":"16\"魔术贴马尾","color":"18P613","size":"16"},"T1587":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"12H24","size":"06"},"THT2001":{"spu":"THT","name":"20pcs刷胶发","color":"01","size":"20"},"T1876":{"spu":"T-FQ","name":"薄发圈(25g)","color":"24","size":"05"},"HQB004WC00-1B":{"spu":"HQB004","name":"大款黑人发包(98g)","color":"1B","size":"00"},"THC18-18P613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"18P613","size":"18"},"THD2002":{"spu":"THD","name":"1片5夹加厚卡子发","color":"02","size":"20"},"TH-BL-A613":{"spu":"TH-BL-A","name":"直发包(30g)","color":"613","size":"00"},"HFM038SC10-1B":{"spu":"HFM038","name":"0.75x6.25\"手勾蕾丝发际线(中分款)","color":"1B","size":"10"},"TFAL14001AE2BW115A03":{"spu":"TFA-AE-B","name":"13.5x13cm 机扎刘海发块曲发14\"","color":"1","size":"14"},"THC2202":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"02","size":"22"},"T2502":{"spu":"T-ZJ","name":"18\"抓夹马尾大波浪","color":"4A","size":"18"},"TH-CL8002V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"02","size":"08"},"TH-CL6070V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"70","size":"06"},"TH1801":{"spu":"TH","name":"8片18夹卡子发","color":"01","size":"18"},"THT1206-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"06","size":"12"},"THT1260-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"60","size":"12"},"THT12-18P613-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"18P613","size":"12"},"HFM039SC06-1B":{"spu":"HFM039","name":"8x8cm PU男士发块","color":"1B","size":"06"},"T1696":{"spu":"T-ZJ","name":"12\"抓夹马尾曲发","color":"86/613","size":"12"},"T858":{"spu":"T-BJ","name":"23\"卡子发8件套直发","color":"1001W","size":"23"},"THC14-4P27":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"4P27","size":"14"},"THC181B":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"1B","size":"18"},"T1822":{"spu":"T-FB","name":"22\"Yaki发包(100g)","color":"1B","size":"22"},"THT1860":{"spu":"THT","name":"20pcs刷胶发","color":"60","size":"18"},"TH20-18P613":{"spu":"TH","name":"8片18夹卡子发","color":"18P613","size":"20"},"THD1802":{"spu":"THD","name":"1片5夹加厚卡子发","color":"02","size":"18"},"T1866-BY":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"12","size":"/"},"TH-CL80-12P613V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"12P613","size":"08"},"TEBL06H37AF2AW070A03":{"spu":"T-ZJFQ","name":"抓夹发圈(65g)","color":"18H613","size":"06"},"THAA16001AOB2AEA0001":{"spu":"THAA-AO-A","name":"8片18夹双帘卡子发(退短毛)","color":"01","size":"16"},"TP032":{"spu":"TP032","name":"7x15cm PU发际线","color":"1B","size":"06"},"T810":{"spu":"T-WJ","name":"30\"卡子发1片5夹直发","color":"613C","size":"30"},"THT1402":{"spu":"THT","name":"20pcs刷胶发","color":"02","size":"14"},"THM1602":{"spu":"THM","name":"1片5夹卡子发","color":"02","size":"16"},"TFAJ14-A96":{"spu":"TF-AJ-S","name":"6x6\"机扎刘海发块(八字刘海)(减薄款)","color":"27GT60L","size":"14"},"T635":{"spu":"T-ZJ","name":"21\"抓夹马尾直发","color":"613C","size":"21"},"TCDL14B13AE2BW140A03":{"spu":"T-ZJ","name":"14\"抓夹马尾卷发","color":"1BT0906","size":"14"},"THQ-D60":{"spu":"THQ-D","name":"空气刘海","color":"60","size":"00"},"TQC003ST12-B32":{"spu":"TQC003","name":"抓夹蓬松发圈(60g)","color":"503","size":"12"},"T1327":{"spu":"T-ZJ","name":"12\"抓夹可弯曲马尾","color":"613C","size":"12"},"TEAL08A69AJ2ZW100A01":{"spu":"TEA-AF-A","name":"黑人小卷长须抽绳发包(90g)","color":"171T银灰","size":"08"},"THL-2460":{"spu":"THL","name":"50pcs U形指甲发","color":"60","size":"24"},"THT14GREY":{"spu":"THT","name":"20pcs刷胶发","color":"GREY","size":"14"},"TH10-12P613":{"spu":"TH","name":"8片18夹卡子发","color":"12P613","size":"10"},"TH-CL4004V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"04","size":"04"},"HFM046SC00-1B/TH0010":{"spu":"HFM046","name":"15x20cm PU男士发块(寸头)","color":"1B","size":""},"THQ-D04":{"spu":"THQ-D","name":"空气刘海","color":"04","size":"00"},"THT2024&2V":{"spu":"THT","name":"20pcs刷胶发","color":"24","size":"20"},"THIB18002ALD2AFB0007":{"spu":"THIB-AL-A","name":"10x12cm 机扎+机制中分发块","color":"02","size":"18"},"HFS056SC16-02":{"spu":"HFS056","name":"9x12cm 翻毛中分发块","color":"02","size":"16"},"TEBL06010AF2AW070A03":{"spu":"T-ZJFQ","name":"抓夹发圈(65g)","color":"10","size":"06"},"TH-BK1404":{"spu":"TH-BK","name":"14\"魔术贴马尾","color":"04","size":"14"},"TEBG04-613":{"spu":"T-CXFQ","name":"抓夹长须发圈(75g)(改良版)","color":"613","size":"04"},"THIA08002BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"02","size":"08"},"T1053":{"spu":"T-FQ","name":"加厚发圈(35g)","color":"银灰","size":"05"},"T1249":{"spu":"T-FQ","name":"加厚发圈(35g)","color":"22H613","size":"05"},"T2213-BY":{"spu":"T-FK","name":"7x5cm 机扎刘海小发块10\"","color":"24/613","size":"1\""},"HYI001SC22-27":{"spu":"HYI001","name":"50pcs铁丝发","color":"27","size":"22"},"THD1806":{"spu":"THD","name":"1片5夹加厚卡子发","color":"06","size":"18"},"T2115":{"spu":"T-CB","name":"20\"吸盘三股辫(三色)","color":"C9","size":"02"},"TH-CI2201":{"spu":"TH-CI","name":"50pcs铁丝发","color":"01","size":"22"},"THC2012":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"12","size":"20"},"THC1402":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"02","size":"14"},"THD2202":{"spu":"THD","name":"1片5夹加厚卡子发","color":"02","size":"22"},"THIB18004ALD2AFB0007":{"spu":"THIB-AL-A","name":"10x12cm 机扎+机制中分发块","color":"04","size":"18"},"THIB16004ALD2AEB0007":{"spu":"THIB-AL-A","name":"10x12cm 机扎+机制中分发块","color":"04","size":"16"},"THIB14004APD2ABB0007":{"spu":"THIB-AP-A","name":"13x15cm 机扎+机制中分发块","color":"04","size":"14"},"TFAL10D34AF2AW050A03":{"spu":"T-LJFK","name":"7.5x5cm 机扎中分小发块","color":"10/144/613C","size":"1\""},"HFM036SC06-1B90Y":{"spu":"HFM036","name":"2x16cm PU发际线","color":"1B90Y","size":"06"},"TH-CI18-18P613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"18P613","size":"18"},"TH-CI18613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"613","size":"18"},"THT22-18P613-R":{"spu":"","name":"","color":"","size":""},"THT1427":{"spu":"THT","name":"20pcs刷胶发","color":"27","size":"14"},"TH-BQ2401":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"01","size":"24"},"TCDL14TL0AE2BW140A03-BY":{"spu":"","name":"","color":"","size":""},"T1599":{"spu":"T-FL","name":"16\"发帘BODY曲","color":"1B","size":"16"},"BTH18-12P613":{"spu":"BTH","name":"8片18夹混毛卡子发","color":"12P613","size":"18"},"T145-BY/T2441-BY":{"spu":"T-MST","name":"26\"魔术贴马尾直发","color":"24/613","size":"26"},"TH-BM-B12P613":{"spu":"TH-BM-B","name":"卷发圈(23g)","color":"12P613","size":"00"},"TLS002ST00-001":{"spu":"TLS002","name":"2夹刘海","color":"01","size":"刘海：6.5寸；鬓角：12寸"},"THM2004":{"spu":"THM","name":"1片5夹卡子发","color":"04","size":"20"},"TH-CL10-18P613V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"18P613","size":"10"},"T498":{"spu":"T-FQ","name":"薄发圈(25g)","color":"10","size":"05"},"T2435":{"spu":"T-SZ","name":"20\"绳子发直发","color":"24","size":"02"},"THC10-4P27":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"4P27","size":"10"},"TH-CI2202":{"spu":"TH-CI","name":"50pcs铁丝发","color":"02","size":"22"},"TH2401":{"spu":"TH","name":"8片18夹卡子发","color":"01","size":"24"},"THIA14P07BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"12P613","size":"14"},"THC2260":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"60","size":"22"},"TACL18A72AB4AW170A01":{"spu":"T-AC-AB","name":"18\"V型卡子发1片5卡直发","color":"5P26/16","size":"18"},"T1647":{"spu":"T-DBZ","name":"26\"黑人EZ大辫子","color":"2","size":"26"},"THC1001":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"01","size":"10"},"THC16-4T4P27":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"4T4P27","size":"16"},"THD2060":{"spu":"THD","name":"1片5夹加厚卡子发","color":"60","size":"20"},"THC1401":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"01","size":"14"},"TEBL06006AH5AW053A01":{"spu":"T-EBAH","name":"长须发圈(46g)","color":"6","size":"06"},"THC241B":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"1B","size":"24"},"T778-BY":{"spu":"T-WJ","name":"27\"卡子发1片5夹曲发","color":"4A","size":"27"},"THT20-2T6":{"spu":"THT","name":"20pcs刷胶发","color":"2T6","size":"20"},"THQ-Q12-18P613Z":{"spu":"THQ-Q---Z","name":"8.5x8.5cm Mono圆顶带旋发块","color":"18P613","size":"12"},"HKL002SC18-12P613":{"spu":"HKL002","name":"12片27夹卡子发","color":"12P613","size":"18"},"TH-BK1602G":{"spu":"TH-BK-G","name":"16\"魔术贴马尾","color":"02","size":"16"},"THE10-18P613":{"spu":"THE","name":"8片18夹双帘卡子发","color":"18P613","size":"10"},"THIC08P02AFD2ABB0007":{"spu":"THIC-AF-A","name":"10x12cm 机扎+机制头旋发块","color":"4P27","size":"08"},"T1327-BY":{"spu":"T-ZJ","name":"12\"抓夹可弯曲马尾","color":"613C","size":"12"},"THT1806":{"spu":"THT","name":"20pcs刷胶发","color":"06","size":"18"},"HKA007SN20-1B":{"spu":"HKA007","name":"1片5夹V型卡子发","color":"1B","size":"20"},"TH-CL8027V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"27","size":"08"},"TQC003ST12-004":{"spu":"TQC003","name":"抓夹蓬松发圈(60g)","color":"04","size":"12"},"THT18-18P613-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"18P613","size":"18"},"THT1202-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"02","size":"12"},"TQC003ST12-E00":{"spu":"TQC003","name":"抓夹蓬松发圈(60g)","color":"88A/89A","size":"12"},"THQ-Q1227Z":{"spu":"THQ-Q---Z","name":"8.5x8.5cm Mono圆顶带旋发块","color":"27","size":"12"},"THC12-4P27V":{"spu":"THC-V","name":"8片18夹卡子发(减重)","color":"4P27","size":"12"},"THT14-4P27-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"4P27","size":"14"},"TH-CI16-18P613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"18P613","size":"16"},"TH-CI2060":{"spu":"TH-CI","name":"50pcs铁丝发","color":"60","size":"20"},"TH-BK22":{"spu":"","name":"","color":"","size":""},"HLQ002SC18-1B":{"spu":"HLQ002","name":"手勾蕾丝圆形补发块(Dia5cm)","color":"1B","size":"18"},"THT2024-AA":{"spu":"THT---AA","name":"20pcs刷胶发(减薄款)","color":"24","size":"20"},"TH241B":{"spu":"TH","name":"8片18夹卡子发","color":"1B","size":"24"},"TEBG04-012":{"spu":"T-CXFQ","name":"抓夹长须发圈(75g)(改良版)","color":"12","size":"04"},"THAA20001AOB2AFA0001":{"spu":"THAA-AO-A","name":"8片18夹双帘卡子发(退短毛)","color":"01","size":"20"},"TEBG04-A54":{"spu":"T-CXFQ","name":"抓夹长须发圈(75g)(改良版)","color":"银灰","size":"04"},"T1865":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"10","size":"/"},"T1834":{"spu":"T-FQ","name":"发圈马尾","color":"1","size":"06"},"TMM007ST06":{"spu":"","name":"","color":"","size":""},"TLS002ST00-10B-BY":{"spu":"","name":"","color":"","size":""},"T228":{"spu":"T-BJ","name":"26\"卡子发8件套直发","color":"12P24","size":"26"},"THT1460-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"60","size":"14"},"THQ-G1602YZ":{"spu":"THQ-G---YZ","name":"10x12女士发块(中分款)(盒装)","color":"02","size":"16"},"THID14P08AID2AEB0007":{"spu":"THID-AI-A","name":"10x12cm 机扎+机制刘海发块","color":"18P613","size":"14"},"THT1604-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"04","size":"16"},"THC1830":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"30","size":"18"},"THE2001":{"spu":"THE","name":"8片18夹双帘卡子发","color":"01","size":"20"},"THAA18P02AOB2AFA0001":{"spu":"THAA-AO-A","name":"8片18夹双帘卡子发(退短毛)","color":"4P27","size":"18"},"THD1804":{"spu":"THD","name":"1片5夹加厚卡子发","color":"04","size":"18"},"T1371":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"24T613","size":"/"},"THIB14002ALD2AEB0007":{"spu":"THIB-AL-A","name":"10x12cm 机扎+机制中分发块","color":"02","size":"14"},"THD1602":{"spu":"THD","name":"1片5夹加厚卡子发","color":"02","size":"16"},"THC22-18P613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"18P613","size":"22"},"THL-24-18P613":{"spu":"THL","name":"50pcs U形指甲发","color":"18P613","size":"24"},"HKH007SC20-1B":{"spu":"HKH007","name":"8片18夹卡子发(减重)","color":"1B","size":"20"},"TP02302":{"spu":"TP023","name":"8x10\"PU男士发块","color":"02","size":"06"},"TIBL24P05AB5FW160A01":{"spu":"TIB-AB-F","name":"24\"可调节绳子发","color":"4AP27A","size":"24"},"HGJ001SC14-06":{"spu":"HGJ001","name":"10pcs刷胶发","color":"06","size":"14"},"THT22-18P613":{"spu":"THT","name":"20pcs刷胶发","color":"18P613","size":"22"},"HLQ003BC16-2R":{"spu":"HLQ003","name":"2x2\"手勾蕾丝圆形补发块(BW)","color":"2R","size":"16"},"TH16-12P613":{"spu":"TH","name":"8片18夹卡子发","color":"12P613","size":"16"},"T1323-BY":{"spu":"T-ZJ","name":"12\"抓夹可弯曲马尾","color":"4A","size":"12"},"TH-CI1802":{"spu":"TH-CI","name":"50pcs铁丝发","color":"02","size":"18"},"THIB10002ALD2AEB0007":{"spu":"THIB-AL-A","name":"10x12cm 机扎+机制中分发块","color":"02","size":"10"},"T468":{"spu":"T-ZJ","name":"26\"抓夹马尾直发(间色)","color":"4AP24A","size":"26"},"THC1624":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"24","size":"16"},"THT14-4T27":{"spu":"THT","name":"20pcs刷胶发","color":"4T27","size":"14"},"THC1204V":{"spu":"THC-V","name":"8片18夹卡子发(减重)","color":"04","size":"12"},"THL-2402":{"spu":"THL","name":"50pcs U形指甲发","color":"02","size":"24"},"TH-CL1270V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"70","size":"12"},"THP-10B":{"spu":"THP---B","name":"10\"发帘(BW)","color":"1B","size":"10"},"HCB003GN22-1B":{"spu":"HCB003","name":"2pcs黑人发把(混丝)(WW)","color":"1B","size":"22\""},"THC1202V":{"spu":"THC-V","name":"8片18夹卡子发(减重)","color":"02","size":"12"},"THP-22&3K":{"spu":"","name":"22\"发帘(KC)","color":"","size":""},"THT2401":{"spu":"THT","name":"20pcs刷胶发","color":"01","size":"24"},"TH-CL1260V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"60","size":"12"},"HFM038SC10-04":{"spu":"HFM038","name":"0.75x6.25\"手勾蕾丝发际线(中分款)","color":"04","size":"10"},"THGB2201BACB2SDA0006":{"spu":"THGB-AC-S","name":"鱼线发(KS)","color":"1B","size":"22"},"THT1424":{"spu":"THT","name":"20pcs刷胶发","color":"24","size":"14"},"THC2206":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"06","size":"22"},"HFM046SC00-1B":{"spu":"HFM046","name":"15x20cm PU男士发块(寸头)","color":"1B","size":""},"THL-1404V":{"spu":"THL-V","name":"50pcs U形指甲发","color":"04","size":"14"},"THIA12002BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"02","size":"12"},"T1690":{"spu":"T-LH","name":"2夹刘海","color":"F10/86","size":"06"},"TEBG04-001-BY":{"spu":"","name":"","color":"","size":""},"THC2406":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"06","size":"24"},"T1813":{"spu":"T-LH","name":"2夹刘海","color":"2/30","size":"06"},"THC1606":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"06","size":"16"},"T1674":{"spu":"T-FB","name":"11\"黑人蓬松爆炸发把","color":"1B/30","size":"11"},"THM16-4P27":{"spu":"THM","name":"1片5夹卡子发","color":"4P27","size":"16"},"TH0029":{"spu":"PJ-TH-CI","name":"200pcs接发环(深棕色)","color":"Dark Brown","size":"/"},"THM1804":{"spu":"THM","name":"1片5夹卡子发","color":"04","size":"18"},"TH-CL10-12P613V":{"spu":"TH-CL-V","name":"2夹垫发片","color":"12P613","size":"10"},"T1586":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"银灰","size":"06"},"THD1660":{"spu":"THD","name":"1片5夹加厚卡子发","color":"60","size":"16"},"THE141B":{"spu":"THE","name":"8片18夹双帘卡子发","color":"1B","size":"14"},"THE1402":{"spu":"THE","name":"8片18夹双帘卡子发","color":"02","size":"14"},"THQ-GF12-4P27Y":{"spu":"THQ-GF---Y","name":"10x12cm女士发块(刘海款)","color":"4P27","size":"12"},"THQ-Q1002Z":{"spu":"THQ-Q---Z","name":"8.5x8.5cm Mono圆顶带旋发块","color":"02","size":"10"},"THIGB10-JLT613Z":{"spu":"THI-GB-S","name":"10x12cm 手勾+机制侧分发块","color":"JLT613","size":"10"},"T1839":{"spu":"T-FQ","name":"发圈马尾","color":"24T613","size":"06"},"THC20-18P613":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"18P613","size":"20"},"T1838":{"spu":"T-FQ","name":"发圈马尾","color":"30T4","size":"06"},"T1815":{"spu":"T-LH","name":"2夹刘海","color":"27","size":"06"},"T715":{"spu":"T-BJ","name":"23\"卡子发8件套直发","color":"4A","size":"23"},"T1557":{"spu":"T-THQ","name":"10\"弹簧条(Dia12mm)","color":"W2-7","size":"1\""},"T1257":{"spu":"T-CFB","name":"插梳发包(90g)","color":"27T613","size":"/"},"THC2201":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"01","size":"22"},"T2605":{"spu":"T-LH","name":"法式刘海","color":"F12/613","size":"/"},"THC18-4P27":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"4P27","size":"18"},"TH-CE12K":{"spu":"TH-CE---K","name":"黑人卡子发8片18夹(双帘KC)","color":"1B","size":"12"},"T1836":{"spu":"T-FQ","name":"发圈马尾","color":"613C","size":"06"},"T226":{"spu":"T-BJ","name":"26\"卡子发8件套直发","color":"16P613","size":"26"},"T1635":{"spu":"T-CFB","name":"插梳发包(90g)","color":"30T613","size":"/"},"THC1404":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"04","size":"14"},"T2413":{"spu":"T-BJ","name":"24\"卡子发8件套曲发","color":"24","size":"24"},"THIA12P07BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"12P613","size":"12"},"THIA08027BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"27","size":"08"},"T2489":{"spu":"T-WJ","name":"24\"卡子发1片5夹曲发","color":"86/613","size":"24"},"T896":{"spu":"T-SZ","name":"20\"绳子发曲发","color":"4A","size":"02"},"T1969":{"spu":"T-FD","name":"鱼骨辫发箍","color":"9/24","size":"/"},"TH-BD20-12P613":{"spu":"TH-BD","name":"绳子发","color":"12P613","size":"20"},"HFS049SC06-613":{"spu":"HFS049","name":"8x10cm 手勾中分发块","color":"613","size":"06"},"THIA06P07BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"12P613","size":"06"},"T2465":{"spu":"T-SZ","name":"20\"绳子发曲发","color":"12P24","size":"02"},"T1324":{"spu":"T-ZJ","name":"12\"抓夹可弯曲马尾","color":"M4","size":"12"},"T1094":{"spu":"T-CFB","name":"插梳发包(90g)","color":"M4","size":"/"},"T1843":{"spu":"T-FQ","name":"发圈马尾","color":"银灰","size":"06"},"TH-BM-B04":{"spu":"TH-BM-B","name":"卷发圈(23g)","color":"04","size":"00"},"THIA06027BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"27","size":"06"},"T1869":{"spu":"T-FQ","name":"蓬蓬发圈(45g)","color":"33","size":"/"},"T1634":{"spu":"T-CFB","name":"插梳发包(90g)","color":"10T613","size":"/"},"T1322":{"spu":"T-ZJ","name":"12\"抓夹可弯曲马尾","color":"1","size":"12"},"THT16-4P27-AA":{"spu":"THT---AA","name":"20pcs刷胶发(减薄款)","color":"4P27","size":"16"},"THC8002":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"02","size":"08"},"T1199":{"spu":"T-CFB","name":"插梳发包(90g)","color":"27H613","size":"/"},"THT18613-AA":{"spu":"THT---AA","name":"20pcs刷胶发(减薄款)","color":"613","size":"18"},"T1632":{"spu":"T-CFB","name":"插梳发包(90g)","color":"171","size":"/"},"HFS049SC12-613":{"spu":"HFS049","name":"8x10cm 手勾中分发块","color":"613","size":"12"},"TH-BC2204":{"spu":"TH-BC","name":"100pcs鱼线发","color":"04","size":"22"},"T2471":{"spu":"T-SZ","name":"20\"绳子发曲发","color":"M4","size":"02"},"T897":{"spu":"T-SZ","name":"20\"绳子发曲发","color":"M4","size":"02"},"THIA0601BBGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"1B","size":"06"},"TH-BD16-4P27":{"spu":"TH-BD","name":"绳子发","color":"4P27","size":"16"},"TH-BD2204":{"spu":"TH-BD","name":"绳子发","color":"04","size":"22"},"TH-BD2002":{"spu":"TH-BD","name":"绳子发","color":"02","size":"20"},"THT1802-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"02","size":"18"},"T1488":{"spu":"T-SZ","name":"16\"绳子发曲发","color":"4A","size":"16"},"T2423":{"spu":"T-SZ","name":"20\"绳子发直发","color":"4A","size":"02"},"TFAL1404AAE2BW115A03":{"spu":"TFA-AE-B","name":"13.5x13cm 机扎刘海发块曲发14\"","color":"4A","size":"14"},"THIA08P07BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"12P613","size":"08"},"THIA10P02BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"4P27","size":"10"},"TH-BD2227":{"spu":"TH-BD","name":"绳子发","color":"27","size":"22"},"T1026":{"spu":"T-FQ","name":"薄发圈(25g)","color":"27T613","size":"05"},"HFM038SC10-613":{"spu":"HFM038","name":"0.75x6.25\"手勾蕾丝发际线(中分款)","color":"613","size":"10"},"T1247":{"spu":"T-FQ","name":"加厚发圈(35g)","color":"深灰","size":"05"},"THM1606":{"spu":"THM","name":"1片5夹卡子发","color":"06","size":"16"},"TH-BK22-18P613":{"spu":"TH-BK","name":"22\"魔术贴马尾","color":"18P613","size":"22"},"THT18-4P27-AA":{"spu":"THT---AA","name":"20pcs刷胶发(减薄款)","color":"4P27","size":"18"},"THL-1804":{"spu":"THL","name":"50pcs U形指甲发","color":"04","size":"18"},"T1643":{"spu":"T-BJ","name":"24\"卡子发8件套曲发(染色间色)","color":"6P26T2","size":"24"},"T1835":{"spu":"T-FQ","name":"发圈马尾","color":"4A","size":"06"},"T1480":{"spu":"T-SZ","name":"16\"绳子发直发","color":"1","size":"16"},"TH-CL1004":{"spu":"TH-CL","name":"2夹垫发片","color":"04","size":"10"},"ULQS-SY-B-T1359":{"spu":"","name":"","color":"","size":""},"TAGL22H29AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"8H27","size":"22"},"TFAJ14-04A":{"spu":"TF-AJ-S","name":"6x6\"机扎刘海发块(八字刘海)(减薄款)","color":"4A","size":"14"},"TH-CI2270":{"spu":"TH-CI","name":"50pcs铁丝发","color":"70","size":"22"},"TMM012BT16-H42":{"spu":"TMM012","name":"16\"一体鸭舌帽大波浪","color":"24H613","size":"16"},"HKF001SG14-60R":{"spu":"HKF001","name":"6片6夹蕾丝卡子发","color":"60R","size":"14"},"TAGL22H43AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"27H613","size":"22"},"TH-CI22-12P613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"12P613","size":"22"},"TWC011ST08-H43":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"27H613","size":"08"},"TDG003LT11-006":{"spu":"TDG003","name":"发箍刘海发块","color":"06","size":"11"},"TMM011BT08-Z28":{"spu":"TMM011","name":"一体棕色鸭舌帽波波头卷发8\"","color":"116/350","size":"8"},"THT22-4T27":{"spu":"THT","name":"20pcs刷胶发","color":"4T27","size":"22"},"TFAL1806AAH4AW200A01":{"spu":"TFA-AH-A","name":"6x6\"机扎刘海大发块18\"","color":"6A","size":"18"},"HYI001SC24-4P27":{"spu":"HYI001","name":"50pcs铁丝发","color":"4P27","size":"24"},"TWD009BT22-04A":{"spu":"TWD009","name":"分层曲发抽绳马尾","color":"4A","size":"22"},"TFAJ14-01B":{"spu":"TF-AJ-S","name":"6x6\"机扎刘海发块(八字刘海)(减薄款)","color":"1B","size":"14"},"THAC20004ADB2ACA0001":{"spu":"THAC-AD-A","name":"1片5夹V型卡子发","color":"04","size":"20"},"T1630":{"spu":"T-CFB","name":"插梳发包(90g)","color":"30","size":"/"},"TFAL18A83AH4AW200A01":{"spu":"TFA-AH-A","name":"6x6\"机扎刘海大发块18\"","color":"27MT60/60A","size":"18"},"TEAL0801BAJ2ZW100A01":{"spu":"TEA-AF-A","name":"黑人小卷长须抽绳发包(90g)","color":"1B","size":"08"},"TWC011ST08-T48":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"24T613","size":"08"},"T1631":{"spu":"T-CFB","name":"插梳发包(90g)","color":"118","size":"/"},"TKAL08001AF5BW200A01":{"spu":"T-MZ","name":"8\"一体鸭舌帽子发波波头卷发","color":"1","size":"08"},"TKD004CH22-H54":{"spu":"TKD004","name":"4片11夹卡子发缠管曲","color":"24H613C","size":"22"},"TFAJ14-06A":{"spu":"TF-AJ-S","name":"6x6\"机扎刘海发块(八字刘海)(减薄款)","color":"6A","size":"14"},"TMC001BT16-06A":{"spu":"TMC001","name":"16\"可拆卸草帽卷发","color":"6A","size":"16"},"T1095":{"spu":"T-CFB","name":"插梳发包(90g)","color":"12","size":"/"},"TFAL18A96AH4AW200A01":{"spu":"TFA-AH-A","name":"6x6\"机扎刘海大发块18\"","color":"27GT60L","size":"18"},"TAGL2204AAA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"4A","size":"22"},"TFAH18-A81F":{"spu":"TF-AH-F","name":"6x6\"机扎刘海大发块曲发(八字刘海)","color":"12/22T","size":"18"},"TH-CI1827":{"spu":"TH-CI","name":"50pcs铁丝发","color":"27","size":"18"},"THL-1806":{"spu":"THL","name":"50pcs U形指甲发","color":"06","size":"18"},"T1092":{"spu":"T-CFB","name":"插梳发包(90g)","color":"1","size":"/"},"TWC011ST08-H28":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"86H613","size":"08"},"TMC001BT16-010":{"spu":"TMC001","name":"16\"可拆卸草帽卷发","color":"10","size":"16"},"T1255":{"spu":"T-CFB","name":"插梳发包(90g)","color":"银灰","size":"/"},"HGT002SG24-06":{"spu":"HGT002","name":"20pcs刷胶发","color":"06","size":"24"},"T1097":{"spu":"T-CFB","name":"插梳发包(90g)","color":"24","size":"/"},"T1096":{"spu":"T-CFB","name":"插梳发包(90g)","color":"613C","size":"/"},"TWC011ST08-H64":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"6H27","size":"08"},"THT16-18P613":{"spu":"THT","name":"20pcs刷胶发","color":"18P613","size":"16"},"HFS058SC11-1B":{"spu":"HFS058","name":"8x11cm 手勾中分发块(基础款)","color":"1B","size":"11"},"TMM011BT08-001":{"spu":"TMM011","name":"一体棕色鸭舌帽波波头卷发8\"","color":"1","size":"8"},"T1093":{"spu":"T-CFB","name":"插梳发包(90g)","color":"4A","size":"/"},"TH-CI1624":{"spu":"TH-CI","name":"50pcs铁丝发","color":"24","size":"16"},"TKAL08PINAF5BW200A01":{"spu":"T-MZ","name":"8\"一体鸭舌帽子发波波头卷发","color":"PINK","size":"08"},"TKAL16A68AF5BW280A01":{"spu":"T-MZ","name":"16\"一体鸭舌帽子发卷发","color":"XT2333","size":"16"},"HYI004SC22-4R":{"spu":"HYI004","name":"50pcs铁丝发(35g)","color":"4R","size":"22"},"TH-CI18-12P613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"12P613","size":"18"},"TWC011ST08-T45":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"12T24","size":"08"},"TAGL22H51AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"6BH22","size":"22"},"TKAL16P10AF5BW280A01":{"spu":"T-MZ","name":"16\"一体鸭舌帽子发卷发","color":"10P22T","size":"16"},"TWC011ST08-H33":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"12H24","size":"08"},"TH-BC1801V":{"spu":"TH-BC-V","name":"100pcs鱼线发","color":"01","size":"18"},"T1728":{"spu":"T-MZ","name":"16\"一体鸭舌帽大波浪","color":"16P613","size":"16"},"TMM011BT08-H43":{"spu":"TMM011","name":"一体棕色鸭舌帽波波头卷发8\"","color":"27H613","size":"8"},"HFM038SC10-6R":{"spu":"HFM038","name":"0.75x6.25\"手勾蕾丝发际线(中分款)","color":"6R","size":"10"},"TH-CI2470":{"spu":"TH-CI","name":"50pcs铁丝发","color":"70","size":"24"},"TMM011BT08-010":{"spu":"TMM011","name":"一体棕色鸭舌帽波波头卷发8\"","color":"10","size":"8"},"HYI004SC22-60R":{"spu":"HYI004","name":"50pcs铁丝发(35g)","color":"60R","size":"22"},"TDG002LT05-012":{"spu":"TDG002","name":"发箍刘海","color":"12","size":"05"},"HFL011SC12-04":{"spu":"HFL011","name":"7x13cm 机扎+机制刘海发块","color":"04","size":"12"},"TFAJ14-08B":{"spu":"TF-AJ-S","name":"6x6\"机扎刘海发块(八字刘海)(减薄款)","color":"8B","size":"14"},"TKAL0802AAF5BW200A01":{"spu":"T-MZ","name":"8\"一体鸭舌帽子发波波头卷发","color":"2A","size":"08"},"T1723":{"spu":"T-MZ","name":"16\"一体鸭舌帽大波浪","color":"1","size":"16"},"HLS006SC00-1B":{"spu":"HLS006","name":"5x12.5cm 手勾法式刘海","color":"1B","size":"0"},"HFS057SC11-1B":{"spu":"HFS057","name":"8x11cm 手勾刘海发块(基础款)","color":"1B","size":"11"},"TMC001BT16-P10":{"spu":"TMC001","name":"16\"可拆卸草帽卷发","color":"10P22T","size":"16"},"T2593":{"spu":"T-MZ","name":"6\"一体鸭舌黑帽子发波波头","color":"6A","size":"06"},"TBCL3408BAZ5AW140A02":{"spu":"T-PJBZ","name":"34\"皮筋辫子","color":"8B","size":"34"},"HFS057SC11-02":{"spu":"HFS057","name":"8x11cm 手勾刘海发块(基础款)","color":"02","size":"11"},"TMM012BT16-Z28":{"spu":"TMM012","name":"16\"一体鸭舌帽大波浪","color":"116/350","size":"16"},"TFAH18-A83F":{"spu":"TF-AH-F","name":"6x6\"机扎刘海大发块曲发(八字刘海)","color":"27MT60/60A","size":"18"},"TMZ008GT18-018":{"spu":"TMZ008","name":"红色针织帽子发(水波纹)","color":"18","size":"18"},"TWC011ST08-H46":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"30H33A(JL)","size":"08"},"TFJ002TB00-T54":{"spu":"TFJ002","name":"化纤男士发块(弹簧卷)","color":"27T613","size":"00"},"TFJ002TB00-01B":{"spu":"TFJ002","name":"化纤男士发块(弹簧卷)","color":"1B","size":"00"},"TKD004CH22-613":{"spu":"TKD004","name":"4片11夹卡子发缠管曲","color":"613","size":"22"},"TH-BC2206":{"spu":"TH-BC","name":"100pcs鱼线发","color":"06","size":"22"},"TMM007BT08-006":{"spu":"TMM007","name":"8\"一体红色鸭舌帽波波头卷发","color":"6","size":"8"},"TKD004CH22-01B":{"spu":"TKD004","name":"4片11夹卡子发缠管曲","color":"1B","size":"22"},"TWC011ST08-012":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"012","size":"08"},"TMM006BT08-E00":{"spu":"TMM006","name":"8\"一体鸭舌帽波波头卷发","color":"88A/89A","size":"8"},"TMM006BT08-Z28":{"spu":"TMM006","name":"8\"一体鸭舌帽波波头卷发","color":"116/350","size":"8"},"THT20GREY-TTV":{"spu":"THT---TT-V","name":"10pcs刷胶发","color":"GREY","size":"20"},"THBA20H38ABB2AAA0028":{"spu":"THT---Y-TT-V","name":"10pcs刷胶发","color":"1BT1BPGREY","size":"20"},"TWD009BT22-001":{"spu":"TWD009","name":"分层曲发抽绳马尾","color":"01","size":"22"},"TMM008BT08-D52":{"spu":"TMM008","name":"8\"一体白色鸭舌帽卷发","color":"27/613","size":"8"},"TKAL0806AAF5BW200A01":{"spu":"T-MZ","name":"8\"一体鸭舌帽子发波波头卷发","color":"6A","size":"08"},"THT24-4T27":{"spu":"THT","name":"20pcs刷胶发","color":"4T27","size":"24"},"TEAL08A70AJ2ZW100A01":{"spu":"TEA-AF-A","name":"黑人小卷长须抽绳发包(90g)","color":"2ATM30","size":"08"},"HKA007SN16-1B":{"spu":"HKA007","name":"1片5夹V型卡子发","color":"1B","size":"16"},"THL-20-12P613":{"spu":"THL","name":"50pcs U形指甲发","color":"12P613","size":"20"},"TFAL18A97AH4AW200A01":{"spu":"TFA-AH-A","name":"6x6\"机扎刘海大发块18\"","color":"16H60L","size":"18"},"THT2024V":{"spu":"THT-V","name":"20pcs刷胶发","color":"24","size":"20"},"THT2404-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"04","size":"24"},"TBB017BJ28-01B":{"spu":"TBB017","name":"28\"海洋波浪卷黑人发","color":"1B","size":"28"},"TMM008BT08-E00":{"spu":"TMM008","name":"8\"一体白色鸭舌帽卷发","color":"88A/89A","size":"8"},"TFAL18A81AH4AW200A01":{"spu":"TFA-AH-A","name":"6x6\"机扎刘海大发块18\"","color":"12/22T","size":"18"},"HFM036SC06-1B":{"spu":"HFM036","name":"2x16cm PU发际线","color":"1B","size":"06"},"TMM008BT08-001":{"spu":"TMM008","name":"8\"一体白色鸭舌帽卷发","color":"01","size":"8"},"THBA22H38ABB2AAA0028":{"spu":"THT---Y-TT-V","name":"10pcs刷胶发","color":"1BT1BPGREY","size":"22"},"T1200":{"spu":"T-CFB","name":"插梳发包(90g)","color":"18H613","size":"/"},"TAGL22H53AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"18H613C","size":"22"},"HLE002SC00-02":{"spu":"HLE002","name":"5x12.5cm 手勾八字刘海","color":"02","size":"0"},"TH-BC22613":{"spu":"TH-BC","name":"100pcs鱼线发","color":"613","size":"22"},"HFS058SC11-02":{"spu":"HFS058","name":"8x11cm 手勾中分发块(基础款)","color":"02","size":"11"},"T2509":{"spu":"T-ZJ","name":"18\"抓夹马尾大波浪","color":"M30","size":"18"},"TAGL22H49AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"6H24","size":"22"},"TFAL18A82AH4AW200A01":{"spu":"TFA-AH-A","name":"6x6\"机扎刘海大发块18\"","color":"88A/108A","size":"18"},"TFAJ14-A82":{"spu":"TF-AJ-S","name":"6x6\"机扎刘海发块(八字刘海)(减薄款)","color":"88A/108A","size":"14"},"TH-BC1860":{"spu":"TH-BC","name":"100pcs鱼线发","color":"60","size":"18"},"TH-BC18-18P613":{"spu":"TH-BC","name":"100pcs鱼线发","color":"18P613","size":"18"},"TMZ002GT18-P18":{"spu":"TMZ002","name":"针织帽子发卷发(水波纹款)","color":"18P613","size":"18"},"HZN001SC16-02":{"spu":"HZN001","name":"绳子发","color":"02","size":"16"},"THS-2404":{"spu":"THS","name":"100pcs U形指甲发","color":"04","size":"24"},"TKD004CH22-0M4":{"spu":"TKD004","name":"4片11夹卡子发缠管曲","color":"M4","size":"22"},"HKA007SN22-1B":{"spu":"HKA007","name":"1片5夹V型卡子发","color":"1B","size":"22"},"HYI004SC24-70":{"spu":"HYI004","name":"50pcs铁丝发(35g)","color":"70","size":"24"},"TAGL22H54AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"24H613C","size":"22"},"THT22-12P613":{"spu":"THT","name":"20pcs刷胶发","color":"12P613","size":"22"},"TAGL22613AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"613","size":"22"},"TMM007ST06-P25":{"spu":"TMM007","name":"6\"一体白色鸭舌帽直发","color":"16P613","size":"6"},"TWC011ST08-613":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"613","size":"08"},"T1725":{"spu":"T-MZ","name":"16\"一体鸭舌帽大波浪","color":"12","size":"16"},"TMM007ST06-001":{"spu":"TMM007","name":"6\"一体白色鸭舌帽直发","color":"1","size":"6"},"TBCL34024AZ5AW150A02":{"spu":"T-PJBZ","name":"34\"皮筋辫子","color":"24","size":"34"},"TKD004CH22-H53":{"spu":"TKD004","name":"4片11夹卡子发缠管曲","color":"18H613C","size":"22"},"HYI001SC18-4P27":{"spu":"HYI001","name":"50pcs铁丝发","color":"4P27","size":"18"},"TKAL08010AF5BW200A01":{"spu":"T-MZ","name":"8\"一体鸭舌帽子发波波头卷发","color":"10","size":"08"},"TAGL22002AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"2","size":"22"},"HYI004SC24-4R":{"spu":"HYI004","name":"50pcs铁丝发(35g)","color":"4R","size":"24"},"TAGL22006AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"6","size":"22"},"TKAL1606AAF5BW280A01":{"spu":"T-MZ","name":"16\"一体鸭舌帽子发卷发","color":"6A","size":"16"},"TH-BC1802":{"spu":"TH-BC","name":"100pcs鱼线发","color":"02","size":"18"},"T2501":{"spu":"T-ZJ","name":"18\"抓夹马尾大波浪","color":"1","size":"18"},"TKAL0804AAF5BW200A01":{"spu":"T-MZ","name":"8\"一体鸭舌帽子发波波头卷发","color":"4A","size":"08"},"TACL18A67AB4AW170A01":{"spu":"T-AC-AB","name":"18\"V型卡子发1片5卡直发","color":"850A","size":"18"},"HYI001SC18-1B":{"spu":"HYI001","name":"50pcs铁丝发","color":"1B","size":"18"},"TWC011ST08-024":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"24","size":"08"},"T2504":{"spu":"T-ZJ","name":"18\"抓夹马尾大波浪","color":"M4","size":"18"},"TMM007BT08-P10":{"spu":"TMM007","name":"8\"一体红色鸭舌帽波波头卷发","color":"10P22T","size":"8"},"TAGL22H55AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"30H613","size":"22"},"T1726":{"spu":"T-MZ","name":"16\"一体鸭舌帽大波浪","color":"613","size":"16"},"TFAL1004AAF2AW050A03":{"spu":"T-LJFK","name":"7.5x5cm 机扎中分小发块","color":"4A","size":"1\""},"TKAL08P10AF5BW200A01":{"spu":"T-MZ","name":"8\"一体鸭舌帽子发波波头卷发","color":"10P22T","size":"08"},"TH-BQ2406":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"06","size":"24"},"THAC12002ADB2ABA0001":{"spu":"THAC-AD-A","name":"1片5夹V型卡子发","color":"02","size":"12"},"TBCL34004AZ5AW150A02":{"spu":"T-PJBZ","name":"34\"皮筋辫子","color":"4","size":"34"},"TFAH18-06AF":{"spu":"TF-AH-F","name":"6x6\"机扎刘海大发块曲发(八字刘海)","color":"6A","size":"18"},"TMM007ST06-P10":{"spu":"TMM007","name":"6\"一体白色鸭舌帽直发","color":"10P22T","size":"6"},"TWC011ST08-H37":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"18H613","size":"08"},"TAGL22H09AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"2H27","size":"22"},"TKAL16001AF5BW280A01":{"spu":"T-MZ","name":"16\"一体鸭舌帽子发卷发","color":"1","size":"16"},"THCC16H04AAB2ADB0001":{"spu":"THCC-AA-A","name":"1片4夹可调节绳子发(盒装)","color":"2T2P6","size":"16"},"TBCL24D99AB7BW130A02":{"spu":"TBC","name":"黑人造型辫子(卷筒型发把)","color":"27/30/613","size":"24"},"T1727":{"spu":"T-MZ","name":"16\"一体鸭舌帽大波浪","color":"99J","size":"16"},"T1636":{"spu":"T-CFB","name":"插梳发包(90g)","color":"24T613","size":"/"},"HYI004SC22-4RP27R":{"spu":"HYI004","name":"50pcs铁丝发(35g)","color":"4RP27R","size":"22"},"TACL18A79AC4BW170A01":{"spu":"T-AC-AC","name":"18\"V型卡子发1片5卡曲发","color":"8LP24L","size":"18"},"TFAL10D46AF2AW050A03":{"spu":"T-LJFK","name":"7.5x5cm 机扎中分小发块","color":"24/613","size":"1\""},"TFAH18-01BF":{"spu":"TF-AH-F","name":"6x6\"机扎刘海大发块曲发(八字刘海)","color":"1B","size":"18"},"TKAL08P25AF5BW200A01":{"spu":"T-MZ","name":"8\"一体鸭舌帽子发波波头卷发","color":"16P613","size":"08"},"TH-BQ24-4P27":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"4P27","size":"24"},"TFAL1804AAH4AW200A01":{"spu":"TFA-AH-A","name":"6x6\"机扎刘海大发块18\"","color":"4A","size":"18"},"TH-BC2460":{"spu":"TH-BC","name":"100pcs鱼线发","color":"60","size":"24"},"TH-BC2401":{"spu":"TH-BC","name":"100pcs鱼线发","color":"01","size":"24"},"TFJ002TB00-B29":{"spu":"TFJ002","name":"化纤男士发块(弹簧卷)","color":"1BTGREY","size":"00"},"TAGL22H50AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"8BH60","size":"22"},"T2597":{"spu":"T-MZ","name":"6\"一体鸭舌黑帽子发波波头","color":"10P22T","size":"06"},"THT1670":{"spu":"THT","name":"20pcs刷胶发","color":"70","size":"16"},"TWC011ST08-Z52":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"88A/89A/109","size":"8"},"THC2060":{"spu":"THC","name":"8片18夹卡子发(减重)","color":"60","size":"20"},"THAC18P02ADB2ACA0001":{"spu":"THAC-AD-A","name":"1片5夹V型卡子发","color":"4P27","size":"18"},"TBB017BJ28-350":{"spu":"TBB017","name":"28\"海洋波浪卷黑人发","color":"350","size":"28"},"HYI004SC24-613R":{"spu":"HYI004","name":"50pcs铁丝发(35g)","color":"613R","size":"24"},"TH-CI20-12P613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"12P613","size":"20"},"TMZ007ST11-001":{"spu":"TMZ007","name":"黑白针织帽子发(直发)","color":"01","size":"11"},"TKAL16088AF5BW280A01":{"spu":"T-MZ","name":"16\"一体鸭舌帽子发卷发","color":"88","size":"16"},"TWC011ST08-010":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"10","size":"08"},"TKD004CH22-022":{"spu":"TKD004","name":"4片11夹卡子发缠管曲","color":"22","size":"22"},"TAGL22022AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"22","size":"22"},"TWD009BT22-P45":{"spu":"TWD009","name":"分层曲发抽绳马尾","color":"22P613","size":"22"},"HKF001SG12-04":{"spu":"HKF001","name":"6片6夹蕾丝卡子发","color":"04","size":"12"},"T1044":{"spu":"T-DBZ","name":"24\"黑人大辫子100g","color":"深紫","size":"24"},"THT2406":{"spu":"THT","name":"20pcs刷胶发","color":"06","size":"24"},"TAGL22H52AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"6BH24","size":"22"},"TH-CI24-18P613":{"spu":"TH-CI","name":"50pcs铁丝发","color":"18P613","size":"24"},"TWC011ST08-E00":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"88A/89A","size":"8"},"HKA007SN18-1B":{"spu":"HKA007","name":"1片5夹V型卡子发","color":"1B","size":"18"},"TEBG04-H33":{"spu":"T-CXFQ","name":"抓夹长须发圈(75g)(改良版)","color":"12H24","size":"04"},"TMM007ST06-06A":{"spu":"TMM007","name":"6\"一体白色鸭舌帽直发","color":"6A","size":"6"},"TMM008BT08-Z28":{"spu":"TMM008","name":"8\"一体白色鸭舌帽卷发","color":"116/350","size":"8"},"HFL011SC14-4P27":{"spu":"HFL011","name":"7x13cm 机扎+机制刘海发块","color":"4P27","size":"14"},"TH-BC2002":{"spu":"TH-BC","name":"100pcs鱼线发","color":"02","size":"20"},"T1047":{"spu":"T-FQ","name":"加厚发圈(35g)","color":"1","size":"05"},"TH-BQ2427":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"27","size":"24"},"THD22613":{"spu":"THD","name":"1片5夹加厚卡子发","color":"613","size":"22"},"TH-CI24-4P27":{"spu":"TH-CI","name":"50pcs铁丝发","color":"4P27","size":"24"},"THT2001V":{"spu":"THT-V","name":"20pcs刷胶发","color":"01","size":"20"},"TWC011ST08-01B":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"1B","size":"08"},"T1058":{"spu":"T-MMC","name":"毛毛虫(85g)","color":"M4","size":"32"},"TMM006BT08-Z29":{"spu":"TMM006","name":"8\"一体鸭舌帽波波头卷发","color":"4/60/88A","size":"8"},"TH-BC22-18P613":{"spu":"TH-BC","name":"100pcs鱼线发","color":"18P613","size":"22"},"TMZ002GT18-P49":{"spu":"TMZ002","name":"针织帽子发卷发(水波纹款)","color":"4P27","size":"18"},"TDG002LT05-P12":{"spu":"TDG002","name":"发箍刘海","color":"12P613","size":"05"},"TAGL220M4AA2BW185A03":{"spu":"T-SJT","name":"22\"卡子发4片11夹曲发","color":"M4","size":"22"},"THT2204":{"spu":"THT","name":"20pcs刷胶发","color":"04","size":"22"},"THAC16P08ADB2ACA0001":{"spu":"THAC-AD-A","name":"1片5夹V型卡子发","color":"18P613","size":"16"},"TMZ009GT18-001":{"spu":"TMZ009","name":"白色针织帽子发(水波纹)","color":"01","size":"18"},"T1091":{"spu":"T-CFB","name":"插梳发包(90g)","color":"12H613","size":"/"},"TACL18A78AC4BW170A01":{"spu":"T-AC-AC","name":"18\"V型卡子发1片5卡曲发","color":"02D/88/60","size":"18"},"T2492":{"spu":"T-WJ","name":"24\"卡子发1片5夹曲发","color":"12","size":"24"},"THT1699J":{"spu":"THT","name":"20pcs刷胶发","color":"99J","size":"16"},"TMC001BT16-001":{"spu":"TMC001","name":"16\"可拆卸草帽卷发","color":"01","size":"16"},"HZN001SC16-1B":{"spu":"HZN001","name":"绳子发","color":"1B","size":"16"},"THT24-12P613-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"12P613","size":"24"},"T2592":{"spu":"T-MZ","name":"6\"一体鸭舌黑帽子发波波头","color":"4A","size":"06"},"TMM007ST06-010":{"spu":"TMM007","name":"6\"一体白色鸭舌帽直发","color":"10","size":"6"},"THM2099J":{"spu":"THM","name":"1片5夹卡子发","color":"99J","size":"20"},"TH-BQ2004":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"04","size":"20"},"THAC18001ADB2ACA0001":{"spu":"THAC-AD-A","name":"1片5夹V型卡子发","color":"01","size":"18"},"HYI001SC24-1B":{"spu":"HYI001","name":"50pcs铁丝发","color":"1B","size":"24"},"TMM010CJ25-TN3":{"spu":"TMM010","name":"25\"一体黑色鸭舌帽子发(缠管曲)","color":"4/30Y","size":"25"},"T2590":{"spu":"T-MZ","name":"6\"一体鸭舌黑帽子发波波头","color":"1","size":"06"},"T1025":{"spu":"T-FQ","name":"薄发圈(25g)","color":"18H613","size":"05"},"TWC011ST08-A77":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"503/88A","size":"8"},"TWC011ST08-88A":{"spu":"TWC011","name":"抓夹蓬蓬马尾","color":"88A","size":"8"},"THAC16004ADB2ACA0001":{"spu":"THAC-AD-A","name":"1片5夹V型卡子发","color":"04","size":"16"},"TACL18A75AB4AW170A01":{"spu":"T-AC-AB","name":"18\"V型卡子发1片5卡直发","color":"10P26/27A","size":"18"},"THT22613V":{"spu":"THT-V","name":"20pcs刷胶发","color":"613","size":"22"},"TFAL1808BAH4AW200A01":{"spu":"TFA-AH-A","name":"6x6\"机扎刘海大发块18\"","color":"8B","size":"18"},"TH-BC241B":{"spu":"TH-BC","name":"100pcs鱼线发","color":"1B","size":"24"},"THT2224":{"spu":"THT","name":"20pcs刷胶发","color":"24","size":"22"},"TH-BC2406":{"spu":"TH-BC","name":"100pcs鱼线发","color":"06","size":"24"},"TFAH18-A97F":{"spu":"TF-AH-F","name":"6x6\"机扎刘海大发块曲发(八字刘海)","color":"16H60L","size":"18"},"THD2406":{"spu":"THD","name":"1片5夹加厚卡子发","color":"06","size":"24"},"THT1204-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"04","size":"12"},"THIA12027BGD2AAB0907":{"spu":"THIA-BG-A","name":"8x10cm 手勾中分发块","color":"27","size":"12"},"TH-BQ2006":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"06","size":"20"},"TH-BQ2206":{"spu":"TH-BQ","name":"50pcs鱼线发","color":"06","size":"22"},"TMZ002GT18-004":{"spu":"TMZ002","name":"针织帽子发卷发(水波纹款)","color":"04","size":"18"},"TWC002BJ18-025":{"spu":"TWC002","name":"18\"抓夹马尾大波浪","color":"25","size":"18"},"TBB017BJ28-030":{"spu":"TBB017","name":"28\"海洋波浪卷黑人发","color":"30","size":"28"},"TFAJ14-A81":{"spu":"TF-AJ-S","name":"6x6\"机扎刘海发块(八字刘海)(减薄款)","color":"12/22T","size":"14"},"T2660":{"spu":"T-LH","name":"8\"黑人弹簧卷刘海","color":"5","size":"08"},"TFAL05012AB2CW060A03":{"spu":"T-FK","name":"13x13cm 机扎头旋发块(短玉米烫)","color":"12","size":"05"},"THT2070-TT":{"spu":"THT---TT","name":"10pcs刷胶发","color":"70","size":"20"},"HYI004SC18-01":{"spu":"HYI004","name":"50pcs铁丝发(35g)","color":"01","size":"18"},"THS-20-4P27":{"spu":"THS","name":"100pcs U形指甲发","color":"4P27","size":"20"},"TDG002LT05-001":{"spu":"TDG002","name":"发箍刘海","color":"01","size":"05"}};</script><!-- /GEN:REFUND_SKU_INFO -->
+
+<!-- tab3data.js 移至底部：2.57MB 数据文件，仅 Tab3 懒加载时使用，不阻塞首屏渲染 -->
+<script src="tab3data.js"></script>
+</body>
+</html>
