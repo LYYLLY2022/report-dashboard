@@ -9,21 +9,21 @@
   /* ── Reset & Base ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg-primary: #0F0A1A;
-    --bg-card: #1A1225;
-    --bg-card2: #251A35;
-    --border: #3D2A4D;
-    --border-glow: rgba(192, 132, 252, 0.3);
-    --accent1: #3B82F6;
-    --accent2: #60A5FA;
-    --accent3: #93C5FD;
-    --text-primary: #E0F2FE;
-    --text-secondary: #94A3B8;
+    --bg-primary: #F5F7FA;
+    --bg-card: #FFFFFF;
+    --bg-card2: #EEF2F7;
+    --border: #DDE1E7;
+    --border-glow: rgba(59, 130, 246, 0.25);
+    --accent1: #2563EB;
+    --accent2: #3B82F6;
+    --accent3: #60A5FA;
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
     --text-white: #FFFFFF;
-    --success: #34D399;
-    --danger: #F472B6;
-    --warning: #FBBF24;
-    --info: #C084FC;
+    --success: #059669;
+    --danger: #DC2626;
+    --warning: #D97706;
+    --info: #7C3AED;
     --font: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
   }
   html, body {
@@ -36,11 +36,11 @@
   }
   /* ── Header ── */
   .header {
-    background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 50%, #EFF6FF 100%);
     border-bottom: 1px solid var(--border);
     padding: 20px 32px 16px;
     position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   }
   .header-top {
     display: flex; align-items: center; gap: 16px;
@@ -57,8 +57,8 @@
   }
   .header h1 {
     font-size: 20px; font-weight: 600;
-    color: #60A5FA;
-    text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+    color: #2563EB;
+    text-shadow: none;
   }
   .header .subtitle {
     color: #94A3B8; font-size: 12px; margin-left: 52px;
@@ -68,7 +68,7 @@
     display: flex; gap: 12px; flex-wrap: wrap;
     padding: 16px 32px;
     border-bottom: 1px solid var(--border);
-    background: #0F0A1A;
+    background: var(--bg-primary);
   }
   .kpi-card {
     flex: 1; min-width: 120px;
@@ -82,7 +82,7 @@
   }
   .kpi-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(59,130,246,0.15);
+    box-shadow: 0 4px 20px rgba(37,99,235,0.15);
     border-color: var(--border-glow);
   }
   .kpi-card::before {
@@ -94,8 +94,8 @@
   .kpi-label { color: var(--text-secondary); font-size: 11px; margin-bottom: 4px; }
   .kpi-value {
     font-size: 22px; font-weight: 700;
-    color: #60A5FA;
-    text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+    color: #2563EB;
+    text-shadow: none;
   }
   .kpi-unit { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
   /* ── Tab Nav ── */
@@ -103,9 +103,9 @@
     display: flex; gap: 4px;
     padding: 12px 32px 0;
     border-bottom: 1px solid var(--border);
-    background: #0F0A1A;
+    background: var(--bg-primary);
     position: sticky; top: 75px; z-index: 90;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
   .tab-btn {
     padding: 8px 20px;
@@ -120,11 +120,11 @@
     transition: all .2s;
     white-space: nowrap;
   }
-  .tab-btn:hover { color: var(--text-primary); background: rgba(0,212,255,0.1); }
+  .tab-btn:hover { color: var(--text-primary); background: rgba(37,99,235,0.08); }
   .tab-btn.active {
     color: var(--accent1);
     border-bottom-color: var(--accent1);
-    background: rgba(0,212,255,0.15);
+    background: rgba(37,99,235,0.12);
   }
   /* ── Content ── */
   .tab-content { display: none; padding: 20px 32px 40px; animation: fadeIn .3s ease; }
@@ -140,7 +140,7 @@
     padding: 20px;
     transition: box-shadow .2s;
   }
-  .chart-card:hover { box-shadow: 0 2px 24px rgba(192,132,252,0.15); border-color: rgba(192,132,252,0.3); }
+  .chart-card:hover { box-shadow: 0 2px 24px rgba(37,99,235,0.12); border-color: rgba(37,99,235,0.25); }
   .chart-card.full { grid-column: 1 / -1; }
   .card-title {
     font-size: 14px; font-weight: 600;
@@ -269,8 +269,8 @@
   #table-platform-op-daily th:nth-child(2) { z-index: 4; left: 70px; }
   #table-platform-op-daily td:first-child { left: 0; z-index: 1; }
   #table-platform-op-daily td:nth-child(2) { left: 70px; z-index: 1; }
-  tr:hover td { background: rgba(192,132,252,0.1) !important; }
-  .num-positive { color: #60A5FA; }
+  tr:hover td { background: rgba(37,99,235,0.06) !important; }
+  .num-positive { color: #2563EB; }
   /* ── Ranking Table ── */
   .ranking-table {
     font-size: 13px;
@@ -291,14 +291,14 @@
     background: rgba(192,132,252,0.1) !important;
   }
   .ranking-table tbody tr:nth-child(even) {
-    background: rgba(37, 26, 53, 0.5);
+    background: rgba(238,242,247,0.8);
   }
   .num-zero { color: var(--text-secondary); }
   /* ── Scrollbar ── */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(167,139,250,0.4); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(192,132,252,0.5); }
+  ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.35); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.55); }
   /* ── Responsive ── */
   @media (max-width: 768px) {
     html { font-size: 14px; }
@@ -648,26 +648,26 @@ const BASE_COLOR = ['#3B82F6','#1D4ED8','#10B981','#EF4444','#F59E0B','#60A5FA',
 function baseTheme() {
   return {
     backgroundColor: 'transparent',
-    textStyle: { color: '#E6EDF3', fontFamily: 'PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif' },
+    textStyle: { color: '#1E293B', fontFamily: 'PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif' },
     grid: { left: '3%', right: '4%', bottom: '10%', top: '8%', containLabel: true },
     tooltip: {
-      backgroundColor: 'rgba(26, 18, 37, 0.95)',
+      backgroundColor: 'rgba(255,255,255,0.97)',
       borderColor: 'rgba(192, 132, 252, 0.4)',
       borderWidth: 1,
-      textStyle: { color: '#F3E8FF', fontSize: 13 },
+      textStyle: { color: '#1E293B', fontSize: 13 },
       padding: [12, 16],
       extraCssText: 'backdrop-filter:blur(10px); border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.4);'
     },
-    legend: { textStyle: { color: '#A78BFA' }, pageIconColor: '#C084FC', pageTextStyle: { color: '#A78BFA' } },
+    legend: { textStyle: { color: '#64748B' }, pageIconColor: '#3B82F6', pageTextStyle: { color: '#64748B' } },
     xAxis: {
       axisLine: { lineStyle: { color: '#3D2A4D' } },
-      axisLabel: { color: '#A78BFA' },
-      splitLine: { lineStyle: { color: '#251A35' } }
+      axisLabel: { color: '#64748B' },
+      splitLine: { lineStyle: { color: '#E2E8F0' } }
     },
     yAxis: {
       axisLine: { lineStyle: { color: '#3D2A4D' } },
-      axisLabel: { color: '#A78BFA' },
-      splitLine: { lineStyle: { color: '#251A35' } }
+      axisLabel: { color: '#64748B' },
+      splitLine: { lineStyle: { color: '#E2E8F0' } }
     },
     color: BASE_COLOR
   };
@@ -816,7 +816,7 @@ function initChartOpRank() {
     },
     grid: { ...theme.grid, left: '15%' },
     xAxis: { ...theme.xAxis, type: 'value', name: 'USD' },
-    yAxis: { ...theme.yAxis, type: 'category', data: names, axisLabel: { color: '#F3E8FF', fontSize: 12 } },
+    yAxis: { ...theme.yAxis, type: 'category', data: names, axisLabel: { color: '#1E293B', fontSize: 12 } },
     series: [{
       name: '累计业绩',
       type: 'bar',
@@ -861,7 +861,7 @@ function initChartOpDailyAvg() {
     },
     grid: { ...theme.grid, left: '15%' },
     xAxis: { ...theme.xAxis, type: 'value', name: 'USD/天' },
-    yAxis: { ...theme.yAxis, type: 'category', data: names, axisLabel: { color: '#F3E8FF', fontSize: 12 } },
+    yAxis: { ...theme.yAxis, type: 'category', data: names, axisLabel: { color: '#1E293B', fontSize: 12 } },
     series: [{
       name: '日均业绩',
       type: 'bar',
@@ -872,7 +872,7 @@ function initChartOpDailyAvg() {
           return { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: `rgba(245,158,11,${0.3+ratio*0.5})` }, { offset: 1, color: '#F59E0B' }] };
         }
       },
-      label: { show: true, position: 'right', color: '#F3E8FF', fontSize: 11, formatter: p => p.value.toFixed(1) + ' USD/天' },
+      label: { show: true, position: 'right', color: '#1E293B', fontSize: 11, formatter: p => p.value.toFixed(1) + ' USD/天' },
       barMaxWidth: 24
     }]
   });
@@ -910,11 +910,14 @@ function initChartPlatformPie() {
     tooltip: { ...theme.tooltip, trigger: 'item', formatter: function(p) { return p.name + ': $' + p.value.toLocaleString('en-US', {minimumFractionDigits:2}) + ' USD (' + p.percent + '%)'; } },
     legend: { ...theme.legend, orient: 'vertical', right: 0, top: 'center' },
     series: [{
-      type: 'pie', radius: ['40%', '70%'],
-      center: ['40%', '50%'],
+      type: 'pie', radius: ['38%', '68%'],
+      center: ['38%', '50%'],
+      avoidLabelOverlap: true,
       data: pieData,
-      label: { color: '#F3E8FF', fontSize: 11 },
-      emphasis: { itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,212,255,0.4)' } }
+      itemStyle: { borderRadius: 4, borderColor: '#FFFFFF', borderWidth: 2 },
+      label: { color: '#1E293B', fontSize: 11, fontWeight: '500' },
+      labelLine: { lineStyle: { color: '#94A3B8' } },
+      emphasis: { itemStyle: { shadowBlur: 15, shadowColor: 'rgba(37,99,235,0.3)' } }
     }]
   });
 }
@@ -1109,7 +1112,7 @@ function initChartSiteRank() {
     series: [{
       name: '累计业绩', type: 'bar', data: vals,
       itemStyle: { color: (p) => BASE_COLOR[p.dataIndex % BASE_COLOR.length] },
-      label: { show: true, position: 'top', color: '#8B949E', fontSize: 11, formatter: p => p.value.toFixed(0) },
+      label: { show: true, position: 'top', color: '#475569', fontSize: 11, formatter: p => p.value.toFixed(0) },
       barMaxWidth: 40
     }]
   });
@@ -1251,7 +1254,7 @@ function initGroupOpCharts(groupKey, rankChartId, avgChartId, statDaysLabelId) {
       },
       grid: { ...theme.grid, left: '15%' },
       xAxis: { ...theme.xAxis, type: 'value', name: 'USD' },
-      yAxis: { ...theme.yAxis, type: 'category', data: names, axisLabel: { color: '#E6EDF3', fontSize: 12 } },
+      yAxis: { ...theme.yAxis, type: 'category', data: names, axisLabel: { color: '#1E293B', fontSize: 12 } },
       series: [{
         name: '累计业绩',
         type: 'bar',
@@ -1263,7 +1266,7 @@ function initGroupOpCharts(groupKey, rankChartId, avgChartId, statDaysLabelId) {
           }
         },
         label: {
-          show: true, position: 'right', fontSize: 11, color: '#F3E8FF',
+          show: true, position: 'right', fontSize: 11, color: '#1E293B',
           formatter: params => {
             const name = names[params.dataIndex];
             const avg = avgMap[name] || 0;
@@ -1368,11 +1371,12 @@ function initGroup1PlatformPie() {
     tooltip: { ...theme.tooltip, trigger: 'item', formatter: function(p) { return p.name + ': $' + p.value.toLocaleString('en-US', {minimumFractionDigits:2}) + ' USD (' + p.percent + '%)'; } },
     legend: { ...theme.legend, type: 'scroll', orient: 'vertical', right: '5%', top: 'center' },
     series: [{
-      type: 'pie', radius: ['40%', '70%'], center: ['35%', '55%'],
+      type: 'pie', radius: ['38%', '68%'], center: ['35%', '52%'],
       avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 6, borderColor: '#0d1117', borderWidth: 2 },
-      label: { show: true, color: '#F3E8FF', formatter: '{b}\n{d}%' },
-      emphasis: { label: { fontSize: 14, fontWeight: 'bold' }, itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
+      itemStyle: { borderRadius: 6, borderColor: '#FFFFFF', borderWidth: 2 },
+      label: { show: true, color: '#1E293B', fontSize: 11, fontWeight: '500', formatter: '{b}\n{d}%' },
+      labelLine: { lineStyle: { color: '#94A3B8' } },
+      emphasis: { label: { fontSize: 13, fontWeight: 'bold' }, itemStyle: { shadowBlur: 10, shadowColor: 'rgba(37,99,235,0.3)' } },
       data: d.names.map((n, i) => ({ name: n, value: d.values[i] }))
     }]
   });
@@ -1505,11 +1509,12 @@ function initGroupPlatformPie(groupId, pieKey, chartId, titleId, groupLabel) {
     tooltip: { ...theme.tooltip, trigger: 'item', formatter: function(p) { return p.name + ': $' + p.value.toLocaleString('en-US', {minimumFractionDigits:2}) + ' USD (' + p.percent + '%)'; } },
     legend: { ...theme.legend, type: 'scroll', orient: 'vertical', right: '5%', top: 'center' },
     series: [{
-      type: 'pie', radius: ['40%', '70%'], center: ['35%', '55%'],
+      type: 'pie', radius: ['38%', '68%'], center: ['35%', '52%'],
       avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 6, borderColor: '#0d1117', borderWidth: 2 },
-      label: { show: true, color: '#F3E8FF', formatter: '{b}\n{d}%' },
-      emphasis: { label: { fontSize: 14, fontWeight: 'bold' }, itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
+      itemStyle: { borderRadius: 6, borderColor: '#FFFFFF', borderWidth: 2 },
+      label: { show: true, color: '#1E293B', fontSize: 11, fontWeight: '500', formatter: '{b}\n{d}%' },
+      labelLine: { lineStyle: { color: '#94A3B8' } },
+      emphasis: { label: { fontSize: 13, fontWeight: 'bold' }, itemStyle: { shadowBlur: 10, shadowColor: 'rgba(37,99,235,0.3)' } },
       data: d.names.map((n, i) => ({ name: n, value: d.values[i] }))
     }]
   });
