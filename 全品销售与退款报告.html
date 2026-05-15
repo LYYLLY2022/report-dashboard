@@ -289,15 +289,16 @@
 <div id="pwd-overlay">
   <div class="pwdbox">
     <div class="pwdlock">&#x1F510;</div>
-    <div class="pwdtitle"><h2>全品销售与退款报告</h2><p>姝ら〉闈㈠凡鍔犲瘑锛岃杈撳叆璁块棶瀵嗙爜</p></div>
-    <input type="password" id="pwd-input" placeholder="璇疯緭鍏ュ瘑鐮? autofocus onkeydown="if(event.key==='Enter')pwdCheck()">
+    <div class="pwdtitle"><h2>&#20840;&#21697;&#38144;&#21806;&#20014;&#36864;&#27438;&#25253;&#21578;</h2><p>&#27492;&#39029;&#38754;&#24050;&#21152;&#23494;&#65292;&#35831;&#36755;&#20837;&#35775;&#38382;&#23494;&#30721;</p></div>
+    <input type="password" id="pwd-input" placeholder="&#35831;&#36755;&#20837;&#23494;&#30721;" autofocus onkeydown="if(event.key==='Enter')pwdCheck()">
     <div class="pwderr" id="pwd-err"></div>
-    <button class="pwdbtn" onclick="pwdCheck()">纭</button>
+    <button class="pwdbtn" onclick="pwdCheck()">&#30830;&#35748;</button>
   </div>
 </div>
 <script>
-(function(){var K='__hst_auth';function h(s){var a=0;for(var i=0;i<s.length;i++){a=((a<<5)-a)+s.charCodeAt(i);a|=0;}return a;}var PH=h('sy18929531199');if(Number(sessionStorage.getItem(K))===PH){document.getElementById('pwd-overlay').remove();}window.pwdCheck=function(){var v=document.getElementById('pwd-input').value;if(h(v)===PH){sessionStorage.setItem(K,PH);document.getElementById('pwd-overlay').remove();}else{document.getElementById('pwd-err').textContent='瀵嗙爜閿欒锛岃閲嶈瘯';document.getElementById('pwd-input').select();}};})();
+(function(){var K='__hst_auth';function h(s){var a=0;for(var i=0;i<s.length;i++){a=((a<<5)-a)+s.charCodeAt(i);a|=0;}return a;}var PH=h('sy18929531199');if(Number(sessionStorage.getItem(K))===PH){document.getElementById('pwd-overlay').remove();}window.pwdCheck=function(){var v=document.getElementById('pwd-input').value;if(h(v)===PH){sessionStorage.setItem(K,PH);document.getElementById('pwd-overlay').remove();}else{document.getElementById('pwd-err').textContent='\u5bc6\u7801\u9519\u8bef\uff0c\u8bf7\u91cd\u8bd5';document.getElementById('pwd-input').select();}};})();
 </script>
+
 
 <div class="header">
   <div class="header-left">
