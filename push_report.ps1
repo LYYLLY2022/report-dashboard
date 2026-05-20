@@ -40,6 +40,26 @@ Write-Host ""
 Write-Host "[3/3] Committing and pushing to GitHub..."
 Set-Location $REPO
 
+# 先拉取远程最新（reset 模式，避免 rebase 冲突）
+# sales-channel.html 是生成文件，始终以本地最新版本为准
+Write-Host "  Fetching remote..."
+git fetch origin master
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[FAIL] git fetch failed. Check network." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    exit 1
+}
+git reset --hard origin/master
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[FAIL] git reset failed." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    exit 1
+}
+
+# 重新复制并注入密码（reset 后文件被远程版本覆盖，需重新写入）
+Copy-Item -Path $SRC_HTML -Destination $DST_HTML -Force
+& powershell -NoProfile -ExecutionPolicy Bypass -File "$REPO\inject_pwd.ps1" -file $DST_HTML -titleCode "sales-channel"
+
 git add sales-channel.html
 
 # 检查是否有实质变更
@@ -56,16 +76,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "[OK] Committed." -ForegroundColor Green
 }
 
-# 同步远程（rebase 模式）
-git pull --rebase origin master
-if ($LASTEXITCODE -ne 0) {
-    git rebase --abort 2>$null
-    Write-Host "[FAIL] pull --rebase failed. Resolve conflicts in $REPO manually." -ForegroundColor Red
-    Read-Host "Press Enter to exit"
-    exit 1
-}
-
-# 推送
+# 推送（不需要 rebase，已经基于最新远程）
 git push origin master
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[FAIL] Push failed. Check network or GitHub auth (Git Credential Manager)." -ForegroundColor Red
