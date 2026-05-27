@@ -1883,8 +1883,7 @@ function initShopDimTable() {
     });
     var csv = csvRows.map(function(row) {
       return row.map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
-    }).join('
-');
+    }).join('\r\n');
     var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
