@@ -640,6 +640,7 @@
       日均 = 当月累计销售额 ÷ 当月已登记天数 &nbsp;|&nbsp; 环比 = 与上月日均相比
     </div>
     <div id="shops-filter-bar"></div>
+    <div id="shops-summary"></div>
     <div class="table-wrap" id="table-all-shops"></div>
   </div>
 </div>
@@ -1831,6 +1832,43 @@ function initShopDimTable() {
       if (fs.e === 'hide' && r.exiting) return false;
       return true;
     });
+
+    // ── 汇总卡片 ──
+    var summaryEl = document.getElementById('shops-summary');
+    if (summaryEl) {
+      var sumCur = 0, exitCount = 0;
+      var sumHist = histMonths.map(function() { return 0; });
+      filtered.forEach(function(r) {
+        sumCur += r.cur_avg || 0;
+        if (r.exiting) exitCount++;
+        (r.hist_avgs || []).forEach(function(v, i) { sumHist[i] += v || 0; });
+      });
+      function kpiCard(label, value, isMain) {
+        return '<div style="background:' + (isMain ? 'rgba(59,130,246,0.12)' : 'rgba(255,255,255,0.05)')
+          + ';border:1px solid ' + (isMain ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.1)')
+          + ';border-radius:10px;padding:10px 18px;min-width:150px;flex:1;">'
+          + '<div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">' + label + '</div>'
+          + '<div style="font-size:18px;font-weight:700;color:' + (isMain ? '#60A5FA' : '#E2E8F0') + ';">'
+          + '$' + value.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+          + '</div>'
+          + '<div style="font-size:11px;color:#6B7280;margin-top:2px;">USD / 天（合计）</div>'
+          + '</div>';
+      }
+      var histCards = histMonths.map(function(h, i) {
+        return kpiCard(h.label + '日均销售额', sumHist[i], false);
+      }).join('');
+      var shopCountNote = exitCount > 0
+        ? '，其中 <span style="color:#F87171;">' + exitCount + ' 家退出中</span>'
+        : '';
+      summaryEl.innerHTML = '<div style="margin:8px 0 12px;">'
+        + '<div style="font-size:12px;color:#6B7280;margin-bottom:8px;">已筛选 <b style="color:#E2E8F0;">' + filtered.length + '</b> 家店铺' + shopCountNote + '</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:10px;">'
+        + kpiCard(curLabel + '日均销售额', sumCur, true)
+        + histCards
+        + '</div>'
+        + '</div>';
+    }
+
     var histThs = histMonths.map(function(h) {
       return '<th style="text-align:right;">' + h.label + '日均<br/><span style="font-weight:normal;font-size:12px;">(USD/天)</span></th>';
     }).join('');
