@@ -1777,9 +1777,10 @@ function initShopDimTable() {
   var curLabel   = RAW.company_monthly_avg.cur_month_label;
   var platforms  = [...new Set(allRows.map(function(r) { return r.platform; }).filter(Boolean))].sort();
   var groups     = [...new Set(allRows.map(function(r) { return r.group; }).filter(Boolean))];
+  var companies  = [...new Set(allRows.map(function(r) { return r.company; }).filter(function(c) { return c && c !== 'nan' && c !== ''; }))].sort();
 
   // 筛选状态（挂到 window 以便 onclick 访问）
-  window._shopFS = { p: null, g: null, e: 'all' };
+  window._shopFS = { p: null, g: null, e: 'all', c: null };
   window._shopApply = function() { _shopRenderFilter(); _shopRenderTable(); };
 
   function filterBtn(label, active, clickCode, danger) {
@@ -1817,10 +1818,15 @@ function initShopDimTable() {
         + '<span style="font-size:12px;color:#6B7280;min-width:36px;flex-shrink:0;">' + label + '</span>'
         + btns + '</div>';
     };
+    var compBtns = filterBtn('全部', !fs.c, "window._shopFS.c=null", false);
+    companies.forEach(function(cv) {
+      compBtns += filterBtn(cv, fs.c === cv, "window._shopFS.c='" + cv.replace(/'/g,"\'") + "'", false);
+    });
     filterEl.innerHTML = '<div style="padding:8px 0 10px;">'
       + row('渠道', platBtns)
       + row('组别', grpBtns)
       + row('状态', exitBtns)
+      + row('主体', compBtns)
       + '</div>';
   }
 
@@ -1832,6 +1838,7 @@ function initShopDimTable() {
       if (fs.e === 'exit'     && !r.exiting) return false;
       if (fs.e === 'transfer' && !r.transferring) return false;
       if (fs.e === 'normal'   && (r.exiting || r.transferring)) return false;
+      if (fs.c && r.company !== fs.c) return false;
       return true;
     });
 
