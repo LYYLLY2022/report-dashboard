@@ -1779,9 +1779,15 @@ function initShopDimTable() {
   var groups     = [...new Set(allRows.map(function(r) { return r.group; }).filter(Boolean))];
   var companies  = [...new Set(allRows.map(function(r) { return r.company; }).filter(function(c) { return c && c !== 'nan' && c !== ''; }))].sort();
 
-  // 筛选状态（挂到 window 以便 onclick 访问）
-  window._shopFS = { p: null, g: null, e: 'all', c: null };
-  window._shopApply = function() { _shopRenderFilter(); _shopRenderTable(); };
+  // 筛选状态：多选，空数组 = 全部（挂到 window 以便 onclick 访问）
+  window._shopFS     = { p: [], g: [], e: [], c: [] };
+  window._shopApply  = function() { _shopRenderFilter(); _shopRenderTable(); };
+  window._shopToggle = function(key, val) {
+    var arr = window._shopFS[key];
+    var idx = arr.indexOf(val);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(val);
+  };
+  window._shopClear  = function(key) { window._shopFS[key] = []; };
 
   function filterBtn(label, active, clickCode, danger) {
     var c = danger ? '#EF4444' : '#7C3AED';
@@ -1796,51 +1802,100 @@ function initShopDimTable() {
   function _shopRenderFilter() {
     if (!filterEl) return;
     var fs = window._shopFS;
-    var platBtns = filterBtn('全部', !fs.p, "window._shopFS.p=null", false);
+
+    var platBtns = filterBtn('全部', fs.p.length === 0, "window._shopClear('p')", false);
     platforms.forEach(function(pv) {
-      platBtns += filterBtn(pv, fs.p === pv, "window._shopFS.p='" + pv.replace(/'/g,"\'") + "'", false);
+      platBtns += filterBtn(pv, fs.p.indexOf(pv) >= 0, "window._shopToggle('p','" + pv.replace(/'/g,"\'") + "')", false);
     });
-    var grpBtns = filterBtn('全部', !fs.g, "window._shopFS.g=null", false);
+
+    var grpBtns = filterBtn('全部', fs.g.length === 0, "window._shopClear('g')", false);
     groups.forEach(function(gv) {
-      grpBtns += filterBtn(gv, fs.g === gv, "window._shopFS.g='" + gv.replace(/'/g,"\'") + "'", false);
+      grpBtns += filterBtn(gv, fs.g.indexOf(gv) >= 0, "window._shopToggle('g','" + gv.replace(/'/g,"\'") + "')", false);
     });
+
     var exitItems = [
-      { v:'all',      label:'全部店铺',   danger:false },
-      { v:'exit',     label:'仅退出中',   danger:true  },
-      { v:'transfer', label:'仅转移中',   danger:true  },
-      { v:'normal',   label:'正常店铺',   danger:false }
+      { v:'exit',     label:'退出中',   danger:true  },
+      { v:'transfer', label:'转移中',   danger:true  },
+      { v:'normal',   label:'正常',     danger:false }
     ];
-    var exitBtns = exitItems.map(function(item) {
-      return filterBtn(item.label, fs.e === item.v, "window._shopFS.e='" + item.v + "'", item.danger);
+    var exitBtns = filterBtn('全部', fs.e.length === 0, "window._shopClear('e')", false);
+    exitBtns += exitItems.map(function(item) {
+      return filterBtn(item.label, fs.e.indexOf(item.v) >= 0, "window._shopToggle('e','" + item.v + "')", item.danger);
     }).join('');
+
+    var compBtns = filterBtn('全部', fs.c.length === 0, "window._shopClear('c')", false);
+    companies.forEach(function(cv) {
+      compBtns += filterBtn(cv, fs.c.indexOf(cv) >= 0, "window._shopToggle('c','" + cv.replace(/'/g,"\'") + "')", false);
+    });
+
     var row = function(label, btns) {
       return '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin-bottom:5px;">'
         + '<span style="font-size:12px;color:#6B7280;min-width:36px;flex-shrink:0;">' + label + '</span>'
         + btns + '</div>';
     };
-    var compBtns = filterBtn('全部', !fs.c, "window._shopFS.c=null", false);
-    companies.forEach(function(cv) {
-      compBtns += filterBtn(cv, fs.c === cv, "window._shopFS.c='" + cv.replace(/'/g,"\'") + "'", false);
-    });
+
     filterEl.innerHTML = '<div style="padding:8px 0 10px;">'
       + row('渠道', platBtns)
       + row('组别', grpBtns)
       + row('状态', exitBtns)
       + row('主体', compBtns)
+      + '<div style="padding:6px 0 2px;">'
+      + '<button onclick="window._shopDownload()" style="padding:5px 16px;border-radius:6px;cursor:pointer;font-size:12px;'
+      + 'border:1px solid rgba(96,165,250,0.4);background:rgba(59,130,246,0.12);color:#60A5FA;">&#11015; 下载筛选数据 (CSV)</button>'
+      + '</div>'
       + '</div>';
   }
 
-  function _shopRenderTable() {
+  // 统一筛选逻辑（供表格渲染和下载共用）
+  function _shopFilter() {
     var fs = window._shopFS;
-    var filtered = allRows.filter(function(r) {
-      if (fs.p && r.platform !== fs.p) return false;
-      if (fs.g && r.group !== fs.g) return false;
-      if (fs.e === 'exit'     && !r.exiting) return false;
-      if (fs.e === 'transfer' && !r.transferring) return false;
-      if (fs.e === 'normal'   && (r.exiting || r.transferring)) return false;
-      if (fs.c && r.company !== fs.c) return false;
+    return allRows.filter(function(r) {
+      if (fs.p.length && fs.p.indexOf(r.platform) < 0) return false;
+      if (fs.g.length && fs.g.indexOf(r.group)    < 0) return false;
+      if (fs.e.length) {
+        var ok = false;
+        if (fs.e.indexOf('exit')     >= 0 && r.exiting)                     ok = true;
+        if (fs.e.indexOf('transfer') >= 0 && r.transferring)                ok = true;
+        if (fs.e.indexOf('normal')   >= 0 && !r.exiting && !r.transferring) ok = true;
+        if (!ok) return false;
+      }
+      if (fs.c.length && fs.c.indexOf(r.company) < 0) return false;
       return true;
     });
+  }
+
+  // 下载当前筛选结果为 CSV（UTF-8 BOM，Excel 可直接打开）
+  window._shopDownload = function() {
+    var filtered = _shopFilter();
+    var headers = ['排名','店铺','运营人员','渠道','组别',
+                   curLabel + '月日均(USD/天)'];
+    histMonths.forEach(function(h) { headers.push(h.label + '月日均(USD/天)'); });
+    headers.push('环比','公司主体','是否保留','状态');
+    var csvRows = [headers];
+    filtered.forEach(function(r, idx) {
+      var status = r.exiting ? '退出中' : r.transferring ? '转移中' : '正常';
+      var mom = (r.mom !== null && r.mom !== undefined) ? r.mom + '%' : '';
+      var dataRow = [idx + 1, r.name, r.operator || '', r.platform || '', r.group || '',
+                     r.cur_avg != null ? r.cur_avg : ''];
+      (r.hist_avgs || []).forEach(function(v) { dataRow.push(v != null ? v : ''); });
+      dataRow.push(mom, r.company || '', r.retain || '', status);
+      csvRows.push(dataRow);
+    });
+    var csv = csvRows.map(function(row) {
+      return row.map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+    }).join('
+');
+    var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '店铺维度_' + new Date().toLocaleDateString('zh-CN').replace(/\//g, '-') + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  function _shopRenderTable() {
+    var filtered = _shopFilter();
 
     // ── 汇总卡片 ──
     var summaryEl = document.getElementById('shops-summary');
