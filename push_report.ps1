@@ -43,9 +43,15 @@ Set-Location $REPO
 # 先拉取远程最新（reset 模式，避免 rebase 冲突）
 # sales-channel.html 是生成文件，始终以本地最新版本为准
 Write-Host "  Fetching remote..."
-git fetch origin master
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "[FAIL] git fetch failed. Check network." -ForegroundColor Red
+$fetchOk = $false
+for ($i = 1; $i -le 3; $i++) {
+    git fetch origin master
+    if ($LASTEXITCODE -eq 0) { $fetchOk = $true; break }
+    Write-Host "  [重试 $i/3] git fetch 失败，5秒后重试..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 5
+}
+if (-not $fetchOk) {
+    Write-Host "[FAIL] git fetch failed after 3 attempts. Check network." -ForegroundColor Red
     Read-Host "Press Enter to exit"
     exit 1
 }
@@ -77,9 +83,15 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # 推送（不需要 rebase，已经基于最新远程）
-git push origin master
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "[FAIL] Push failed. Check network or GitHub auth (Git Credential Manager)." -ForegroundColor Red
+$pushOk = $false
+for ($i = 1; $i -le 3; $i++) {
+    git push origin master
+    if ($LASTEXITCODE -eq 0) { $pushOk = $true; break }
+    Write-Host "  [重试 $i/3] git push 失败，5秒后重试..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 5
+}
+if (-not $pushOk) {
+    Write-Host "[FAIL] Push failed after 3 attempts. Check network or GitHub auth." -ForegroundColor Red
     Read-Host "Press Enter to exit"
     exit 1
 }
