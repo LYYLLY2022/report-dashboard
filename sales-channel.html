@@ -1779,9 +1779,10 @@ function initShopDimTable() {
   var groups     = [...new Set(allRows.map(function(r) { return r.group; }).filter(Boolean))];
   var companies  = [...new Set(allRows.map(function(r) { return r.company; }).filter(function(c) { return c && c !== 'nan' && c !== ''; }))].sort();
   var sites      = [...new Set(allRows.map(function(r) { return r.site; }).filter(function(s) { return s && s !== 'nan' && s !== ''; }))].sort();
+  var operators  = [...new Set(allRows.map(function(r) { return r.operator; }).filter(function(o) { return o && o !== 'nan' && o !== ''; }))].sort();
 
   // 筛选状态：多选，空数组 = 全部（挂到 window 以便 onclick 访问）
-  window._shopFS     = { p: [], g: [], e: [], c: [], s: [] };
+  window._shopFS     = { p: [], g: [], e: [], c: [], s: [], o: [] };
   window._shopApply  = function() { _shopRenderFilter(); _shopRenderTable(); };
   window._shopToggle = function(key, val) {
     var arr = window._shopFS[key];
@@ -1834,6 +1835,11 @@ function initShopDimTable() {
       siteBtns += filterBtn(sv, fs.s.indexOf(sv) >= 0, "window._shopToggle('s','" + sv.replace(/'/g,"\'") + "')", false);
     });
 
+    var opBtns = filterBtn('全部', fs.o.length === 0, "window._shopClear('o')", false);
+    operators.forEach(function(ov) {
+      opBtns += filterBtn(ov, fs.o.indexOf(ov) >= 0, "window._shopToggle('o','" + ov.replace(/'/g,"\'") + "')", false);
+    });
+
     var row = function(label, btns) {
       return '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin-bottom:5px;">'
         + '<span style="font-size:12px;color:#6B7280;min-width:36px;flex-shrink:0;">' + label + '</span>'
@@ -1841,6 +1847,7 @@ function initShopDimTable() {
     };
 
     filterEl.innerHTML = '<div style="padding:8px 0 10px;">'
+      + row('运营', opBtns)
       + row('渠道', platBtns)
       + row('站点', siteBtns)
       + row('组别', grpBtns)
@@ -1866,8 +1873,9 @@ function initShopDimTable() {
         if (fs.e.indexOf('normal')   >= 0 && !r.exiting && !r.transferring) ok = true;
         if (!ok) return false;
       }
-      if (fs.c.length && fs.c.indexOf(r.company) < 0) return false;
-      if (fs.s.length && fs.s.indexOf(r.site)    < 0) return false;
+      if (fs.c.length && fs.c.indexOf(r.company)  < 0) return false;
+      if (fs.s.length && fs.s.indexOf(r.site)     < 0) return false;
+      if (fs.o.length && fs.o.indexOf(r.operator) < 0) return false;
       return true;
     });
   }
