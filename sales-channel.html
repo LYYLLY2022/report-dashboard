@@ -1437,6 +1437,7 @@ function initGroup1ShopCompare() {
         <th style="width:60px;">排名</th>
         <th>店铺</th>
         <th>渠道</th>
+        <th>站点</th>
         <th style="text-align:right;">${curMonthLabel}日均销售额<br/><span style="font-weight:normal;font-size:12px;">(USD/天)</span></th>
         ${histThs}
         <th style="text-align:right;">日均销售额<br/>环比</th>
@@ -1457,6 +1458,7 @@ function initGroup1ShopCompare() {
   html += `<tr style="background:rgba(37,99,235,0.07);border-bottom:2px solid rgba(37,99,235,0.2);">
     <td style="text-align:center;font-weight:700;color:#2563EB;">合计</td>
     <td style="font-weight:700;">—</td>
+    <td style="font-weight:600;color:#9CA3AF;">—</td>
     <td style="font-weight:600;color:#9CA3AF;">—</td>
     <td style="text-align:right;font-weight:700;color:#2563EB;">${fmt(g1ShopTotCurAvg)}</td>
     ${g1ShopTotHistTds}
@@ -1480,10 +1482,15 @@ function initGroup1ShopCompare() {
           ? `<span style="color:#3FB950;">↓${Math.abs(row.mom)}%</span>`
           : `<span style="color:#9CA3AF;">→0%</span>`;
     const histTds = (row.hist_avgs || []).map(v => `<td style="text-align:right;">${v > 0 ? fmt(v) : '<span style="color:#9CA3AF;">–</span>'}</td>`).join('');
+    const g1SiteVal = (row.site && row.site !== '' && row.site !== 'nan') ? row.site : '';
+    const g1SiteTd = g1SiteVal
+      ? `<span style="display:inline-block;font-size:11px;padding:1px 6px;border-radius:4px;background:rgba(148,163,184,0.15);color:#94A3B8;">${g1SiteVal}</span>`
+      : '<span style="color:#9CA3AF;">–</span>';
     html += `<tr>
       <td style="text-align:center;">${rankBadge}</td>
       <td style="font-weight:500;">${row.name}${row.exiting ? '<span style="font-size:10px;color:#F87171;font-weight:400;margin-left:5px;vertical-align:middle;">退出中</span>' : ''}${row.transferring ? '<span style="font-size:10px;color:#FBBF24;font-weight:400;margin-left:5px;vertical-align:middle;">转移中</span>' : ''}</td>
       <td>${row.platform || '<span style="color:#9CA3AF;">–</span>'}</td>
+      <td>${g1SiteTd}</td>
       <td class="num-positive" style="text-align:right;">${fmt(row.cur_avg)}</td>
       ${histTds}
       <td style="text-align:right;">${momHtml}</td>
@@ -1618,6 +1625,7 @@ function initGroupShopCompare(shopKey, tableId, titleId, groupLabel) {
         <th style="width:60px;">排名</th>
         <th>店铺</th>
         <th>渠道</th>
+        <th>站点</th>
         <th style="text-align:right;">${curMonthLabel}日均销售额<br/><span style="font-weight:normal;font-size:12px;">(USD/天)</span></th>
         ${histThs}
         <th style="text-align:right;">日均销售额<br/>环比</th>
@@ -1638,6 +1646,7 @@ function initGroupShopCompare(shopKey, tableId, titleId, groupLabel) {
   html += `<tr style="background:rgba(37,99,235,0.07);border-bottom:2px solid rgba(37,99,235,0.2);">
     <td style="text-align:center;font-weight:700;color:#2563EB;">合计</td>
     <td style="font-weight:700;">—</td>
+    <td style="font-weight:600;color:#9CA3AF;">—</td>
     <td style="font-weight:600;color:#9CA3AF;">—</td>
     <td style="text-align:right;font-weight:700;color:#2563EB;">${fmt(shopTotCurAvg)}</td>
     ${shopTotHistTds}
@@ -1661,10 +1670,15 @@ function initGroupShopCompare(shopKey, tableId, titleId, groupLabel) {
           ? `<span style="color:#3FB950;">↓${Math.abs(row.mom)}%</span>`
           : `<span style="color:#9CA3AF;">→0%</span>`;
     const histTds = (row.hist_avgs || []).map(v => `<td style="text-align:right;">${v > 0 ? fmt(v) : '<span style="color:#9CA3AF;">–</span>'}</td>`).join('');
+    const siteVal = (row.site && row.site !== '' && row.site !== 'nan') ? row.site : '';
+    const siteTd = siteVal
+      ? `<span style="display:inline-block;font-size:11px;padding:1px 6px;border-radius:4px;background:rgba(148,163,184,0.15);color:#94A3B8;">${siteVal}</span>`
+      : '<span style="color:#9CA3AF;">–</span>';
     html += `<tr>
       <td style="text-align:center;">${rankBadge}</td>
       <td style="font-weight:500;">${row.name}${row.exiting ? '<span style="font-size:10px;color:#F87171;font-weight:400;margin-left:5px;vertical-align:middle;">退出中</span>' : ''}${row.transferring ? '<span style="font-size:10px;color:#FBBF24;font-weight:400;margin-left:5px;vertical-align:middle;">转移中</span>' : ''}</td>
       <td>${row.platform || '<span style="color:#9CA3AF;">–</span>'}</td>
+      <td>${siteTd}</td>
       <td class="num-positive" style="text-align:right;">${fmt(row.cur_avg)}</td>
       ${histTds}
       <td style="text-align:right;">${momHtml}</td>
