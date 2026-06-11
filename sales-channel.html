@@ -1445,6 +1445,25 @@ function initGroup1ShopCompare() {
     </thead>
     <tbody>`;
 
+  // ── 合计行 ──
+  const g1ShopTotCurAvg = rows.reduce((s, r) => s + (r.cur_avg || 0), 0);
+  const g1ShopTotHist   = histMonths.map((_, i) => rows.reduce((s, r) => s + ((r.hist_avgs || [])[i] || 0), 0));
+  const g1ShopTotPrev   = g1ShopTotHist[0] || 0;
+  const g1ShopTotMom    = g1ShopTotPrev > 0 ? ((g1ShopTotCurAvg - g1ShopTotPrev) / g1ShopTotPrev * 100).toFixed(1) : null;
+  const g1ShopTotMomHtml = g1ShopTotMom === null ? '<span style="color:#9CA3AF;">–</span>'
+    : parseFloat(g1ShopTotMom) > 0 ? `<span style="color:#F85149;">↑${g1ShopTotMom}%</span>`
+    : parseFloat(g1ShopTotMom) < 0 ? `<span style="color:#3FB950;">↓${Math.abs(g1ShopTotMom)}%</span>`
+    : `<span style="color:#9CA3AF;">→0%</span>`;
+  const g1ShopTotHistTds = g1ShopTotHist.map(v => `<td style="text-align:right;font-weight:600;">${v > 0 ? fmt(v) : '<span style="color:#9CA3AF;">–</span>'}</td>`).join('');
+  html += `<tr style="background:rgba(37,99,235,0.07);border-bottom:2px solid rgba(37,99,235,0.2);">
+    <td style="text-align:center;font-weight:700;color:#2563EB;">合计</td>
+    <td style="font-weight:700;">—</td>
+    <td style="font-weight:600;color:#9CA3AF;">—</td>
+    <td style="text-align:right;font-weight:700;color:#2563EB;">${fmt(g1ShopTotCurAvg)}</td>
+    ${g1ShopTotHistTds}
+    <td style="text-align:right;">${g1ShopTotMomHtml}</td>
+  </tr>`;
+
   rows.forEach((row, idx) => {
     const rank = idx + 1;
     var badgeStyle = '';
@@ -1501,6 +1520,26 @@ function initGroupPlatformMonthly(dataKey, tableId, titleId, groupLabel) {
       </tr>
     </thead>
     <tbody>`;
+
+  // ── 合计行 ──
+  const totCurTotal = rows.reduce((s, r) => s + (r.cur_total || 0), 0);
+  const totCurAvg   = rows.reduce((s, r) => s + (r.cur_avg   || 0), 0);
+  const totHistAvgs = histMonths.map((_, i) => rows.reduce((s, r) => s + ((r.hist_avgs || [])[i] || 0), 0));
+  const totPrev = totHistAvgs[0] || 0;
+  const totMom  = totPrev > 0 ? ((totCurAvg - totPrev) / totPrev * 100).toFixed(1) : null;
+  const totMomHtml = totMom === null ? '<span style="color:#9CA3AF;">–</span>'
+    : parseFloat(totMom) > 0 ? `<span style="color:#F85149;">↑${totMom}%</span>`
+    : parseFloat(totMom) < 0 ? `<span style="color:#3FB950;">↓${Math.abs(totMom)}%</span>`
+    : `<span style="color:#9CA3AF;">→0%</span>`;
+  const totHistTds = totHistAvgs.map(v => `<td style="text-align:right;font-weight:600;">${v > 0 ? fmt(v) : '<span style="color:#9CA3AF;">–</span>'}</td>`).join('');
+  html += `<tr style="background:rgba(37,99,235,0.07);border-bottom:2px solid rgba(37,99,235,0.2);">
+    <td style="text-align:center;font-weight:700;color:#2563EB;">合计</td>
+    <td style="font-weight:700;">—</td>
+    <td style="text-align:right;font-size:15px;font-weight:700;color:#2563EB;">${fmt(totCurTotal)}</td>
+    <td style="text-align:right;font-weight:700;color:#2563EB;">${fmt(totCurAvg)}</td>
+    ${totHistTds}
+    <td style="text-align:right;">${totMomHtml}</td>
+  </tr>`;
 
   rows.forEach((row, idx) => {
     const rank = idx + 1;
@@ -1587,6 +1626,25 @@ function initGroupShopCompare(shopKey, tableId, titleId, groupLabel) {
     </thead>
     <tbody>`;
 
+  // ── 合计行 ──
+  const shopTotCurAvg = rows.reduce((s, r) => s + (r.cur_avg || 0), 0);
+  const shopTotHist   = histMonths.map((_, i) => rows.reduce((s, r) => s + ((r.hist_avgs || [])[i] || 0), 0));
+  const shopTotPrev   = shopTotHist[0] || 0;
+  const shopTotMom    = shopTotPrev > 0 ? ((shopTotCurAvg - shopTotPrev) / shopTotPrev * 100).toFixed(1) : null;
+  const shopTotMomHtml = shopTotMom === null ? '<span style="color:#9CA3AF;">–</span>'
+    : parseFloat(shopTotMom) > 0 ? `<span style="color:#F85149;">↑${shopTotMom}%</span>`
+    : parseFloat(shopTotMom) < 0 ? `<span style="color:#3FB950;">↓${Math.abs(shopTotMom)}%</span>`
+    : `<span style="color:#9CA3AF;">→0%</span>`;
+  const shopTotHistTds = shopTotHist.map(v => `<td style="text-align:right;font-weight:600;">${v > 0 ? fmt(v) : '<span style="color:#9CA3AF;">–</span>'}</td>`).join('');
+  html += `<tr style="background:rgba(37,99,235,0.07);border-bottom:2px solid rgba(37,99,235,0.2);">
+    <td style="text-align:center;font-weight:700;color:#2563EB;">合计</td>
+    <td style="font-weight:700;">—</td>
+    <td style="font-weight:600;color:#9CA3AF;">—</td>
+    <td style="text-align:right;font-weight:700;color:#2563EB;">${fmt(shopTotCurAvg)}</td>
+    ${shopTotHistTds}
+    <td style="text-align:right;">${shopTotMomHtml}</td>
+  </tr>`;
+
   rows.forEach((row, idx) => {
     const rank = idx + 1;
     var badgeStyle = '';
@@ -1667,6 +1725,26 @@ function initGroupCharts(groupIdx, avgTableId, pieKey, pieChartId, pieTitleId, s
         </tr>
       </thead>
       <tbody>`;
+
+    // ── 合计行 ──
+    const opTotTotal   = rows.reduce((s, r) => s + (r.total  || 0), 0);
+    const opTotCurAvg  = rows.reduce((s, r) => s + (r.curAvg || 0), 0);
+    const opTotHist    = histMonths.map((_, i) => rows.reduce((s, r) => s + (r.histAvgs[i] || 0), 0));
+    const opTotPrev    = opTotHist[0] || 0;
+    const opTotMom     = opTotPrev > 0 ? ((opTotCurAvg - opTotPrev) / opTotPrev * 100).toFixed(1) : null;
+    const opTotMomHtml = opTotMom === null ? '<span style="color:#9CA3AF;">—</span>'
+      : parseFloat(opTotMom) > 0 ? `<span style="color:#F85149;">▲ ${opTotMom}%</span>`
+      : parseFloat(opTotMom) < 0 ? `<span style="color:#3FB950;">▼ ${Math.abs(opTotMom)}%</span>`
+      : `<span style="color:#9CA3AF;">— 0%</span>`;
+    const opTotHistTds = opTotHist.map(v => `<td style="text-align:right;font-weight:600;">${v > 0 ? fmt(v) : '<span style="color:#9CA3AF;">—</span>'}</td>`).join('');
+    html += `<tr style="background:rgba(37,99,235,0.07);border-bottom:2px solid rgba(37,99,235,0.2);">
+      <td style="text-align:center;font-weight:700;color:#2563EB;">合计</td>
+      <td style="font-weight:700;">—</td>
+      <td style="text-align:right;font-size:15px;font-weight:700;color:#2563EB;">${fmt(opTotTotal)}</td>
+      <td style="text-align:right;font-weight:700;color:#2563EB;">${fmt(opTotCurAvg)}</td>
+      ${opTotHistTds}
+      <td style="text-align:right;">${opTotMomHtml}</td>
+    </tr>`;
 
     rows.forEach((row, idx) => {
       const rank = idx + 1;
