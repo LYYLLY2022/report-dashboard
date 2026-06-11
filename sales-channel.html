@@ -556,6 +556,7 @@
 
 <!-- Tab 6: Group1 -->
 <div id="tab-group1" class="tab-content">
+  <div class="kpi-bar" id="g1-kpi-bar" style="padding:12px 32px 4px;"></div>
   <div class="chart-grid">
     <div class="chart-card full">
       <div class="card-title">一组运营 — 每日总销售额趋势</div>
@@ -1744,8 +1745,57 @@ function initGroupDailyTrend(groupIdx, chartId, groupLabel) {
   });
 }
 
+// ── 组别 KPI 汇总行 ────────────────────────────────────────────────────────
+function initGroupKpi(pmKey, shopKey, barId) {
+  var bar = document.getElementById(barId);
+  if (!bar) return;
+  var pm        = RAW[pmKey]   || [];
+  var shops     = RAW[shopKey] || [];
+  var histMonths = (RAW.company_monthly_avg || {}).hist_months || [];
+  var curLabel   = (RAW.company_monthly_avg || {}).cur_month_label || '';
+  var prevLabel  = histMonths.length > 0 ? histMonths[0].label : '';
+
+  // 合计：汇总各渠道日均
+  var curTotal = 0, prevTotal = 0;
+  pm.forEach(function(p) {
+    curTotal  += (p.cur_avg  || 0);
+    prevTotal += (p.hist_avgs && p.hist_avgs.length > 0 ? (p.hist_avgs[0] || 0) : 0);
+  });
+  curTotal  = Math.round(curTotal  * 100) / 100;
+  prevTotal = Math.round(prevTotal * 100) / 100;
+  var mom = prevTotal > 0 ? Math.round((curTotal - prevTotal) / prevTotal * 1000) / 10 : null;
+  var momColor = mom === null ? '#9CA3AF' : mom > 0 ? '#F85149' : mom < 0 ? '#3FB950' : '#9CA3AF';
+  var momText  = mom === null ? '–'
+    : (mom > 0 ? '<span style="color:#F85149;">↑' + Math.abs(mom) + '%</span>'
+    : mom < 0 ? '<span style="color:#3FB950;">↓' + Math.abs(mom) + '%</span>'
+    : '<span style="color:#9CA3AF;">→0%</span>');
+
+  var fmt = function(v) { return v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+
+  // 唯一店铺数（跨站点去重）
+  var shopNames = new Set(shops.map(function(s) { return s.name; }));
+  // 渠道数
+  var channels = pm.length;
+
+  function card(label, val, unit) {
+    return '<div class="kpi-card" style="flex:1;min-width:110px;">'
+      + '<div class="kpi-label">' + label + '</div>'
+      + '<div class="kpi-value" style="font-size:20px;">' + val + '</div>'
+      + '<div class="kpi-unit">' + unit + '</div>'
+      + '</div>';
+  }
+
+  bar.innerHTML =
+    card(curLabel  + '月日均', curTotal  > 0 ? fmt(curTotal)  : '–', 'USD / 天')
+  + card(prevLabel + '月日均', prevTotal > 0 ? fmt(prevTotal) : '–', 'USD / 天')
+  + card('环比',     momText,  '')
+  + card('店铺数',   shopNames.size, '家（去重）')
+  + card('活跃渠道', channels, '个');
+}
+
 // ── Group1: 完整初始化 ────────
 function initGroup1Charts() {
+  initGroupKpi('g1_platform_monthly', 'g1_shop_compare', 'g1-kpi-bar');
   initGroupDailyTrend(0, 'chart-g1-daily-trend', '一组运营');
   initGroupCharts(0, 'table-g1-avg', 'g1_platform_pie', 'chart-g1-platform-pie', 'g1-pie-title', 'g1_shop_compare', 'table-g1-shop', 'g1-shop-title', '一组运营');
   initGroupPlatformMonthly('g1_platform_monthly', 'table-g1-platform-monthly', 'g1-pm-title', '一组运营');
