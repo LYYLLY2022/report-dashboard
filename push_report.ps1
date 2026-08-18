@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 
 $PYTHON   = "C:\Users\liche\.workbuddy\binaries\python\versions\3.11.9\python.exe"
 $SCRIPT   = "C:\Users\liche\AppData\Roaming\WorkBuddy\User\globalStorage\tencent-cloud.coding-copilot\brain\b11f38441fcf41bfa1758005f67019af\generate_report.py"
-$SRC_HTML = "D:\claw\业绩统计\业绩统计输出\惠时尚非亚渠道业绩报告.html"
+$SRC_HTML = "D:\chatgpt备份\迁移\CLAUDE CODE\业绩统计\业绩统计输出\惠时尚非亚渠道业绩报告.html"
 $REPO     = "D:\claw\report-dashboard"
 $DST_HTML = "$REPO\sales-channel.html"
 $TIMESTAMP = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
